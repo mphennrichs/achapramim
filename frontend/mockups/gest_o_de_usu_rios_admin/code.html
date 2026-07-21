@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Achapramim Admin - Gestão de Usuários</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #031427;
+            color: #d3e4fe;
+            margin: 0;
+        }
+        /* Custom Scrollbar for High Density */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #031427;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #26364a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f465c;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#785900",
+                        "on-tertiary": "#263143",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-background": "#d3e4fe",
+                        "on-primary-fixed": "#261a00",
+                        "surface-container-lowest": "#000f21",
+                        "inverse-surface": "#d3e4fe",
+                        "on-tertiary-fixed-variant": "#3c475a",
+                        "inverse-on-surface": "#213145",
+                        "on-secondary": "#283044",
+                        "on-primary": "#3f2e00",
+                        "surface-container-highest": "#26364a",
+                        "outline-variant": "#4f4632",
+                        "surface-variant": "#26364a",
+                        "on-tertiary-container": "#4b566a",
+                        "on-secondary-fixed": "#131b2e",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "secondary": "#bec6e0",
+                        "on-primary-fixed-variant": "#5b4300",
+                        "on-secondary-container": "#adb4ce",
+                        "primary-container": "#ffc107",
+                        "background": "#031427",
+                        "primary-fixed-dim": "#fabd00",
+                        "surface-tint": "#fabd00",
+                        "on-surface-variant": "#d4c5ab",
+                        "secondary-fixed": "#dae2fd",
+                        "primary": "#ffe4af",
+                        "outline": "#9c8f78",
+                        "error": "#ffb4ab",
+                        "tertiary": "#dce7ff",
+                        "tertiary-container": "#c0cbe3",
+                        "surface-bright": "#2a3a4f",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#0b1c30",
+                        "on-surface": "#d3e4fe",
+                        "tertiary-fixed": "#d8e3fb",
+                        "on-tertiary-fixed": "#111c2d",
+                        "surface-container-high": "#1b2b3f",
+                        "primary-fixed": "#ffdf9e",
+                        "surface-dim": "#031427",
+                        "on-primary-container": "#6d5100",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "surface": "#031427",
+                        "secondary-container": "#3f465c",
+                        "tertiary-fixed-dim": "#bcc7de",
+                        "surface-container": "#102034"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "0.5rem",
+                        "xl": "2.5rem",
+                        "xs": "0.25rem",
+                        "md": "1rem",
+                        "admin-gutter": "0.75rem",
+                        "lg": "1.5rem",
+                        "user-margin": "2rem"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "title-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- SIDEBAR -->
+<aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-container flex flex-col p-admin-gutter transition-colors duration-150 border-r border-outline-variant z-50">
+<div class="mb-xl flex items-center gap-md px-sm">
+<span class="material-symbols-outlined text-primary font-headline-lg text-headline-lg">monitoring</span>
+<div class="flex flex-col">
+<h1 class="font-headline-lg text-headline-lg text-primary leading-none">Achapramim Admin</h1>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Monitoring Engine</span>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps rounded-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-primary font-bold border-r-2 border-primary bg-surface-variant transition-colors duration-150 font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Gestão de Usuários</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps rounded-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Configuração Global</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps rounded-sm" href="#">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+<span>Watches &amp; Scans</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant pt-admin-gutter">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps rounded-sm" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- MAIN CONTENT -->
+<main class="ml-[260px] min-h-screen flex flex-col">
+<!-- TOP APP BAR -->
+<header class="flex justify-between items-center w-full px-lg h-16 bg-surface border-b border-outline-variant sticky top-0 z-40">
+<div class="flex items-center gap-lg">
+<h2 class="font-title-md text-title-md text-primary font-bold">Gestão de Usuários</h2>
+<div class="flex gap-md text-on-surface-variant font-label-caps text-label-caps">
+<span class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+                        System Status: Active
+                    </span>
+<span>Interval: 30s</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant" data-icon="search">search</span>
+<input class="bg-surface-container-low border border-outline-variant text-body-sm font-body-sm rounded-lg pl-10 pr-4 py-1.5 focus:ring-2 focus:ring-primary-container focus:outline-none transition-all w-64" placeholder="Buscar usuário..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all duration-100 scale-95" data-icon="notifications">notifications</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A sharp, high-contrast professional headshot of a senior technology administrator in a dimly lit, blue-toned server room environment. The lighting is crisp and cinematic, emphasizing sharp facial features and professional attire. The style is modern corporate, following a dark mode aesthetic with deep slate and golden yellow accents in the background light reflections." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLfUnJR8SZqj_MJO_qBYNDqnCtrznvgQXU3kmiAu-D38BFdR_yJ-SYpyI7P1WBiIhsHS0jlXCu_SYCbOWTdtn5Rz4DcqC50ug0gr853cZ3tt1xdpYPW7M_rR-eyOhm4643YdzwgSRVrltPAqBsMrmY6b1A1YjE1g0YGI0evSRNBWAxGtta12-Ae6KQih_Wio9lFfx2Fg-n-CYr2z-wuUL12AWtj6g74qkyzDYMTiPX28yXOSg2D4Tsnw"/>
+</div>
+</div>
+</header>
+<!-- CONTENT AREA -->
+<div class="p-lg flex-1 space-y-lg">
+<!-- CONTROLS ROW -->
+<div class="flex flex-wrap items-center justify-between gap-md bg-surface-container p-md rounded-lg">
+<div class="flex flex-wrap items-center gap-md">
+<div class="flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Role</label>
+<select class="bg-surface-container-low border border-outline-variant text-on-surface rounded-sm px-md py-1.5 text-body-sm focus:border-primary-container outline-none appearance-none cursor-pointer pr-8 bg-no-repeat bg-[right_0.5rem_center]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239c8f78%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E');">
+<option>Todos os Roles</option>
+<option>Admin</option>
+<option>Editor</option>
+<option>Viewer</option>
+</select>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Status</label>
+<select class="bg-surface-container-low border border-outline-variant text-on-surface rounded-sm px-md py-1.5 text-body-sm focus:border-primary-container outline-none appearance-none cursor-pointer pr-8 bg-no-repeat bg-[right_0.5rem_center]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239c8f78%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E');">
+<option>Todos os Status</option>
+<option>Ativo</option>
+<option>Desativado</option>
+</select>
+</div>
+</div>
+<button class="flex items-center gap-sm bg-primary-container text-on-primary-container px-lg py-sm rounded-sm font-label-caps text-label-caps hover:brightness-110 transition-all">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+                    Criar Usuário
+                </button>
+</div>
+<!-- DATA TABLE -->
+<div class="bg-surface-container border border-outline-variant overflow-hidden rounded-lg shadow-2xl">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-highest border-b border-outline-variant">
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Nome</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Email</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Role</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Status</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Data de Criação</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant text-right">Ações</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- ACTIVE USER 1 -->
+<tr class="hover:bg-surface-variant transition-colors group">
+<td class="px-md py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" data-alt="A close-up portrait of a professional woman with a confident smile, wearing glasses and corporate attire. The background is a blurred office setting with cool slate tones and warm amber highlights, maintaining a consistent professional dark-mode UI aesthetic with soft, studio-quality lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCtO0cFpLzO_a3ZkxXsbOi1rvFch15xq0CuJobyt9CQ0wkfA-FBQ8jJnAhhfLqvMI-vS4_A7jZ_PTmVlOgH7pGsGUp6h_m0YKgnf1HaQ6LXzSFSGn4ZJqTKHV6XhCfriL3rc2zfwE31avAhcFT3ojLcIXIOhHRXE8PQFm7Ln7n55c8cSqKi3Eib5NhgCghiAstAb5G-sqFgazKWPPn0rwFIqLNbNQqzKY8cgPYVUT7rKG3CcYcH0jtow"/>
+</div>
+<span class="font-data-mono text-data-mono font-semibold">Ana Silva</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">ana.silva@achapramim.com</td>
+<td class="px-md py-sm font-data-mono text-data-mono">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-0.5 rounded-sm">Admin</span>
+</td>
+<td class="px-md py-sm">
+<span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-label-caps text-[10px] uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Ativo
+                                </span>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">12/10/2023</td>
+<td class="px-md py-sm text-right">
+<button class="p-1 hover:bg-error-container hover:text-on-error-container rounded-sm transition-colors text-on-surface-variant" title="Desativar">
+<span class="material-symbols-outlined text-[20px]" data-icon="block">block</span>
+</button>
+</td>
+</tr>
+<!-- ACTIVE USER 2 -->
+<tr class="hover:bg-surface-variant transition-colors group">
+<td class="px-md py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" data-alt="A professional male developer portrait with neutral expression, short hair, and modern tech casual wear. The setting is a darkened creative studio with subtle digital elements in the background, lit with teal and gold ambient light to match the analytical and high-performance brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuApiU3l3PHJ0JOU7E4mrH_jwBayXJsIldN_gnXwnArB5oo3zA7p4q-aMP8RuKnAhRaxa6m1k21yNAel1VP6WhlO49n5qQJNGE7lfoiNsg5btpuAjsvkbLP6Sqo6mznnUeIyhW7b4BSO4a88rHIJCTqjKukW-jMf4IncdmAkBUfT0TgXz49hexxumkl1bFqTHtDxuLVaadSRUmWYl8eO2KVkIzY4nBMSOZCNwZmvR80vYf-9dhkw2rjguA"/>
+</div>
+<span class="font-data-mono text-data-mono font-semibold">Carlos Santos</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">carlos.santos@achapramim.com</td>
+<td class="px-md py-sm font-data-mono text-data-mono">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-0.5 rounded-sm">Editor</span>
+</td>
+<td class="px-md py-sm">
+<span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-label-caps text-[10px] uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Ativo
+                                </span>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">05/11/2023</td>
+<td class="px-md py-sm text-right">
+<button class="p-1 hover:bg-error-container hover:text-on-error-container rounded-sm transition-colors text-on-surface-variant" title="Desativar">
+<span class="material-symbols-outlined text-[20px]" data-icon="block">block</span>
+</button>
+</td>
+</tr>
+<!-- INACTIVE USER (FADED) -->
+<tr class="hover:bg-surface-variant transition-colors group opacity-50">
+<td class="px-md py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline grayscale">
+<img class="w-full h-full object-cover" data-alt="A portrait of a male professional, intentionally styled in a desaturated, high-contrast monochrome look. The lighting is dramatic and moody, reflecting a deactivated or archival state in a digital system. Background is dark slate with minimal texture, maintaining the professional corporate design language." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWv-_OJij7dllYABmP_bQiTmXJYEnaCPSG6v9raL0f198URsjL9Yly98t_Q15wP6zaylsXo4Yn5m3_HZH1D4OyKR5K0Ftv_G6Ie-0FyEm1es6YpbqgixXPkIDm5Q6pQC-MgQ0k8rQQ-7-9Iw8Q2RW1tY3ihIsmnoQMDoapCjexfc8jOG5IYgyAOXE9eHFZ_06Z9mdklQgTWFfE92VfBzKr14lGmcakfJe0Z-lDkRVVOfK2xx21Tj4jQQ"/>
+</div>
+<span class="font-data-mono text-data-mono font-semibold">Juliana Ferreira</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">juliana.f@achapramim.com</td>
+<td class="px-md py-sm font-data-mono text-data-mono">
+<span class="bg-surface-container-highest text-on-surface-variant px-sm py-0.5 rounded-sm">Viewer</span>
+</td>
+<td class="px-md py-sm">
+<span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-on-surface-variant/10 text-on-surface-variant font-label-caps text-[10px] uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span> Desativado
+                                </span>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">20/09/2023</td>
+<td class="px-md py-sm text-right">
+<button class="p-1 hover:bg-primary-container hover:text-on-primary-container rounded-sm transition-colors text-on-surface-variant" title="Reativar">
+<span class="material-symbols-outlined text-[20px]" data-icon="check_circle">check_circle</span>
+</button>
+</td>
+</tr>
+<!-- ACTIVE USER 3 -->
+<tr class="hover:bg-surface-variant transition-colors group">
+<td class="px-md py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of a woman in a high-tech corporate environment, with glowing screens and interface elements bokeh-blurred in the background. She has a focused and analytical expression. The color palette consists of deep blues, slate grays, and golden yellow highlights, adhering to a sophisticated monitoring system aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAZquFj5sjzAiw31dvIlikXUk9cOuTiiIEpOc89orcE1FZGEfRVM63xBCAxKc0neQERDEBvX0j6Tvb8pAl_SRjwxy78tmEsdm8UaB1gjU4a62CxKryML9Una3iNYoBfqci6QPrpRk305BUGpXe9VF98eMOHLrMiu02MW2t1gjeHsXQyBrH8Vxf9I66Vm8c5ms_velN1e97dN7U0wESU2kZ9bcFZqsTpex4HjjxAi9RI2rGnxrizIkcXw"/>
+</div>
+<span class="font-data-mono text-data-mono font-semibold">Marcos Oliveira</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">marcos.o@achapramim.com</td>
+<td class="px-md py-sm font-data-mono text-data-mono">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-0.5 rounded-sm">Viewer</span>
+</td>
+<td class="px-md py-sm">
+<span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-label-caps text-[10px] uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Ativo
+                                </span>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">15/01/2024</td>
+<td class="px-md py-sm text-right">
+<button class="p-1 hover:bg-error-container hover:text-on-error-container rounded-sm transition-colors text-on-surface-variant" title="Desativar">
+<span class="material-symbols-outlined text-[20px]" data-icon="block">block</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- FOOTER / PAGINATION -->
+<div class="flex items-center justify-between px-md py-sm bg-surface-container-high border-t border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Exibindo 4 de 128 usuários</span>
+<div class="flex items-center gap-xs">
+<button class="p-1 hover:bg-surface-variant rounded-sm text-on-surface-variant disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<span class="bg-primary-container text-on-primary-container w-6 h-6 flex items-center justify-center rounded-sm font-label-caps text-label-caps">1</span>
+<button class="p-1 hover:bg-surface-variant rounded-sm text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- BENTO STYLE METRICS (Admin Density) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="bg-surface-container-low border border-outline-variant p-md rounded-lg flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Novos Usuários (30d)</span>
+<div class="flex items-end justify-between mt-sm">
+<span class="font-headline-lg text-headline-lg text-primary">+24</span>
+<span class="text-emerald-400 font-data-mono text-xs flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span> 12%
+                        </span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-md rounded-lg flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Taxa de Atividade</span>
+<div class="flex items-end justify-between mt-sm">
+<span class="font-headline-lg text-headline-lg text-primary">94.2%</span>
+<span class="text-emerald-400 font-data-mono text-xs flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span> Estável
+                        </span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-md rounded-lg flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Média de Sessões</span>
+<div class="flex items-end justify-between mt-sm">
+<span class="font-headline-lg text-headline-lg text-primary">12/dia</span>
+<span class="text-primary font-data-mono text-xs flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" data-icon="bolt">bolt</span> High Perf
+                        </span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Simple micro-interaction for rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', (e) => {
+                if(e.target.closest('button')) return;
+                // Highlight logic could go here
+                console.log('User row clicked');
+            });
+        });
+
+        // Search feedback
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('input', (e) => {
+            // Live filtering logic placeholder
+        });
+    </script>
+</body></html>

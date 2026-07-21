@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#785900",
+                        "on-tertiary": "#263143",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-background": "#d3e4fe",
+                        "on-primary-fixed": "#261a00",
+                        "surface-container-lowest": "#000f21",
+                        "inverse-surface": "#d3e4fe",
+                        "on-tertiary-fixed-variant": "#3c475a",
+                        "inverse-on-surface": "#213145",
+                        "on-secondary": "#283044",
+                        "on-primary": "#3f2e00",
+                        "surface-container-highest": "#26364a",
+                        "outline-variant": "#4f4632",
+                        "surface-variant": "#26364a",
+                        "on-tertiary-container": "#4b566a",
+                        "on-secondary-fixed": "#131b2e",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "secondary": "#bec6e0",
+                        "on-primary-fixed-variant": "#5b4300",
+                        "on-secondary-container": "#adb4ce",
+                        "primary-container": "#ffc107",
+                        "background": "#031427",
+                        "primary-fixed-dim": "#fabd00",
+                        "surface-tint": "#fabd00",
+                        "on-surface-variant": "#d4c5ab",
+                        "secondary-fixed": "#dae2fd",
+                        "primary": "#ffe4af",
+                        "outline": "#9c8f78",
+                        "error": "#ffb4ab",
+                        "tertiary": "#dce7ff",
+                        "tertiary-container": "#c0cbe3",
+                        "surface-bright": "#2a3a4f",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#0b1c30",
+                        "on-surface": "#d3e4fe",
+                        "tertiary-fixed": "#d8e3fb",
+                        "on-tertiary-fixed": "#111c2d",
+                        "surface-container-high": "#1b2b3f",
+                        "primary-fixed": "#ffdf9e",
+                        "surface-dim": "#031427",
+                        "on-primary-container": "#6d5100",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "surface": "#031427",
+                        "secondary-container": "#3f465c",
+                        "tertiary-fixed-dim": "#bcc7de",
+                        "surface-container": "#102034"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "0.5rem",
+                        "xl": "2.5rem",
+                        "xs": "0.25rem",
+                        "md": "1rem",
+                        "admin-gutter": "0.75rem",
+                        "lg": "1.5rem",
+                        "user-margin": "2rem"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "title-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .user-row:hover .expand-icon {
+            transform: translateX(4px);
+        }
+        .expand-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .expand-content.active {
+            max-height: 2000px;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #031427;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #26364a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen overflow-hidden">
+<!-- Admin SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-dim flex flex-col h-screen p-admin-gutter border-r border-outline-variant z-50">
+<div class="mb-10 px-md">
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Achapramim Admin</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-70">Monitoring Engine</p>
+</div>
+<nav class="flex-1 space-y-xs">
+<a class="flex items-center gap-md p-md transition-colors duration-150 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex items-center gap-md p-md transition-colors duration-150 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-caps text-label-caps">Gestão de Usuários</span>
+</a>
+<a class="flex items-center gap-md p-md transition-colors duration-150 text-primary font-bold border-r-2 border-primary bg-surface-container" href="#">
+<span class="material-symbols-outlined">visibility</span>
+<span class="font-label-caps text-label-caps">Watches &amp; Scans</span>
+</a>
+<a class="flex items-center gap-md p-md transition-colors duration-150 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-label-caps">Configuração Global</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant pt-md px-md">
+<button class="flex items-center gap-md p-md w-full transition-colors duration-150 text-on-surface-variant hover:text-error">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-caps text-label-caps">Logout</span>
+</button>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-[260px] h-16 bg-surface flex justify-between items-center px-lg border-b border-outline-variant z-40">
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="font-title-md text-title-md text-on-surface-variant">System Status: Active</span>
+</div>
+<span class="text-outline text-body-sm">|</span>
+<span class="font-title-md text-title-md text-on-surface-variant">Interval: 30s</span>
+</div>
+<div class="flex items-center gap-lg">
+<div class="relative">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-all duration-100 scale-95">notifications</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-primary-container rounded-full"></span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-all duration-100 scale-95">settings</span>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" data-alt="A professional high-contrast portrait of a male system administrator in a dark, tech-focused environment. The lighting is moody and cinematic with golden yellow highlights that match the corporate brand colors. He is looking directly at the camera with a confident, analytical expression, set against a background of blurred server racks and blue data visualizations." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZ5gaO5USFG0aKVbpzFEl5sYsyMnY4FmHX_h7Qqy2MhzwsCCESgOytEGNHB4FFYx_92Ov3bcm-WRleQOHqXab2fgoEryC1bcsFVq-7I81RrWQUyPSlaF0Qe3JP_VM5wWBRcphmykHoLwiS7cSLsNsE3rXcfFlJD3z4whnHo_NYEyMbXB5qUJqu-083ci9M3mhnQoxggCCYWz36HFFQAbXMSWkCPOSnR1KKpze6ib8TT_SpZd07lEPjgg"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[260px] pt-16 h-screen overflow-y-auto">
+<div class="p-lg max-w-[1440px] mx-auto">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-lg">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Watches e Scans por Usuário</h2>
+<p class="text-on-surface-variant font-body-md">Monitore o desempenho das consultas e a atividade de cada cliente.</p>
+</div>
+<div class="flex gap-md">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="bg-surface-container-high border border-outline-variant text-on-surface text-body-sm pl-10 pr-md py-2 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none w-64 transition-all" placeholder="Buscar usuário ou watch..." type="text"/>
+</div>
+<button class="bg-primary text-background font-label-caps px-md py-2 rounded-lg hover:bg-primary-fixed transition-colors flex items-center gap-xs">
+<span class="material-symbols-outlined text-lg">refresh</span>
+                        ATUALIZAR DADOS
+                    </button>
+</div>
+</div>
+<!-- Dashboard Stats Summary -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md mb-xl">
+<div class="bg-surface-container-low p-lg border border-outline-variant rounded-xl">
+<p class="font-label-caps text-on-surface-variant">TOTAL USUÁRIOS</p>
+<p class="font-headline-lg text-primary">1,284</p>
+</div>
+<div class="bg-surface-container-low p-lg border border-outline-variant rounded-xl">
+<p class="font-label-caps text-on-surface-variant">WATCHES ATIVOS</p>
+<p class="font-headline-lg text-primary">4,592</p>
+</div>
+<div class="bg-surface-container-low p-lg border border-outline-variant rounded-xl">
+<p class="font-label-caps text-on-surface-variant">SCANS ÚLTIMAS 24H</p>
+<p class="font-headline-lg text-primary">18.4k</p>
+</div>
+<div class="bg-surface-container-low p-lg border border-outline-variant rounded-xl">
+<p class="font-label-caps text-on-surface-variant">TAXA DE SUCESSO</p>
+<p class="font-headline-lg text-green-400">98.2%</p>
+</div>
+</div>
+<!-- Users List Table Header -->
+<div class="bg-surface-container rounded-t-xl overflow-hidden">
+<div class="grid grid-cols-12 gap-md p-md bg-surface-variant border-b border-outline-variant font-label-caps text-on-surface-variant">
+<div class="col-span-4 pl-md">USUÁRIO</div>
+<div class="col-span-2 text-center">WATCHES (A/M)</div>
+<div class="col-span-3 text-center">ÚLTIMO SCAN</div>
+<div class="col-span-2 text-center">STATUS</div>
+<div class="col-span-1"></div>
+</div>
+<!-- User Row 1 (Active) -->
+<div class="user-row border-b border-outline-variant transition-colors hover:bg-surface-container-high cursor-pointer" onclick="toggleExpand('expand-1')">
+<div class="grid grid-cols-12 gap-md p-md items-center">
+<div class="col-span-4 flex items-center gap-md pl-md">
+<div class="w-10 h-10 bg-secondary-container rounded-full flex items-center justify-center font-bold text-on-secondary-container">RH</div>
+<div>
+<p class="font-bold text-on-surface">Ricardo Henrico</p>
+<p class="text-xs text-on-surface-variant">ricardo.h@email.com</p>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="text-primary font-bold">12</span>
+<span class="text-on-surface-variant mx-1">/</span>
+<span class="text-on-surface-variant">2</span>
+</div>
+<div class="col-span-3 text-center font-data-mono text-body-sm text-on-surface-variant">
+                            2024-05-23 14:32:01
+                        </div>
+<div class="col-span-2 flex justify-center">
+<span class="bg-green-950/40 text-green-400 text-[10px] px-2 py-1 rounded font-bold border border-green-800 uppercase tracking-wider">Ativo</span>
+</div>
+<div class="col-span-1 text-right pr-md">
+<span class="material-symbols-outlined expand-icon transition-transform duration-200">expand_more</span>
+</div>
+</div>
+<!-- Expandable Details Row 1 -->
+<div class="expand-content bg-background/50" id="expand-1">
+<div class="p-lg border-t border-outline-variant/30">
+<h4 class="font-label-caps text-primary mb-md">LISTA DE WATCHES</h4>
+<div class="space-y-sm">
+<!-- Watch Item -->
+<div class="bg-surface-container-low p-md rounded-lg flex items-center justify-between border border-outline-variant/20">
+<div class="flex gap-lg items-center">
+<div class="w-1 bg-primary h-8 rounded-full"></div>
+<div>
+<p class="font-bold text-on-surface">iPhone 15 Pro Max 256GB</p>
+<p class="text-xs text-on-surface-variant">OLX, Mercado Livre, Kabum</p>
+</div>
+</div>
+<div class="text-center px-lg">
+<p class="text-xs text-on-surface-variant uppercase font-bold">Alvo</p>
+<p class="font-data-mono text-primary">R$ 6.800,00</p>
+</div>
+<div class="flex-1 px-lg max-w-xs">
+<p class="text-[10px] text-on-surface-variant mb-1 uppercase font-bold">History (24h)</p>
+<div class="flex gap-1 h-6 items-end">
+<div class="flex-1 bg-green-500/30 h-full rounded-t-sm" title="Success: 12 offers"></div>
+<div class="flex-1 bg-green-500/30 h-4/5 rounded-t-sm" title="Success: 8 offers"></div>
+<div class="flex-1 bg-yellow-500/30 h-1/2 rounded-t-sm" title="Partial: 2 offers"></div>
+<div class="flex-1 bg-green-500/30 h-full rounded-t-sm" title="Success: 15 offers"></div>
+<div class="flex-1 bg-red-500/30 h-1/4 rounded-t-sm" title="Fail: 0 offers"></div>
+<div class="flex-1 bg-green-500/30 h-3/4 rounded-t-sm" title="Success: 10 offers"></div>
+</div>
+</div>
+<div class="flex gap-md px-md">
+<span class="bg-surface-variant text-on-surface-variant text-[10px] px-2 py-1 rounded font-bold border border-outline-variant">ACTIVE</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"><span class="material-symbols-outlined text-lg">edit</span></button>
+<button class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"><span class="material-symbols-outlined text-lg">volume_off</span></button>
+<button class="p-2 hover:bg-error/20 rounded transition-colors text-error"><span class="material-symbols-outlined text-lg">delete</span></button>
+</div>
+</div>
+<!-- Watch Item 2 (Muted) -->
+<div class="bg-surface-container-low p-md rounded-lg flex items-center justify-between border border-outline-variant/20 opacity-70">
+<div class="flex gap-lg items-center">
+<div class="w-1 bg-outline h-8 rounded-full"></div>
+<div>
+<p class="font-bold text-on-surface">RTX 4090 Rog Strix</p>
+<p class="text-xs text-on-surface-variant">Amazon, Terabyte</p>
+</div>
+</div>
+<div class="text-center px-lg">
+<p class="text-xs text-on-surface-variant uppercase font-bold">Alvo</p>
+<p class="font-data-mono text-primary">R$ 11.200,00</p>
+</div>
+<div class="flex-1 px-lg max-w-xs"></div>
+<div class="flex gap-md px-md">
+<span class="bg-secondary-container text-on-secondary-container text-[10px] px-2 py-1 rounded font-bold border border-outline-variant">MUTED</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-2 hover:bg-surface-variant rounded transition-colors text-on-surface-variant"><span class="material-symbols-outlined text-lg">edit</span></button>
+<button class="p-2 hover:bg-surface-variant rounded transition-colors text-primary"><span class="material-symbols-outlined text-lg">volume_up</span></button>
+<button class="p-2 hover:bg-error/20 rounded transition-colors text-error"><span class="material-symbols-outlined text-lg">delete</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- User Row 2 (Disabled) -->
+<div class="user-row border-b border-outline-variant transition-colors hover:bg-surface-container-high cursor-pointer" onclick="toggleExpand('expand-2')">
+<div class="grid grid-cols-12 gap-md p-md items-center opacity-60">
+<div class="col-span-4 flex items-center gap-md pl-md">
+<div class="w-10 h-10 bg-error-container rounded-full flex items-center justify-center font-bold text-on-error-container">MS</div>
+<div>
+<p class="font-bold text-on-surface">Mariana Silva</p>
+<p class="text-xs text-on-surface-variant">mari.silva@corp.net</p>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="text-on-surface-variant">0</span>
+<span class="text-on-surface-variant mx-1">/</span>
+<span class="text-on-surface-variant">5</span>
+</div>
+<div class="col-span-3 text-center font-data-mono text-body-sm text-on-surface-variant">
+                            2024-04-12 09:12:44
+                        </div>
+<div class="col-span-2 flex justify-center">
+<span class="bg-error-container/20 text-error text-[10px] px-2 py-1 rounded font-bold border border-error/50 uppercase tracking-wider">Desativado</span>
+</div>
+<div class="col-span-1 text-right pr-md">
+<span class="material-symbols-outlined expand-icon transition-transform duration-200">expand_more</span>
+</div>
+</div>
+<div class="expand-content bg-background/50" id="expand-2">
+<div class="p-lg border-t border-outline-variant/30">
+<div class="bg-error-container/10 border border-error/30 p-md rounded-lg mb-lg flex items-center gap-md">
+<span class="material-symbols-outlined text-error">warning</span>
+<p class="text-sm text-on-surface">Este usuário está desativado. Todos os watches associados estão pausados compulsoriamente.</p>
+</div>
+<h4 class="font-label-caps text-on-surface-variant mb-md">LISTA DE WATCHES</h4>
+<div class="space-y-sm">
+<div class="bg-surface-container-low p-md rounded-lg flex items-center justify-between border border-outline-variant/20">
+<div class="flex gap-lg items-center">
+<div class="w-1 bg-error h-8 rounded-full"></div>
+<div>
+<p class="font-bold text-on-surface">PlayStation 5 Slim</p>
+<p class="text-xs text-on-surface-variant">Vários marketplaces</p>
+</div>
+</div>
+<div class="text-center px-lg">
+<p class="text-xs text-on-surface-variant uppercase font-bold">Alvo</p>
+<p class="font-data-mono text-on-surface-variant">R$ 3.200,00</p>
+</div>
+<div class="flex-1"></div>
+<div class="flex gap-md px-md">
+<span class="bg-error-container text-on-error-container text-[10px] px-2 py-1 rounded font-bold border border-error/50">PAUSED BY OWNER DISABLE</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-2 opacity-30 cursor-not-allowed text-on-surface-variant"><span class="material-symbols-outlined text-lg">edit</span></button>
+<button class="p-2 opacity-30 cursor-not-allowed text-on-surface-variant"><span class="material-symbols-outlined text-lg">volume_off</span></button>
+<button class="p-2 hover:bg-error/20 rounded transition-colors text-error"><span class="material-symbols-outlined text-lg">delete</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- User Row 3 (Active) -->
+<div class="user-row border-b border-outline-variant transition-colors hover:bg-surface-container-high cursor-pointer" onclick="toggleExpand('expand-3')">
+<div class="grid grid-cols-12 gap-md p-md items-center">
+<div class="col-span-4 flex items-center gap-md pl-md">
+<div class="w-10 h-10 bg-tertiary-container rounded-full flex items-center justify-center font-bold text-on-tertiary">AL</div>
+<div>
+<p class="font-bold text-on-surface">Ana Luiza Costa</p>
+<p class="text-xs text-on-surface-variant">ana.costa@gmail.com</p>
+</div>
+</div>
+<div class="col-span-2 text-center">
+<span class="text-primary font-bold">3</span>
+<span class="text-on-surface-variant mx-1">/</span>
+<span class="text-on-surface-variant">0</span>
+</div>
+<div class="col-span-3 text-center font-data-mono text-body-sm text-on-surface-variant">
+                            2024-05-23 15:00:45
+                        </div>
+<div class="col-span-2 flex justify-center">
+<span class="bg-green-950/40 text-green-400 text-[10px] px-2 py-1 rounded font-bold border border-green-800 uppercase tracking-wider">Ativo</span>
+</div>
+<div class="col-span-1 text-right pr-md">
+<span class="material-symbols-outlined expand-icon transition-transform duration-200">expand_more</span>
+</div>
+</div>
+<div class="expand-content bg-background/50" id="expand-3">
+<div class="p-lg border-t border-outline-variant/30">
+<h4 class="font-label-caps text-primary mb-md">LISTA DE WATCHES</h4>
+<div class="space-y-sm text-on-surface-variant text-sm italic">
+                                Expandido: Detalhes dos watches seriam listados aqui de forma similar ao primeiro usuário.
+                            </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-lg flex justify-between items-center bg-surface-container-low p-md rounded-xl border border-outline-variant">
+<span class="text-body-sm text-on-surface-variant">Mostrando 1-10 de 128 usuários</span>
+<div class="flex gap-xs">
+<button class="p-2 border border-outline-variant rounded hover:bg-surface-variant transition-colors disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="px-4 py-2 bg-primary text-background font-bold rounded">1</button>
+<button class="px-4 py-2 border border-outline-variant text-on-surface rounded hover:bg-surface-variant">2</button>
+<button class="px-4 py-2 border border-outline-variant text-on-surface rounded hover:bg-surface-variant">3</button>
+<button class="p-2 border border-outline-variant rounded hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<script>
+        function toggleExpand(id) {
+            const content = document.getElementById(id);
+            const parent = content.closest('.user-row');
+            const icon = parent.querySelector('.expand-icon');
+            
+            // Toggle active class
+            content.classList.toggle('active');
+            
+            // Rotate icon
+            if (content.classList.contains('active')) {
+                icon.style.transform = 'rotate(180deg)';
+                parent.classList.add('bg-surface-container-high');
+            } else {
+                icon.style.transform = 'rotate(0deg)';
+                parent.classList.remove('bg-surface-container-high');
+            }
+        }
+    </script>
+</body></html>

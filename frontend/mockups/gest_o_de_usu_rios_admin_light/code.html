@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Achapramim Admin - Gestão de Usuários</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #1a202c;
+            margin: 0;
+        }
+        /* Custom Scrollbar for Light Mode */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f3f5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dee2e6;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ced4da;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffc107",
+                        "on-primary": "#3f2e00",
+                        "primary-container": "#ffdf9e",
+                        "on-primary-container": "#6d5100",
+                        "background": "#f8f9fa",
+                        "on-background": "#1a202c",
+                        "surface": "#ffffff",
+                        "on-surface": "#1a202c",
+                        "surface-variant": "#f1f3f5",
+                        "on-surface-variant": "#495057",
+                        "outline": "#ced4da",
+                        "outline-variant": "#dee2e6",
+                        "surface-container": "#f8f9fa",
+                        "surface-container-low": "#ffffff",
+                        "surface-container-high": "#e9ecef",
+                        "surface-container-highest": "#dee2e6",
+                        "secondary": "#495057",
+                        "secondary-container": "#e9ecef",
+                        "on-secondary-container": "#343a40",
+                        "error": "#d00000",
+                        "error-container": "#f8d7da"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "0.5rem",
+                        "xl": "2.5rem",
+                        "xs": "0.25rem",
+                        "md": "1rem",
+                        "admin-gutter": "0.75rem",
+                        "lg": "1.5rem",
+                        "user-margin": "2rem"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "title-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background">
+<!-- SIDEBAR -->
+<aside class="fixed left-0 top-0 h-full w-[260px] bg-white flex flex-col p-admin-gutter transition-colors duration-150 border-r border-outline-variant z-50">
+<div class="mb-xl flex items-center gap-md px-sm">
+<span class="material-symbols-outlined text-primary font-headline-lg text-headline-lg">monitoring</span>
+<div class="flex flex-col">
+<h1 class="font-headline-lg text-headline-lg text-on-background leading-none">Achapramim Admin</h1>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Monitoring Engine</span>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps rounded-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-primary bg-primary transition-colors duration-150 font-label-caps text-label-caps rounded-sm shadow-sm" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Gestão de Usuários</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps rounded-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Configuração Global</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps rounded-sm" href="#">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+<span>Watches &amp; Scans</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant pt-admin-gutter">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps rounded-sm" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- MAIN CONTENT -->
+<main class="ml-[260px] min-h-screen flex flex-col bg-background">
+<!-- TOP APP BAR -->
+<header class="flex justify-between items-center w-full px-lg h-16 bg-white border-b border-outline-variant sticky top-0 z-40">
+<div class="flex items-center gap-lg">
+<h2 class="font-title-md text-title-md text-on-background font-bold">Gestão de Usuários</h2>
+<div class="flex gap-md text-on-surface-variant font-label-caps text-label-caps">
+<span class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        System Status: Active
+                    </span>
+<span>Interval: 30s</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant" data-icon="search">search</span>
+<input class="bg-surface-container-low border border-outline text-body-sm font-body-sm rounded-lg pl-10 pr-4 py-1.5 focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none transition-all w-64" placeholder="Buscar usuário..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all duration-100" data-icon="notifications">notifications</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLfUnJR8SZqj_MJO_qBYNDqnCtrznvgQXU3kmiAu-D38BFdR_yJ-SYpyI7P1WBiIhsHS0jlXCu_SYCbOWTdtn5Rz4DcqC50ug0gr853cZ3tt1xdpYPW7M_rR-eyOhm4643YdzwgSRVrltPAqBsMrmY6b1A1YjE1g0YGI0evSRNBWAxGtta12-Ae6KQih_Wio9lFfx2Fg-n-CYr2z-wuUL12AWtj6g74qkyzDYMTiPX28yXOSg2D4Tsnw"/>
+</div>
+</div>
+</header>
+<!-- CONTENT AREA -->
+<div class="p-lg flex-1 space-y-lg">
+<!-- CONTROLS ROW -->
+<div class="flex flex-wrap items-center justify-between gap-md bg-white p-md rounded-lg shadow-sm border border-outline-variant">
+<div class="flex flex-wrap items-center gap-md">
+<div class="flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Role</label>
+<select class="bg-surface-container-low border border-outline text-on-surface rounded-sm px-md py-1.5 text-body-sm focus:border-primary outline-none appearance-none cursor-pointer pr-8 bg-no-repeat bg-[right_0.5rem_center]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23495057%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E');">
+<option>Todos os Roles</option>
+<option>Admin</option>
+<option>Editor</option>
+<option>Viewer</option>
+</select>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Status</label>
+<select class="bg-surface-container-low border border-outline text-on-surface rounded-sm px-md py-1.5 text-body-sm focus:border-primary outline-none appearance-none cursor-pointer pr-8 bg-no-repeat bg-[right_0.5rem_center]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23495057%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E');">
+<option>Todos os Status</option>
+<option>Ativo</option>
+<option>Desativado</option>
+</select>
+</div>
+</div>
+<button class="flex items-center gap-sm bg-primary text-on-primary px-lg py-sm rounded-sm font-label-caps text-label-caps hover:brightness-95 transition-all shadow-sm">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+                    Criar Usuário
+                </button>
+</div>
+<!-- DATA TABLE -->
+<div class="bg-white border border-outline-variant overflow-hidden rounded-lg shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high border-b border-outline-variant">
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Nome</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Email</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Role</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Status</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant">Data de Criação</th>
+<th class="px-md py-sm font-label-caps text-label-caps text-on-surface-variant text-right">Ações</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- ACTIVE USER 1 -->
+<tr class="hover:bg-surface-variant transition-colors group">
+<td class="px-md py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCtO0cFpLzO_a3ZkxXsbOi1rvFch15xq0CuJobyt9CQ0wkfA-FBQ8jJnAhhfLqvMI-vS4_A7jZ_PTmVlOgH7pGsGUp6h_m0YKgnf1HaQ6LXzSFSGn4ZJqTKHV6XhCfriL3rc2zfwE31avAhcFT3ojLcIXIOhHRXE8PQFm7Ln7n55c8cSqKi3Eib5NhgCghiAstAb5G-sqFgazKWPPn0rwFIqLNbNQqzKY8cgPYVUT7rKG3CcYcH0jtow"/>
+</div>
+<span class="font-data-mono text-data-mono font-semibold">Ana Silva</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">ana.silva@achapramim.com</td>
+<td class="px-md py-sm font-data-mono text-data-mono">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-0.5 rounded-sm">Admin</span>
+</td>
+<td class="px-md py-sm">
+<span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-label-caps text-[10px] uppercase tracking-wider font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Ativo
+                                </span>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">12/10/2023</td>
+<td class="px-md py-sm text-right">
+<button class="p-1 hover:bg-error-container hover:text-error rounded-sm transition-colors text-on-surface-variant" title="Desativar">
+<span class="material-symbols-outlined text-[20px]" data-icon="block">block</span>
+</button>
+</td>
+</tr>
+<!-- ACTIVE USER 2 -->
+<tr class="hover:bg-surface-variant transition-colors group">
+<td class="px-md py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApiU3l3PHJ0JOU7E4mrH_jwBayXJsIldN_gnXwnArB5oo3zA7p4q-aMP8RuKnAhRaxa6m1k21yNAel1VP6WhlO49n5qQJNGE7lfoiNsg5btpuAjsvkbLP6Sqo6mznnUeIyhW7b4BSO4a88rHIJCTqjKukW-jMf4IncdmAkBUfT0TgXz49hexxumkl1bFqTHtDxuLVaadSRUmWYl8eO2KVkIzY4nBMSOZCNwZmvR80vYf-9dhkw2rjguA"/>
+</div>
+<span class="font-data-mono text-data-mono font-semibold">Carlos Santos</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">carlos.santos@achapramim.com</td>
+<td class="px-md py-sm font-data-mono text-data-mono">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-0.5 rounded-sm">Editor</span>
+</td>
+<td class="px-md py-sm">
+<span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-label-caps text-[10px] uppercase tracking-wider font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Ativo
+                                </span>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">05/11/2023</td>
+<td class="px-md py-sm text-right">
+<button class="p-1 hover:bg-error-container hover:text-error rounded-sm transition-colors text-on-surface-variant" title="Desativar">
+<span class="material-symbols-outlined text-[20px]" data-icon="block">block</span>
+</button>
+</td>
+</tr>
+<!-- INACTIVE USER (FADED) -->
+<tr class="hover:bg-surface-variant transition-colors group bg-gray-50">
+<td class="px-md py-sm">
+<div class="flex items-center gap-sm opacity-60">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline grayscale">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWv-_OJij7dllYABmP_bQiTmXJYEnaCPSG6v9raL0f198URsjL9Yly98t_Q15wP6zaylsXo4Yn5m3_HZH1D4OyKR5K0Ftv_G6Ie-0FyEm1es6YpbqgixXPkIDm5Q6pQC-MgQ0k8rQQ-7-9Iw8Q2RW1tY3ihIsmnoQMDoapCjexfc8jOG5IYgyAOXE9eHFZ_06Z9mdklQgTWFfE92VfBzKr14lGmcakfJe0Z-lDkRVVOfK2xx21Tj4jQQ"/>
+</div>
+<span class="font-data-mono text-data-mono font-semibold">Juliana Ferreira</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant opacity-60">juliana.f@achapramim.com</td>
+<td class="px-md py-sm font-data-mono text-data-mono opacity-60">
+<span class="bg-surface-container-highest text-on-surface-variant px-sm py-0.5 rounded-sm">Viewer</span>
+</td>
+<td class="px-md py-sm">
+<span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-secondary-container text-on-surface-variant font-label-caps text-[10px] uppercase tracking-wider font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span> Desativado
+                                </span>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant opacity-60">20/09/2023</td>
+<td class="px-md py-sm text-right">
+<button class="p-1 hover:bg-primary-container hover:text-on-primary-container rounded-sm transition-colors text-on-surface-variant" title="Reativar">
+<span class="material-symbols-outlined text-[20px]" data-icon="check_circle">check_circle</span>
+</button>
+</td>
+</tr>
+<!-- ACTIVE USER 3 -->
+<tr class="hover:bg-surface-variant transition-colors group">
+<td class="px-md py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAZquFj5sjzAiw31dvIlikXUk9cOuTiiIEpOc89orcE1FZGEfRVM63xBCAxKc0neQERDEBvX0j6Tvb8pAl_SRjwxy78tmEsdm8UaB1gjU4a62CxKryML9Una3iNYoBfqci6QPrpRk305BUGpXe9VF98eMOHLrMiu02MW2t1gjeHsXQyBrH8Vxf9I66Vm8c5ms_velN1e97dN7U0wESU2kZ9bcFZqsTpex4HjjxAi9RI2rGnxrizIkcXw"/>
+</div>
+<span class="font-data-mono text-data-mono font-semibold">Marcos Oliveira</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">marcos.o@achapramim.com</td>
+<td class="px-md py-sm font-data-mono text-data-mono">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-0.5 rounded-sm">Viewer</span>
+</td>
+<td class="px-md py-sm">
+<span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-label-caps text-[10px] uppercase tracking-wider font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Ativo
+                                </span>
+</td>
+<td class="px-md py-sm font-data-mono text-data-mono text-on-surface-variant">15/01/2024</td>
+<td class="px-md py-sm text-right">
+<button class="p-1 hover:bg-error-container hover:text-error rounded-sm transition-colors text-on-surface-variant" title="Desativar">
+<span class="material-symbols-outlined text-[20px]" data-icon="block">block</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- FOOTER / PAGINATION -->
+<div class="flex items-center justify-between px-md py-sm bg-surface-container-high border-t border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Exibindo 4 de 128 usuários</span>
+<div class="flex items-center gap-xs">
+<button class="p-1 hover:bg-surface-variant rounded-sm text-on-surface-variant disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<span class="bg-primary text-on-primary w-6 h-6 flex items-center justify-center rounded-sm font-label-caps text-label-caps font-bold shadow-sm">1</span>
+<button class="p-1 hover:bg-surface-variant rounded-sm text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- BENTO STYLE METRICS (Admin Density) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="bg-white border border-outline-variant p-md rounded-lg flex flex-col justify-between shadow-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase font-semibold">Novos Usuários (30d)</span>
+<div class="flex items-end justify-between mt-sm">
+<span class="font-headline-lg text-headline-lg text-on-background">+24</span>
+<span class="text-emerald-600 font-data-mono text-xs flex items-center gap-xs font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span> 12%
+                        </span>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-md rounded-lg flex flex-col justify-between shadow-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase font-semibold">Taxa de Atividade</span>
+<div class="flex items-end justify-between mt-sm">
+<span class="font-headline-lg text-headline-lg text-on-background">94.2%</span>
+<span class="text-emerald-600 font-data-mono text-xs flex items-center gap-xs font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span> Estável
+                        </span>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-md rounded-lg flex flex-col justify-between shadow-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase font-semibold">Média de Sessões</span>
+<div class="flex items-end justify-between mt-sm">
+<span class="font-headline-lg text-headline-lg text-on-background">12/dia</span>
+<span class="text-primary-on-container bg-primary-container px-xs py-0.5 rounded font-data-mono text-[10px] flex items-center gap-xs font-bold">
+<span class="material-symbols-outlined text-[12px]" data-icon="bolt">bolt</span> High Perf
+                        </span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Simple micro-interaction for rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', (e) => {
+                if(e.target.closest('button')) return;
+                console.log('User row clicked');
+            });
+        });
+
+        // Search feedback
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('input', (e) => {
+            // Live filtering logic placeholder
+        });
+    </script>
+</body></html>
