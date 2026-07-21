@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: achapramim-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: achapramim
+      POSTGRES_PASSWORD: achapramim
+      POSTGRES_DB: achapramim
+    ports:
+      - "5432:5432"
+    volumes:
+      - achapramim_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U achapramim"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: achapramim-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgres://achapramim:achapramim@achapramim-db:5432/achapramim?sslmode=disable
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  achapramim_postgres_data:

@@ -1,0 +1,5 @@
+# LLM sempre offline e com revisão humana, nunca em tempo real de Scan
+
+O sistema usa LLM em dois pontos: extração de dados a partir de um link (ADR 0003) e geração de sugestões de sinônimos para palavras-chave/bloqueadas. Em ambos os casos, o LLM roda sob demanda, uma vez, fora do ciclo de Scan, e a saída é sempre uma proposta revisável — nunca aplicada automaticamente. A Classificação de uma Offer (cálculo de relevância feito a cada Scan) é deliberadamente determinística: string matching sobre a lista de palavras-chave/bloqueadas já expandida por sinônimos aceitos anteriormente. Nenhuma chamada a LLM acontece por Offer ou por Scan.
+
+Alternativa considerada e rejeitada: usar o LLM (ou embeddings gerados por ele) diretamente no cálculo da Classificação, em tempo real. Rejeitada porque multiplicaria custo e latência por Offer × Scan × Watch, tornaria o sistema refém da disponibilidade de um provedor externo para sua operação central, e tornaria o motivo de uma Offer ter recebido determinado score menos previsível/depurável. Ao manter o LLM só como ferramenta offline de preparação de dados, o núcleo de Scan continua barato, rápido e determinístico.

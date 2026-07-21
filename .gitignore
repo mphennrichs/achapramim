@@ -27,6 +27,28 @@ go.work.sum
 # env file
 .env
 
+# Claude Code local settings (per-machine/person permissions)
+.claude/settings.local.json
+
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Flutter/Dart
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub-cache/
+**/.pub/
+**/build/
+**/flutter_export_environment.sh
+.metadata
+*.g.dart
+*.freezed.dart
+
+# Flutter web build output
+/web/build/
+
+# Flutter/Dart tool version files
+.fvm/
+.fvmrc

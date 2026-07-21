@@ -1,0 +1,3 @@
+# Coleta híbrida: API oficial onde existir, scraping como fallback
+
+Mercado Livre, OLX e Facebook Marketplace precisam ser consultados a cada Scan. Mercado Livre expõe uma API pública oficial de busca, então usamos ela diretamente. OLX e Facebook Marketplace não oferecem API pública equivalente, então a coleta desses dois é feita por scraping de páginas públicas. Essa estratégia é específica por marketplace e vive inteiramente na camada de implementação (adapter/fetcher por Marketplace) — não é um conceito de domínio. O scraping está sujeito a mudanças de layout e bloqueio anti-bot; falhas de um Marketplace não derrubam o Scan inteiro (ver sucesso parcial em CONTEXT.md).

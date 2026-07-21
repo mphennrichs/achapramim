@@ -1,0 +1,3 @@
+# Preenchimento de Watch a partir de link via LLM
+
+Para permitir criar um Watch colando um link de anúncio, o conteúdo da página (título, descrição, preço) é enviado a um LLM, que propõe palavras-chave, palavras bloqueadas e valor-alvo. A alternativa seria extração determinística (regex/tokenização do título), mais simples e sem dependência externa, mas com sugestões mais pobres — não captura sinônimos, marca/modelo implícitos ou relevância. A proposta do LLM nunca é salva diretamente: sempre abre como formulário de Watch pré-preenchido e editável, exigindo confirmação explícita do usuário antes de persistir. Em caso de falha ou análise parcial do link, o formulário abre com o que foi possível extrair e em branco no restante — nunca bloqueia a criação manual do Watch.

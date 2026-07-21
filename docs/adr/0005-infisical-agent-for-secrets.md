@@ -1,0 +1,3 @@
+# Segredos via Infisical Agent, não .env versionado nem SDK embutido
+
+Credenciais externas (API do Mercado Livre, chave da API Anthropic, endpoint/token do ibex-bot, JWT secret) são gerenciadas no Infisical, não em um `.env` mantido manualmente no servidor (como no padrão anterior do trupesound). O Infisical Agent roda como sidecar no ambiente do fogolab e sincroniza os segredos para variáveis de ambiente do container do backend. O código Go continua lendo configuração via `os.Getenv`, sem SDK ou dependência do Infisical embutida na aplicação — troca de segredo/rotação acontece fora do processo de deploy do binário.
