@@ -3,10 +3,13 @@ package httpapi
 import (
 	"encoding/json"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
@@ -27,6 +30,7 @@ func NewRouter(deps Deps) http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(corsMiddleware())
 
 	r.Get("/api/health", handleHealth)
 
@@ -70,6 +74,26 @@ func NewRouter(deps Deps) http.Handler {
 	})
 
 	return r
+}
+
+// corsMiddleware libera o frontend web (origem distinta em desenvolvimento
+// local, ou quando o deploy não coloca frontend e backend sob o mesmo
+// domínio) a chamar a API. CORS_ALLOWED_ORIGINS é uma lista separada por
+// vírgula; sem configuração, cai no padrão permissivo de desenvolvimento
+// (qualquer localhost).
+func corsMiddleware() func(http.Handler) http.Handler {
+	origins := []string{"http://localhost:*", "http://127.0.0.1:*"}
+	if raw := os.Getenv("CORS_ALLOWED_ORIGINS"); raw != "" {
+		origins = strings.Split(raw, ",")
+	}
+
+	return cors.Handler(cors.Options{
+		AllowedOrigins:   origins,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	})
 }
 
 func handleHealth(w http.ResponseWriter, r *http.Request) {

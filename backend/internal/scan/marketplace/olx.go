@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/chromedp/chromedp"
+
+	"github.com/mphennrichs/achapramim/backend/internal/browser"
 )
 
 const olxSlug = "olx"
@@ -52,7 +54,7 @@ func (f *OLXFetcher) Fetch(ctx context.Context, query Query) ([]Listing, error) 
 	if allocCtx == nil {
 		allocCtx = ctx
 	}
-	browserCtx, cancel := chromedp.NewContext(allocCtx)
+	browserCtx, cancel := browser.NewContext(allocCtx)
 	defer cancel()
 
 	timeoutCtx, cancelTimeout := context.WithTimeout(browserCtx, 30*time.Second)

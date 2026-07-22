@@ -1,0 +1,112 @@
+# Referência de deploy de produção (fogolab, Komodo + Infisical + Traefik).
+#
+# Este arquivo NÃO é o que roda no fogolab — é a referência para criar
+# fogolab/achapramim/docker-compose.yaml lá (ver CLAUDE.md do fogolab: "Adding
+# a new stack — checklist"). Ao portar:
+#   - Toda variável ${VAR} precisa existir no folder /achapramim do Infisical
+#     (projeto fogolab, env prod) e ser sincronizada via sync-secrets-deploy.
+#   - "achapramim" precisa entrar na allowlist de
+#     fogolab/.github/workflows/on-image-updated.yml antes do primeiro
+#     dispatch ter efeito (este repo dispara repository_dispatch após
+#     publicar imagem — ver .github/workflows/docker-publish.yml).
+#   - Rede aqui é só `traefik` (compartilhada), sem rede interna própria —
+#     mesmo padrão do trupesound: os serviços se enxergam pelo container_name
+#     na própria rede traefik.
+#
+# Uso local (fora do fogolab): ver compose.dev.yml, que builda a partir do
+# código-fonte em vez de puxar do GHCR.
+networks:
+  traefik:
+    external: true
+
+volumes:
+  postgres_data:
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: achapramim-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${ACHAPRAMIM_DB_USER}
+      POSTGRES_PASSWORD: ${ACHAPRAMIM_DB_PASSWORD}
+      POSTGRES_DB: ${ACHAPRAMIM_DB_NAME}
+    networks:
+      - traefik
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ACHAPRAMIM_DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        tag: "db"
+        max-size: "10m"
+        max-file: "3"
+
+  backend:
+    image: ghcr.io/mphennrichs/achapramim-backend:latest
+    container_name: achapramim-backend
+    restart: unless-stopped
+    environment:
+      # Nome único do container, não "db": a rede traefik compartilhada tem
+      # outros containers com alias "db" (mesma pegadinha documentada no
+      # trupesound/docker-compose.yaml do fogolab).
+      DATABASE_URL: postgres://${ACHAPRAMIM_DB_USER}:${ACHAPRAMIM_DB_PASSWORD}@achapramim-db:5432/${ACHAPRAMIM_DB_NAME}?sslmode=disable
+      HTTP_PORT: "8080"
+      JWT_SECRET: ${JWT_SECRET}
+      ACCESS_TOKEN_TTL_MINUTES: "30"
+      REFRESH_TOKEN_TTL_MINUTES: "43200"
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      SCAN_POLL_INTERVAL_SECONDS: "60"
+    networks:
+      - traefik
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        tag: "backend"
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.achapramim-api.rule=Host(`achapramim.foguinhodogoias.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.achapramim-api.entrypoints=web-secure"
+      - "traefik.http.routers.achapramim-api.tls.certresolver=cloudflare"
+      - "traefik.http.routers.achapramim-api.priority=10"
+      - "traefik.http.services.achapramim-api.loadbalancer.server.port=8080"
+
+  frontend:
+    image: ghcr.io/mphennrichs/achapramim-frontend:latest
+    container_name: achapramim-frontend
+    restart: unless-stopped
+    networks:
+      - traefik
+    depends_on:
+      - backend
+    logging:
+      driver: json-file
+      options:
+        tag: "frontend"
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.achapramim.rule=Host(`achapramim.foguinhodogoias.com`)"
+      - "traefik.http.routers.achapramim.entrypoints=web-secure"
+      - "traefik.http.routers.achapramim.priority=1"
+      - "traefik.http.routers.achapramim.tls.certresolver=cloudflare"
+      - "traefik.http.services.achapramim.loadbalancer.server.port=80"

@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/chromedp/chromedp"
+
+	"github.com/mphennrichs/achapramim/backend/internal/browser"
 )
 
 // PageContent é o conteúdo bruto extraído de uma página de anúncio, antes
@@ -19,7 +21,7 @@ type PageContent struct {
 // de anúncio tendem a ter proteção anti-bot que bloqueia requisições HTTP
 // simples) e extrai título + texto visível da página.
 func FetchPage(ctx context.Context, url string) (PageContent, error) {
-	browserCtx, cancel := chromedp.NewContext(ctx)
+	browserCtx, cancel := browser.NewContext(ctx)
 	defer cancel()
 
 	timeoutCtx, cancelTimeout := context.WithTimeout(browserCtx, 30*time.Second)

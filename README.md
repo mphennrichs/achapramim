@@ -16,8 +16,10 @@ Terminologia completa em [CONTEXT.md](./CONTEXT.md). Decisões de arquitetura em
 
 ## Deploy
 
-- Ambiente: fogolab, via Docker Compose + Traefik, mesma topologia usada pelo projeto [trupesound](../trupesound) (rede `traefik` externa + rede interna própria, roteamento por `Host` + `PathPrefix(/api)`, healthchecks, TLS via Cloudflare, logging `json-file` limitado).
-- Sem pipeline de CI/CD por enquanto — build e publicação de imagem ficam para depois, quando houver algo funcional para deployar.
+- Ambiente: fogolab, via Docker Compose + Traefik + Komodo, mesma topologia usada pelo projeto trupesound (rede `traefik` externa compartilhada, roteamento por `Host` + `PathPrefix(/api)`, healthchecks, TLS via Cloudflare, logging `json-file` limitado). `compose.yml` na raiz deste repo é a referência dessa topologia — o arquivo que roda de fato é `fogolab/achapramim/docker-compose.yaml`, criado a partir dela seguindo o checklist "Adding a new stack" do `CLAUDE.md` do fogolab.
+- Segredos via Infisical (projeto `fogolab`, folder `/achapramim`, env `prod`), sincronizados para o Stack do Komodo pela Action `sync-secrets-deploy.yml` do fogolab — nunca hardcoded em compose.
+- CI/CD: [.github/workflows/docker-publish.yml](./.github/workflows/docker-publish.yml) builda e publica `achapramim-backend`/`achapramim-frontend` no GHCR a cada push na `main`, e dispara um `repository_dispatch` para o fogolab com a tag `sha-<commit>` — o `on-image-updated.yml` de lá faz o pin da imagem no compose do stack e o push aciona o redeploy via Komodo. Pré-requisito no lado do fogolab: `achapramim` precisa estar na allowlist desse workflow e o Stack precisar já existir (com os secrets citados acima) antes do primeiro dispatch surtir efeito.
+- O backend controla um Chrome real via `chromedp` (contorna bloqueio anti-bot de fingerprint ao raspar os marketplaces — ver [ADR 0002](./docs/adr/0002-hybrid-marketplace-data-collection.md)), então a imagem de runtime do backend inclui Chromium (`backend/Dockerfile`) — não é só uma dependência de build.
 
 ## Usuários e permissões
 
