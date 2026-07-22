@@ -10,12 +10,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
+	"github.com/mphennrichs/achapramim/backend/internal/linkpreview"
 )
 
 type Deps struct {
 	Pool            *pgxpool.Pool
 	Issuer          *auth.TokenIssuer
 	RefreshTokenTTL time.Duration
+	Proposer        *linkpreview.Proposer
 }
 
 func NewRouter(deps Deps) http.Handler {
@@ -50,6 +52,9 @@ func NewRouter(deps Deps) http.Handler {
 
 		scanSettingsHandler := NewScanSettingsHandler(deps.Pool)
 		r.Get("/api/scan-settings", scanSettingsHandler.Get)
+
+		linkPreviewHandler := NewLinkPreviewHandler(deps.Proposer)
+		r.Post("/api/watches/link-preview", linkPreviewHandler.Preview)
 
 		r.Group(func(r chi.Router) {
 			r.Use(auth.RequireAdmin)

@@ -15,6 +15,7 @@ import (
 	"github.com/mphennrichs/achapramim/backend/internal/bootstrap"
 	"github.com/mphennrichs/achapramim/backend/internal/config"
 	"github.com/mphennrichs/achapramim/backend/internal/httpapi"
+	"github.com/mphennrichs/achapramim/backend/internal/linkpreview"
 	"github.com/mphennrichs/achapramim/backend/internal/scan"
 	"github.com/mphennrichs/achapramim/backend/internal/scan/marketplace"
 )
@@ -56,6 +57,7 @@ func main() {
 		Pool:            pool,
 		Issuer:          issuer,
 		RefreshTokenTTL: cfg.RefreshTokenTTL,
+		Proposer:        linkpreview.NewProposer(cfg.AnthropicAPIKey),
 	})
 
 	server := &http.Server{
