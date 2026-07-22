@@ -9,3 +9,9 @@ RETURNING *;
 -- name: RecordScanMarketplaceFailure :exec
 INSERT INTO scan_marketplace_failures (scan_id, marketplace_slug, error_message)
 VALUES ($1, $2, $3);
+
+-- name: ListScansByWatch :many
+SELECT * FROM scans WHERE watch_id = $1 ORDER BY started_at DESC LIMIT $2;
+
+-- name: ListScanMarketplaceFailures :many
+SELECT * FROM scan_marketplace_failures WHERE scan_id = $1;

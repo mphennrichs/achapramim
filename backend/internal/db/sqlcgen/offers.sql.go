@@ -11,6 +11,32 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getOfferByID = `-- name: GetOfferByID :one
+SELECT id, watch_id, marketplace_slug, external_id, url, title, image_url, price_cents, classification, available, first_seen_scan_id, last_checked_scan_id, created_at, updated_at FROM offers WHERE id = $1
+`
+
+func (q *Queries) GetOfferByID(ctx context.Context, id pgtype.UUID) (Offer, error) {
+	row := q.db.QueryRow(ctx, getOfferByID, id)
+	var i Offer
+	err := row.Scan(
+		&i.ID,
+		&i.WatchID,
+		&i.MarketplaceSlug,
+		&i.ExternalID,
+		&i.Url,
+		&i.Title,
+		&i.ImageUrl,
+		&i.PriceCents,
+		&i.Classification,
+		&i.Available,
+		&i.FirstSeenScanID,
+		&i.LastCheckedScanID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const insertOfferPricePointIfChanged = `-- name: InsertOfferPricePointIfChanged :exec
 INSERT INTO offer_price_points (offer_id, price_cents, scan_id)
 SELECT $1, $2, $3
@@ -38,6 +64,36 @@ type InsertOfferPricePointIfChangedParams struct {
 func (q *Queries) InsertOfferPricePointIfChanged(ctx context.Context, arg InsertOfferPricePointIfChangedParams) error {
 	_, err := q.db.Exec(ctx, insertOfferPricePointIfChanged, arg.OfferID, arg.PriceCents, arg.ScanID)
 	return err
+}
+
+const listOfferPricePoints = `-- name: ListOfferPricePoints :many
+SELECT id, offer_id, price_cents, observed_at, scan_id FROM offer_price_points WHERE offer_id = $1 ORDER BY observed_at ASC
+`
+
+func (q *Queries) ListOfferPricePoints(ctx context.Context, offerID pgtype.UUID) ([]OfferPricePoint, error) {
+	rows, err := q.db.Query(ctx, listOfferPricePoints, offerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OfferPricePoint
+	for rows.Next() {
+		var i OfferPricePoint
+		if err := rows.Scan(
+			&i.ID,
+			&i.OfferID,
+			&i.PriceCents,
+			&i.ObservedAt,
+			&i.ScanID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const markOffersUnavailableNotIn = `-- name: MarkOffersUnavailableNotIn :exec

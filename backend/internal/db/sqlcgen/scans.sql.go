@@ -55,6 +55,66 @@ func (q *Queries) FinishScan(ctx context.Context, arg FinishScanParams) (Scan, e
 	return i, err
 }
 
+const listScanMarketplaceFailures = `-- name: ListScanMarketplaceFailures :many
+SELECT scan_id, marketplace_slug, error_message FROM scan_marketplace_failures WHERE scan_id = $1
+`
+
+func (q *Queries) ListScanMarketplaceFailures(ctx context.Context, scanID pgtype.UUID) ([]ScanMarketplaceFailure, error) {
+	rows, err := q.db.Query(ctx, listScanMarketplaceFailures, scanID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ScanMarketplaceFailure
+	for rows.Next() {
+		var i ScanMarketplaceFailure
+		if err := rows.Scan(&i.ScanID, &i.MarketplaceSlug, &i.ErrorMessage); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listScansByWatch = `-- name: ListScansByWatch :many
+SELECT id, watch_id, status, started_at, finished_at, offers_found FROM scans WHERE watch_id = $1 ORDER BY started_at DESC LIMIT $2
+`
+
+type ListScansByWatchParams struct {
+	WatchID pgtype.UUID `json:"watch_id"`
+	Limit   int32       `json:"limit"`
+}
+
+func (q *Queries) ListScansByWatch(ctx context.Context, arg ListScansByWatchParams) ([]Scan, error) {
+	rows, err := q.db.Query(ctx, listScansByWatch, arg.WatchID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Scan
+	for rows.Next() {
+		var i Scan
+		if err := rows.Scan(
+			&i.ID,
+			&i.WatchID,
+			&i.Status,
+			&i.StartedAt,
+			&i.FinishedAt,
+			&i.OffersFound,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const recordScanMarketplaceFailure = `-- name: RecordScanMarketplaceFailure :exec
 INSERT INTO scan_marketplace_failures (scan_id, marketplace_slug, error_message)
 VALUES ($1, $2, $3)

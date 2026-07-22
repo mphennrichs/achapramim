@@ -43,6 +43,11 @@ func NewRouter(deps Deps) http.Handler {
 		r.Patch("/api/watches/{id}/active", watchHandler.SetActive)
 		r.Delete("/api/watches/{id}", watchHandler.Delete)
 
+		offerHandler := NewOfferHandler(deps.Pool)
+		r.Get("/api/watches/{id}/offers", offerHandler.List)
+		r.Get("/api/watches/{id}/offers/{offerId}/price-history", offerHandler.PriceHistory)
+		r.Get("/api/watches/{id}/scans", offerHandler.ListScans)
+
 		r.Group(func(r chi.Router) {
 			r.Use(auth.RequireAdmin)
 

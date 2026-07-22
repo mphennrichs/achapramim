@@ -46,8 +46,14 @@ func newWatchRequest(t *testing.T, method, target string, claims *auth.Claims, b
 }
 
 func withChiParam(req *http.Request, key, value string) *http.Request {
+	return withChiParams(req, map[string]string{key: value})
+}
+
+func withChiParams(req *http.Request, params map[string]string) *http.Request {
 	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add(key, value)
+	for key, value := range params {
+		rctx.URLParams.Add(key, value)
+	}
 	return req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
 }
 

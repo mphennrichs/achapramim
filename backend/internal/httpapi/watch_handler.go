@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -188,17 +187,7 @@ func (h *WatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	q := sqlcgen.New(tx)
 
-	existing, err := q.GetWatchByID(ctx, watchID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			writeError(w, http.StatusNotFound, "watch not found")
-			return
-		}
-		writeError(w, http.StatusInternalServerError, "internal error")
-		return
-	}
-	if uuidString(existing.UserID) != claims.UserID && !auth.IsAdmin(claims) {
-		writeError(w, http.StatusNotFound, "watch not found")
+	if _, ok := getOwnedWatch(ctx, w, q, watchID, claims); !ok {
 		return
 	}
 
@@ -265,18 +254,8 @@ func (h *WatchHandler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	q := sqlcgen.New(h.pool)
 
-	watch, err := q.GetWatchByID(ctx, parseUUID(chi.URLParam(r, "id")))
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			writeError(w, http.StatusNotFound, "watch not found")
-			return
-		}
-		writeError(w, http.StatusInternalServerError, "internal error")
-		return
-	}
-
-	if uuidString(watch.UserID) != claims.UserID && !auth.IsAdmin(claims) {
-		writeError(w, http.StatusNotFound, "watch not found")
+	watch, ok := getOwnedWatch(ctx, w, q, parseUUID(chi.URLParam(r, "id")), claims)
+	if !ok {
 		return
 	}
 
@@ -344,17 +323,7 @@ func (h *WatchHandler) SetActive(w http.ResponseWriter, r *http.Request) {
 	q := sqlcgen.New(h.pool)
 	watchID := parseUUID(chi.URLParam(r, "id"))
 
-	existing, err := q.GetWatchByID(ctx, watchID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			writeError(w, http.StatusNotFound, "watch not found")
-			return
-		}
-		writeError(w, http.StatusInternalServerError, "internal error")
-		return
-	}
-	if uuidString(existing.UserID) != claims.UserID && !auth.IsAdmin(claims) {
-		writeError(w, http.StatusNotFound, "watch not found")
+	if _, ok := getOwnedWatch(ctx, w, q, watchID, claims); !ok {
 		return
 	}
 
@@ -387,17 +356,7 @@ func (h *WatchHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	q := sqlcgen.New(h.pool)
 	watchID := parseUUID(chi.URLParam(r, "id"))
 
-	existing, err := q.GetWatchByID(ctx, watchID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			writeError(w, http.StatusNotFound, "watch not found")
-			return
-		}
-		writeError(w, http.StatusInternalServerError, "internal error")
-		return
-	}
-	if uuidString(existing.UserID) != claims.UserID && !auth.IsAdmin(claims) {
-		writeError(w, http.StatusNotFound, "watch not found")
+	if _, ok := getOwnedWatch(ctx, w, q, watchID, claims); !ok {
 		return
 	}
 

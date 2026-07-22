@@ -34,6 +34,12 @@ WHERE watch_id = $1
   AND available
   AND external_id != ALL(sqlc.arg(seen_external_ids)::text[]);
 
+-- name: GetOfferByID :one
+SELECT * FROM offers WHERE id = $1;
+
+-- name: ListOfferPricePoints :many
+SELECT * FROM offer_price_points WHERE offer_id = $1 ORDER BY observed_at ASC;
+
 -- name: InsertOfferPricePointIfChanged :exec
 -- Um novo ponto de Histórico de Preço só é registrado quando o valor difere
 -- do último observado (reverificação sem mudança não gera ponto novo).
