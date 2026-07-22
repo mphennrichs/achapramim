@@ -48,6 +48,9 @@ func NewRouter(deps Deps) http.Handler {
 		r.Get("/api/watches/{id}/offers/{offerId}/price-history", offerHandler.PriceHistory)
 		r.Get("/api/watches/{id}/scans", offerHandler.ListScans)
 
+		scanSettingsHandler := NewScanSettingsHandler(deps.Pool)
+		r.Get("/api/scan-settings", scanSettingsHandler.Get)
+
 		r.Group(func(r chi.Router) {
 			r.Use(auth.RequireAdmin)
 
@@ -56,6 +59,8 @@ func NewRouter(deps Deps) http.Handler {
 			r.Get("/api/users", userHandler.List)
 			r.Patch("/api/users/{id}/role", userHandler.SetRole)
 			r.Patch("/api/users/{id}/active", userHandler.SetActive)
+
+			r.Put("/api/scan-settings", scanSettingsHandler.Update)
 		})
 	})
 
