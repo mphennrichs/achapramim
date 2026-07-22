@@ -56,7 +56,7 @@ Além da criação manual, um Watch pode ser criado colando um link de anúncio:
 - Cada Watch roda em seu próprio ritmo: o próximo Scan é sorteado dentro de um intervalo mínimo/máximo global, definido pelo admin.
 - Um Scan é sempre agregado por Watch: consulta todos os marketplaces configurados naquele Watch em uma única execução (não existe um Scan por marketplace).
 - Um Scan pode ter sucesso parcial — se um marketplace falhar, os demais seguem sendo processados e notificados normalmente.
-- Coleta de dados é híbrida por marketplace: API oficial onde existir (Mercado Livre), scraping como fallback onde não existir (OLX, Facebook Marketplace). Detalhes em [ADR 0002](./docs/adr/0002-hybrid-marketplace-data-collection.md).
+- Coleta de dados é por scraping de páginas públicas de busca nos três marketplaces (Mercado Livre, OLX, Facebook Marketplace) — nenhum oferece API oficial de busca de terceiros para este caso de uso. Detalhes em [ADR 0002](./docs/adr/0002-hybrid-marketplace-data-collection.md).
 
 ## Offer (oferta encontrada)
 

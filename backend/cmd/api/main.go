@@ -15,6 +15,8 @@ import (
 	"github.com/mphennrichs/achapramim/backend/internal/bootstrap"
 	"github.com/mphennrichs/achapramim/backend/internal/config"
 	"github.com/mphennrichs/achapramim/backend/internal/httpapi"
+	"github.com/mphennrichs/achapramim/backend/internal/scan"
+	"github.com/mphennrichs/achapramim/backend/internal/scan/marketplace"
 )
 
 func main() {
@@ -43,6 +45,12 @@ func main() {
 	}
 
 	issuer := auth.NewTokenIssuer(cfg.JWTSecret, cfg.AccessTokenTTL)
+
+	runner := scan.NewRunner(pool, []marketplace.Fetcher{
+		marketplace.NewOLXFetcher(),
+	})
+	scheduler := scan.NewScheduler(pool, runner, cfg.ScanPollInterval)
+	go scheduler.Run(ctx)
 
 	router := httpapi.NewRouter(httpapi.Deps{
 		Pool:            pool,

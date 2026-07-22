@@ -18,8 +18,10 @@ type Config struct {
 
 	AnthropicAPIKey string
 
-	MercadoLivreAppID     string
-	MercadoLivreAppSecret string
+	// Intervalo entre verificações de Watches devidos a rodar um novo Scan
+	// (não confundir com o intervalo mín/máx por Watch, que fica em
+	// scan_settings no banco).
+	ScanPollInterval time.Duration
 
 	IbexBotBaseURL string
 	IbexBotToken   string
@@ -34,17 +36,15 @@ type Config struct {
 
 func Load() (Config, error) {
 	cfg := Config{
-		HTTPPort:              getEnv("HTTP_PORT", "8080"),
-		DatabaseURL:           os.Getenv("DATABASE_URL"),
-		JWTSecret:             os.Getenv("JWT_SECRET"),
-		AnthropicAPIKey:       os.Getenv("ANTHROPIC_API_KEY"),
-		MercadoLivreAppID:     os.Getenv("MERCADO_LIVRE_APP_ID"),
-		MercadoLivreAppSecret: os.Getenv("MERCADO_LIVRE_APP_SECRET"),
-		IbexBotBaseURL:        os.Getenv("IBEX_BOT_BASE_URL"),
-		IbexBotToken:          os.Getenv("IBEX_BOT_TOKEN"),
-		TelegramBotToken:      os.Getenv("TELEGRAM_BOT_TOKEN"),
-		AdminEmail:            os.Getenv("ADMIN_EMAIL"),
-		AdminPassword:         os.Getenv("ADMIN_PASSWORD"),
+		HTTPPort:         getEnv("HTTP_PORT", "8080"),
+		DatabaseURL:      os.Getenv("DATABASE_URL"),
+		JWTSecret:        os.Getenv("JWT_SECRET"),
+		AnthropicAPIKey:  os.Getenv("ANTHROPIC_API_KEY"),
+		IbexBotBaseURL:   os.Getenv("IBEX_BOT_BASE_URL"),
+		IbexBotToken:     os.Getenv("IBEX_BOT_TOKEN"),
+		TelegramBotToken: os.Getenv("TELEGRAM_BOT_TOKEN"),
+		AdminEmail:       os.Getenv("ADMIN_EMAIL"),
+		AdminPassword:    os.Getenv("ADMIN_PASSWORD"),
 	}
 
 	accessTTL, err := getDurationMinutes("ACCESS_TOKEN_TTL_MINUTES", 30)
@@ -58,6 +58,12 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 	cfg.RefreshTokenTTL = refreshTTL
+
+	scanPollSeconds, err := getDurationSeconds("SCAN_POLL_INTERVAL_SECONDS", 60)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.ScanPollInterval = scanPollSeconds
 
 	if cfg.DatabaseURL == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")
@@ -86,4 +92,16 @@ func getDurationMinutes(key string, fallbackMinutes int) (time.Duration, error) 
 		return 0, fmt.Errorf("%s must be an integer number of minutes: %w", key, err)
 	}
 	return time.Duration(minutes) * time.Minute, nil
+}
+
+func getDurationSeconds(key string, fallbackSeconds int) (time.Duration, error) {
+	v := os.Getenv(key)
+	if v == "" {
+		return time.Duration(fallbackSeconds) * time.Second, nil
+	}
+	seconds, err := strconv.Atoi(v)
+	if err != nil {
+		return 0, fmt.Errorf("%s must be an integer number of seconds: %w", key, err)
+	}
+	return time.Duration(seconds) * time.Second, nil
 }
