@@ -30,13 +30,19 @@ func NewAuthHandler(pool *pgxpool.Pool, issuer *auth.TokenIssuer, refreshTokenTT
 }
 
 type loginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	// EmailOrUsername aceita indistintamente o email ou o Username do User
+	// (ver CONTEXT.md) no mesmo campo.
+	EmailOrUsername string `json:"email_or_username"`
+	Password        string `json:"password"`
 }
 
 type tokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
+	// UsernamePending indica que o User ainda não passou pelo Primeiro
+	// Acesso (username não definido) — o front deve bloquear o restante do
+	// app até a definição do username.
+	UsernamePending bool `json:"username_pending"`
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +53,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	user, err := h.queries.GetUserByEmail(ctx, req.Email)
+	user, err := h.queries.GetUserByEmailOrUsername(ctx, req.EmailOrUsername)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			writeError(w, http.StatusUnauthorized, "invalid credentials")
@@ -67,7 +73,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.issueTokenPair(w, r, user.ID.String(), user.Role)
+	h.issueTokenPair(w, r, user.ID.String(), user.Role, user.Username == nil)
 }
 
 type refreshRequest struct {
@@ -105,10 +111,10 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.issueTokenPair(w, r, user.ID.String(), user.Role)
+	h.issueTokenPair(w, r, user.ID.String(), user.Role, user.Username == nil)
 }
 
-func (h *AuthHandler) issueTokenPair(w http.ResponseWriter, r *http.Request, userID, role string) {
+func (h *AuthHandler) issueTokenPair(w http.ResponseWriter, r *http.Request, userID, role string, usernamePending bool) {
 	accessToken, err := h.issuer.IssueAccessToken(userID, role)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to issue token")
@@ -132,7 +138,8 @@ func (h *AuthHandler) issueTokenPair(w http.ResponseWriter, r *http.Request, use
 	}
 
 	writeJSON(w, http.StatusOK, tokenResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		AccessToken:     accessToken,
+		RefreshToken:    refreshToken,
+		UsernamePending: usernamePending,
 	})
 }

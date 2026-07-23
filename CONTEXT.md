@@ -44,6 +44,14 @@ Nível de permissão de um User dentro do sistema. Modelado de forma extensível
 
 Cada Watch pertence a um User, que o cria, edita, exclui e ativa/inativa livremente sem depender do admin. Um User comum vê os Scans e Offers apenas dos próprios Watches. O admin, além disso, tem visibilidade e controle cross-user: pode ver os Watches e Scans de todos os Users, agrupados por User, cadastrar novos Users, alterar Roles, desativar Users, e também editar, ativar/inativar e excluir o Watch de qualquer User — o mesmo controle que o próprio dono tem sobre seu Watch.
 
+**Username**:
+Identificador único e permanente do User, escolhido por ele mesmo (não pelo admin) no Primeiro Acesso. Login aceita indistintamente email ou Username no mesmo campo. Diferente do email, não pode ser alterado depois de definido — trocar de username fica fora de escopo do User, resolvido apenas por intervenção manual (suporte/admin direto no banco), não por uma tela de edição.
+_Avoid_: Apelido, handle
+
+**Primeiro Acesso**:
+Etapa obrigatória entre o admin cadastrar um User (com nome, email e senha) e o User poder usar o restante do sistema: o User loga normalmente com email+senha, e o Primeiro Acesso consiste unicamente em escolher seu Username antes de prosseguir — não é um fluxo de troca de senha (a senha definida pelo admin já vale desde o cadastro, sem exigir troca). Um User sem Username definido consegue autenticar (login retorna token normalmente), mas o front bloqueia todo o resto do app até o Username ser definido.
+_Avoid_: Onboarding, cadastro (o User já foi cadastrado pelo admin; isso é só a etapa do username)
+
 **User desativado**:
 Um User pode ser desativado pelo admin (soft-disable, sem apagar histórico). Ao ser desativado, todos os Watches daquele User pausam automaticamente — deixam de gerar novos Scans e Notifications. Reativar o User volta os Watches ao funcionamento normal (respeitando o estado ativo/inativo de cada Watch, se houver algum inativo). O histórico de Watches/Scans/Offers permanece visível independente do estado do User.
 _Avoid_: Deletar, remover, banir

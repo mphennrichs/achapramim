@@ -13,14 +13,14 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _emailOrUsernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _loading = false;
   String? _errorMessage;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _emailOrUsernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -34,17 +34,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authServiceProvider).login(
-            email: _emailController.text.trim(),
+      final usernamePending = await ref.read(authServiceProvider).login(
+            emailOrUsername: _emailOrUsernameController.text.trim(),
             password: _passwordController.text,
           );
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed('/watches');
+      Navigator.of(context).pushReplacementNamed(
+        usernamePending ? '/set-username' : '/watches',
+      );
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       setState(() {
         _errorMessage = status == 401
-            ? 'E-mail ou senha inválidos.'
+            ? 'E-mail/username ou senha inválidos.'
             : 'Não foi possível conectar. Tente novamente.';
       });
     } finally {
@@ -79,11 +81,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(labelText: 'E-mail'),
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Informe o e-mail' : null,
+                    controller: _emailOrUsernameController,
+                    decoration: const InputDecoration(labelText: 'E-mail ou username'),
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'Informe o e-mail ou username'
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(

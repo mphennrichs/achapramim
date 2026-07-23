@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'api/api_client.dart';
 import 'api/auth_service.dart';
 import 'api/link_preview_service.dart';
+import 'api/me_service.dart';
 import 'api/watch_service.dart';
 
 /// URL base da API.
@@ -36,4 +37,8 @@ final watchServiceProvider = Provider<WatchService>((ref) {
 
 final linkPreviewServiceProvider = Provider<LinkPreviewService>((ref) {
   return LinkPreviewService(ref.watch(apiClientProvider));
+});
+
+final meServiceProvider = Provider<MeService>((ref) {
+  return MeService(ref.watch(apiClientProvider));
 });

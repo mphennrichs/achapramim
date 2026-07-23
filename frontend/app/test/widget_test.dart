@@ -15,7 +15,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Achapramim'), findsOneWidget);
-    expect(find.widgetWithText(TextFormField, 'E-mail'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'E-mail ou username'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Entrar'), findsOneWidget);
   });
 

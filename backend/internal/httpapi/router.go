@@ -41,6 +41,10 @@ func NewRouter(deps Deps) http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(auth.Middleware(deps.Issuer))
 
+		meHandler := NewMeHandler(deps.Pool)
+		r.Get("/api/me", meHandler.Get)
+		r.Put("/api/me/username", meHandler.SetUsername)
+
 		watchHandler := NewWatchHandler(deps.Pool)
 		r.Post("/api/watches", watchHandler.Create)
 		r.Get("/api/watches", watchHandler.List)

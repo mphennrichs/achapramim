@@ -37,11 +37,12 @@ type setUserActiveRequest struct {
 }
 
 type userResponse struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Email  string `json:"email"`
-	Role   string `json:"role"`
-	Active bool   `json:"active"`
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	Email    string  `json:"email"`
+	Role     string  `json:"role"`
+	Active   bool    `json:"active"`
+	Username *string `json:"username"`
 }
 
 // Create cadastra um novo User. Não existe self-signup: só um admin chega
@@ -144,10 +145,11 @@ func (h *UserHandler) SetActive(w http.ResponseWriter, r *http.Request) {
 
 func toUserResponse(u sqlcgen.User) userResponse {
 	return userResponse{
-		ID:     uuidString(u.ID),
-		Name:   u.Name,
-		Email:  u.Email,
-		Role:   u.Role,
-		Active: u.Active,
+		ID:       uuidString(u.ID),
+		Name:     u.Name,
+		Email:    u.Email,
+		Role:     u.Role,
+		Active:   u.Active,
+		Username: u.Username,
 	}
 }

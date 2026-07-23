@@ -4,6 +4,7 @@ import (
 	"context"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -12,21 +13,26 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-// newTestPool sobe um Postgres efêmero via testcontainers, aplica a
-// migration inicial e retorna um pool pronto para uso. O container é
+// newTestPool sobe um Postgres efêmero via testcontainers, aplica todas as
+// migrations (em ordem) e retorna um pool pronto para uso. O container é
 // derrubado automaticamente ao fim do teste (t.Cleanup).
 func newTestPool(t *testing.T) *pgxpool.Pool {
 	t.Helper()
 	ctx := context.Background()
 
 	_, thisFile, _, _ := runtime.Caller(0)
-	migrationPath := filepath.Join(filepath.Dir(thisFile), "..", "db", "migrations", "000001_init.up.sql")
+	migrationsDir := filepath.Join(filepath.Dir(thisFile), "..", "db", "migrations")
+	migrationPaths, err := filepath.Glob(filepath.Join(migrationsDir, "*.up.sql"))
+	if err != nil {
+		t.Fatalf("failed to glob migrations: %v", err)
+	}
+	sort.Strings(migrationPaths)
 
 	container, err := postgres.Run(ctx, "postgres:16-alpine",
 		postgres.WithDatabase("achapramim_test"),
 		postgres.WithUsername("achapramim"),
 		postgres.WithPassword("achapramim"),
-		postgres.WithInitScripts(migrationPath),
+		postgres.WithInitScripts(migrationPaths...),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
 		),

@@ -14,7 +14,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (name, email, password_hash, role)
 VALUES ($1, $2, $3, $4)
-RETURNING id, name, email, password_hash, role, active, created_at, updated_at
+RETURNING id, name, email, password_hash, role, active, created_at, updated_at, username
 `
 
 type CreateUserParams struct {
@@ -41,12 +41,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Active,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Username,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, email, password_hash, role, active, created_at, updated_at FROM users WHERE email = $1
+SELECT id, name, email, password_hash, role, active, created_at, updated_at, username FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -61,12 +62,34 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Active,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Username,
+	)
+	return i, err
+}
+
+const getUserByEmailOrUsername = `-- name: GetUserByEmailOrUsername :one
+SELECT id, name, email, password_hash, role, active, created_at, updated_at, username FROM users WHERE email = $1 OR username = $1
+`
+
+func (q *Queries) GetUserByEmailOrUsername(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmailOrUsername, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Role,
+		&i.Active,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Username,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, name, email, password_hash, role, active, created_at, updated_at FROM users WHERE id = $1
+SELECT id, name, email, password_hash, role, active, created_at, updated_at, username FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error) {
@@ -81,12 +104,13 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 		&i.Active,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Username,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, name, email, password_hash, role, active, created_at, updated_at FROM users ORDER BY created_at DESC
+SELECT id, name, email, password_hash, role, active, created_at, updated_at, username FROM users ORDER BY created_at DESC
 `
 
 func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
@@ -107,6 +131,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 			&i.Active,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Username,
 		); err != nil {
 			return nil, err
 		}
@@ -119,7 +144,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 }
 
 const setUserActive = `-- name: SetUserActive :one
-UPDATE users SET active = $2, updated_at = now() WHERE id = $1 RETURNING id, name, email, password_hash, role, active, created_at, updated_at
+UPDATE users SET active = $2, updated_at = now() WHERE id = $1 RETURNING id, name, email, password_hash, role, active, created_at, updated_at, username
 `
 
 type SetUserActiveParams struct {
@@ -139,12 +164,13 @@ func (q *Queries) SetUserActive(ctx context.Context, arg SetUserActiveParams) (U
 		&i.Active,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Username,
 	)
 	return i, err
 }
 
 const setUserRole = `-- name: SetUserRole :one
-UPDATE users SET role = $2, updated_at = now() WHERE id = $1 RETURNING id, name, email, password_hash, role, active, created_at, updated_at
+UPDATE users SET role = $2, updated_at = now() WHERE id = $1 RETURNING id, name, email, password_hash, role, active, created_at, updated_at, username
 `
 
 type SetUserRoleParams struct {
@@ -164,6 +190,37 @@ func (q *Queries) SetUserRole(ctx context.Context, arg SetUserRoleParams) (User,
 		&i.Active,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Username,
+	)
+	return i, err
+}
+
+const setUsername = `-- name: SetUsername :one
+UPDATE users SET username = $2, updated_at = now()
+WHERE id = $1 AND username IS NULL
+RETURNING id, name, email, password_hash, role, active, created_at, updated_at, username
+`
+
+type SetUsernameParams struct {
+	ID       pgtype.UUID `json:"id"`
+	Username *string     `json:"username"`
+}
+
+// Só aplica se o User ainda não tiver username (Primeiro Acesso é
+// one-shot — trocar depois de definido não é suportado por esta query).
+func (q *Queries) SetUsername(ctx context.Context, arg SetUsernameParams) (User, error) {
+	row := q.db.QueryRow(ctx, setUsername, arg.ID, arg.Username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Role,
+		&i.Active,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Username,
 	)
 	return i, err
 }
