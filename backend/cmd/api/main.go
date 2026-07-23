@@ -14,6 +14,7 @@ import (
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
 	"github.com/mphennrichs/achapramim/backend/internal/bootstrap"
 	"github.com/mphennrichs/achapramim/backend/internal/config"
+	"github.com/mphennrichs/achapramim/backend/internal/db"
 	"github.com/mphennrichs/achapramim/backend/internal/httpapi"
 	"github.com/mphennrichs/achapramim/backend/internal/linkpreview"
 	"github.com/mphennrichs/achapramim/backend/internal/scan"
@@ -32,6 +33,13 @@ func main() {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+
+	// Antes de qualquer query: um banco novo não tem tabela alguma, e o
+	// EnsureAdmin abaixo falharia com `relation "users" does not exist`.
+	if err := db.Migrate(cfg.DatabaseURL); err != nil {
+		logger.Error("failed to run database migrations", "error", err)
+		os.Exit(1)
+	}
 
 	pool, err := pgxpool.New(ctx, cfg.DatabaseURL)
 	if err != nil {
