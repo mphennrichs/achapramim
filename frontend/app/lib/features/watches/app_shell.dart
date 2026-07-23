@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Casco compartilhado das telas de usuário: sidebar fixa em telas largas
 /// (desktop/tablet), drawer em telas estreitas (mobile) — replica a
@@ -20,10 +21,11 @@ class AppShell extends ConsumerWidget {
     this.floatingActionButton,
   });
 
-  static const _destinations = [
-    _NavDestination(icon: Icons.visibility, label: 'Meus Watches', route: '/watches'),
-    _NavDestination(icon: Icons.search, label: 'Nova Consulta', route: '/watches/new'),
-  ];
+  static List<_NavDestination> _destinations(AppLocalizations l10n) => [
+        _NavDestination(icon: Icons.visibility, label: l10n.navMyWatches, route: '/watches'),
+        _NavDestination(icon: Icons.search, label: l10n.navNewWatch, route: '/watches/new'),
+        _NavDestination(icon: Icons.person, label: l10n.navProfile, route: '/profile'),
+      ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -105,6 +107,8 @@ class _SideNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final destinations = AppShell._destinations(l10n);
 
     return Container(
       color: scheme.surfaceContainerLowest,
@@ -116,20 +120,20 @@ class _SideNav extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
             child: Row(
               children: [
-                Icon(Icons.visibility, color: scheme.primary),
+                Image.asset('assets/images/logo.png', width: 28, height: 28),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Achapramim',
+                        l10n.appTitle,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
                       ),
                       Text(
-                        'User Dashboard',
+                        l10n.navUserDashboard,
                         style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
                       ),
                     ],
@@ -139,16 +143,16 @@ class _SideNav extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          for (var i = 0; i < AppShell._destinations.length; i++)
+          for (var i = 0; i < destinations.length; i++)
             _NavTile(
-              destination: AppShell._destinations[i],
+              destination: destinations[i],
               selected: i == selectedIndex,
             ),
           const Spacer(),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
+            title: Text(l10n.navLogout),
             onTap: onLogout,
           ),
         ],

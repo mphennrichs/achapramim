@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/models/offer.dart';
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 import 'app_shell.dart';
 
 final _watchProvider =
@@ -30,22 +31,23 @@ class WatchDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final watchAsync = ref.watch(_watchProvider(watchId));
+    final l10n = AppLocalizations.of(context)!;
 
     return AppShell(
-      title: watchAsync.valueOrNull?.name ?? 'Watch',
+      title: watchAsync.valueOrNull?.name ?? l10n.watchDetailFallbackTitle,
       selectedIndex: 0,
       body: watchAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Falha ao carregar Watch: $error')),
+        error: (error, _) => Center(child: Text(l10n.watchDetailLoadError(error.toString()))),
         data: (watch) => DefaultTabController(
           length: 2,
           child: Column(
             children: [
               _WatchSummaryHeader(watch: watch),
-              const TabBar(
+              TabBar(
                 tabs: [
-                  Tab(text: 'Offers'),
-                  Tab(text: 'Histórico de Scans'),
+                  Tab(text: l10n.watchDetailTabOffers),
+                  Tab(text: l10n.watchDetailTabScans),
                 ],
               ),
               Expanded(
@@ -72,6 +74,7 @@ class _WatchSummaryHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final priceLabel =
         'R\$ ${(watch.targetPriceCents / 100).toStringAsFixed(2).replaceAll('.', ',')}';
 
@@ -86,12 +89,12 @@ class _WatchSummaryHeader extends StatelessWidget {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Chip(label: Text('Alvo: $priceLabel')),
-          Chip(label: Text('Tolerância: ${watch.tolerancePercent}%')),
-          Chip(label: Text('Gatilho de queda: ${watch.priceDropThresholdPercent}%')),
-          Chip(label: Text('Máx. ofertas: ${watch.maxOffers}')),
+          Chip(label: Text(l10n.watchDetailTarget(priceLabel))),
+          Chip(label: Text(l10n.watchDetailTolerance(watch.tolerancePercent))),
+          Chip(label: Text(l10n.watchDetailDropThreshold(watch.priceDropThresholdPercent))),
+          Chip(label: Text(l10n.watchDetailMaxOffers(watch.maxOffers))),
           Chip(
-            label: Text(watch.active ? 'Ativo' : 'Inativo'),
+            label: Text(watch.active ? l10n.watchDetailActive : l10n.watchDetailInactive),
             backgroundColor: watch.active
                 ? scheme.primaryContainer
                 : scheme.surfaceContainerHigh,
@@ -112,15 +115,16 @@ class _OffersTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final offersAsync = ref.watch(_offersProvider(watchId));
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return offersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Falha ao carregar Offers: $error')),
+      error: (error, _) => Center(child: Text(l10n.watchDetailOffersLoadError(error.toString()))),
       data: (offers) {
         if (offers.isEmpty) {
           return Center(
             child: Text(
-              'Nenhuma Offer encontrada ainda.',
+              l10n.watchDetailNoOffers,
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
           );
@@ -144,6 +148,7 @@ class _OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final priceLabel =
         'R\$ ${(offer.priceCents / 100).toStringAsFixed(2).replaceAll('.', ',')}';
 
@@ -204,7 +209,7 @@ class _OfferCard extends StatelessWidget {
                       const SizedBox(width: 12),
                       if (!offer.available)
                         Chip(
-                          label: const Text('Indisponível'),
+                          label: Text(l10n.watchDetailOfferUnavailable),
                           backgroundColor: scheme.errorContainer,
                           labelStyle: TextStyle(color: scheme.onErrorContainer),
                         ),
@@ -216,7 +221,7 @@ class _OfferCard extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.open_in_new),
               onPressed: () {},
-              tooltip: 'Abrir anúncio',
+              tooltip: l10n.watchDetailOpenListing,
             ),
           ],
         ),
@@ -234,16 +239,17 @@ class _ScansTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scansAsync = ref.watch(_scansProvider(watchId));
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
     return scansAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Falha ao carregar Scans: $error')),
+      error: (error, _) => Center(child: Text(l10n.watchDetailScansLoadError(error.toString()))),
       data: (scans) {
         if (scans.isEmpty) {
           return Center(
             child: Text(
-              'Nenhum Scan executado ainda.',
+              l10n.watchDetailNoScans,
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
           );
@@ -258,9 +264,9 @@ class _ScansTab extends ConsumerWidget {
               leading: _StatusIcon(status: scan.status),
               title: Text(dateFormat.format(scan.startedAt.toLocal())),
               subtitle: scan.failedMarketplaces.isNotEmpty
-                  ? Text('Falhas: ${scan.failedMarketplaces.join(', ')}')
+                  ? Text(l10n.watchDetailScanFailures(scan.failedMarketplaces.join(', ')))
                   : null,
-              trailing: Text('${scan.offersFound} ofertas'),
+              trailing: Text(l10n.watchDetailOffersFound(scan.offersFound)),
             );
           },
         );

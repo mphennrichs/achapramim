@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Tela do Primeiro Acesso (ver CONTEXT.md): exibida sempre que o User
 /// autenticado ainda não definiu seu Username. Bloqueia o restante do app —
@@ -42,10 +43,11 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/watches');
     } on DioException catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _errorMessage = e.response?.statusCode == 409
-            ? 'Este username já está em uso. Escolha outro.'
-            : 'Não foi possível salvar. Tente novamente.';
+            ? l10n.setUsernameTaken
+            : l10n.setUsernameGenericError;
       });
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -55,6 +57,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Center(
@@ -71,7 +74,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                   Icon(Icons.person_pin, color: scheme.primary, size: 40),
                   const SizedBox(height: 12),
                   Text(
-                    'Escolha seu username',
+                    l10n.setUsernameTitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w700,
@@ -79,8 +82,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Identificador único e permanente — não poderá ser alterado depois. '
-                    'Você poderá usá-lo para entrar, junto com seu e-mail.',
+                    l10n.setUsernameDescription,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: scheme.onSurfaceVariant),
                   ),
@@ -91,13 +93,13 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[a-z0-9_]')),
                     ],
-                    decoration: const InputDecoration(
-                      labelText: 'Username',
-                      helperText: 'Minúsculas, números e underscore. 3 a 30 caracteres.',
+                    decoration: InputDecoration(
+                      labelText: l10n.setUsernameLabel,
+                      helperText: l10n.setUsernameHelper,
                     ),
                     validator: (value) {
                       if (value == null || !_usernamePattern.hasMatch(value)) {
-                        return 'Use 3 a 30 letras minúsculas, números ou _';
+                        return l10n.setUsernameValidationError;
                       }
                       return null;
                     },
@@ -116,7 +118,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Confirmar'),
+                        : Text(l10n.setUsernameConfirm),
                   ),
                 ],
               ),

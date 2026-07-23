@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/providers.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/set_username_screen.dart';
+import 'features/profile/profile_screen.dart';
 import 'features/watches/new_watch_screen.dart';
 import 'features/watches/watch_detail_screen.dart';
 import 'features/watches/watch_list_screen.dart';
+import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -25,6 +27,8 @@ class AchapramimApp extends StatelessWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: const _EntryPoint(),
       onGenerateRoute: _onGenerateRoute,
     );
@@ -44,6 +48,9 @@ class AchapramimApp extends StatelessWidget {
     }
     if (name == '/watches/new') {
       return MaterialPageRoute(builder: (_) => const NewWatchScreen());
+    }
+    if (name == '/profile') {
+      return MaterialPageRoute(builder: (_) => const ProfileScreen());
     }
     final watchDetailMatch = RegExp(r'^/watches/([^/]+)$').firstMatch(name);
     if (watchDetailMatch != null) {

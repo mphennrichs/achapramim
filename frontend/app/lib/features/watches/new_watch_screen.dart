@@ -4,14 +4,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 import 'app_shell.dart';
 
 const _availableMarketplaces = ['olx', 'mercado_livre', 'facebook_marketplace'];
-const _marketplaceLabels = {
-  'olx': 'OLX Brasil',
-  'mercado_livre': 'Mercado Livre',
-  'facebook_marketplace': 'FB Marketplace',
-};
+
+String _marketplaceLabel(AppLocalizations l10n, String slug) {
+  switch (slug) {
+    case 'olx':
+      return l10n.marketplaceOlx;
+    case 'mercado_livre':
+      return l10n.marketplaceMercadoLivre;
+    case 'facebook_marketplace':
+      return l10n.marketplaceFacebook;
+    default:
+      return slug;
+  }
+}
 
 class NewWatchScreen extends ConsumerStatefulWidget {
   const NewWatchScreen({super.key});
@@ -82,7 +91,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
       });
     } on DioException {
       setState(() {
-        _errorMessage = 'Não foi possível analisar o link agora. Preencha manualmente.';
+        _errorMessage = AppLocalizations.of(context)!.newWatchLinkAnalysisError;
       });
     } finally {
       if (mounted) setState(() => _analyzingLink = false);
@@ -113,7 +122,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
 
     if (name.isEmpty || targetPrice == null || _selectedMarketplaces.isEmpty) {
       setState(() {
-        _errorMessage = 'Preencha nome, preço-alvo e ao menos um marketplace.';
+        _errorMessage = AppLocalizations.of(context)!.newWatchValidationError;
       });
       return;
     }
@@ -143,7 +152,8 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
       Navigator.of(context).pop();
     } on DioException catch (e) {
       setState(() {
-        _errorMessage = 'Falha ao salvar Watch: ${e.response?.data ?? e.message}';
+        _errorMessage = AppLocalizations.of(context)!
+            .newWatchSaveError('${e.response?.data ?? e.message}');
       });
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -153,9 +163,10 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return AppShell(
-      title: 'Nova Consulta',
+      title: l10n.newWatchTitle,
       selectedIndex: 1,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -176,7 +187,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Criar a partir de Link',
+                              l10n.newWatchFromLinkTitle,
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),
@@ -184,7 +195,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Cole a URL de um anúncio para gerar uma Proposta de Preenchimento — sempre editável, nunca cria o Watch sozinha.',
+                        l10n.newWatchFromLinkDescription,
                         style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
                       ),
                       const SizedBox(height: 12),
@@ -193,8 +204,8 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                           Expanded(
                             child: TextField(
                               controller: _linkController,
-                              decoration: const InputDecoration(
-                                hintText: 'https://www.olx.com.br/...',
+                              decoration: InputDecoration(
+                                hintText: l10n.newWatchLinkHint,
                               ),
                             ),
                           ),
@@ -208,14 +219,14 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   )
                                 : const Icon(Icons.auto_awesome),
-                            label: const Text('Analisar'),
+                            label: Text(l10n.newWatchAnalyze),
                           ),
                         ],
                       ),
                       if (_partialFailure) ...[
                         const SizedBox(height: 8),
                         Text(
-                          'A análise foi parcial — revise os campos preenchidos e complete o restante manualmente.',
+                          l10n.newWatchPartialFailure,
                           style: TextStyle(color: scheme.error, fontSize: 12),
                         ),
                       ],
@@ -234,21 +245,21 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              'Identificação do Watch',
+                              l10n.newWatchIdentification,
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                           ),
                           if (_aiFilled)
                             Chip(
                               avatar: const Icon(Icons.auto_awesome, size: 16),
-                              label: const Text('Sugerido por IA'),
+                              label: Text(l10n.newWatchAiSuggested),
                             ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _nameController,
-                        decoration: const InputDecoration(labelText: 'Nome do Watch'),
+                        decoration: InputDecoration(labelText: l10n.newWatchNameLabel),
                       ),
                     ],
                   ),
@@ -260,7 +271,8 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                 children: [
                   Expanded(
                     child: _WordListCard(
-                      label: 'Palavras-Chave',
+                      label: l10n.newWatchKeywords,
+                      hint: l10n.newWatchAddWordHint,
                       inputController: _keywordInputController,
                       words: _keywords,
                       onAdd: _addKeyword,
@@ -270,7 +282,8 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _WordListCard(
-                      label: 'Palavras Bloqueadas',
+                      label: l10n.newWatchBlockedWords,
+                      hint: l10n.newWatchAddWordHint,
                       inputController: _blockedInputController,
                       words: _blockedWords,
                       onAdd: _addBlockedWord,
@@ -287,7 +300,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text('Marketplaces Ativos', style: Theme.of(context).textTheme.labelLarge),
+                      Text(l10n.newWatchActiveMarketplaces, style: Theme.of(context).textTheme.labelLarge),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 12,
@@ -295,7 +308,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                         children: [
                           for (final slug in _availableMarketplaces)
                             FilterChip(
-                              label: Text(_marketplaceLabels[slug]!),
+                              label: Text(_marketplaceLabel(l10n, slug)),
                               selected: _selectedMarketplaces.contains(slug),
                               onSelected: (selected) {
                                 setState(() {
@@ -320,7 +333,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text('Financeiro e Limites', style: Theme.of(context).textTheme.labelLarge),
+                      Text(l10n.newWatchFinanceAndLimits, style: Theme.of(context).textTheme.labelLarge),
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -328,7 +341,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                             child: TextField(
                               controller: _targetPriceController,
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              decoration: const InputDecoration(labelText: 'Preço-Alvo (BRL)'),
+                              decoration: InputDecoration(labelText: l10n.newWatchTargetPriceLabel),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -336,7 +349,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                             child: TextField(
                               controller: _toleranceController,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Tolerância (%)'),
+                              decoration: InputDecoration(labelText: l10n.newWatchToleranceLabel),
                             ),
                           ),
                         ],
@@ -348,8 +361,8 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                             child: TextField(
                               controller: _thresholdController,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Gatilho de Queda (%)',
+                              decoration: InputDecoration(
+                                labelText: l10n.newWatchDropThresholdLabel,
                               ),
                             ),
                           ),
@@ -358,7 +371,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                             child: TextField(
                               controller: _maxOffersController,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Máximo de Ofertas'),
+                              decoration: InputDecoration(labelText: l10n.newWatchMaxOffersLabel),
                             ),
                           ),
                         ],
@@ -381,7 +394,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.save),
-                label: const Text('Ativar Monitoramento'),
+                label: Text(l10n.newWatchSubmit),
               ),
               const SizedBox(height: 32),
             ],
@@ -394,6 +407,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
 
 class _WordListCard extends StatelessWidget {
   final String label;
+  final String hint;
   final TextEditingController inputController;
   final List<String> words;
   final VoidCallback onAdd;
@@ -402,6 +416,7 @@ class _WordListCard extends StatelessWidget {
 
   const _WordListCard({
     required this.label,
+    required this.hint,
     required this.inputController,
     required this.words,
     required this.onAdd,
@@ -442,7 +457,7 @@ class _WordListCard extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: inputController,
-                    decoration: const InputDecoration(hintText: 'Adicionar...'),
+                    decoration: InputDecoration(hintText: hint),
                     onSubmitted: (_) => onAdd(),
                   ),
                 ),

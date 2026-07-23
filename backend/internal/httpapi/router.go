@@ -44,6 +44,8 @@ func NewRouter(deps Deps) http.Handler {
 		meHandler := NewMeHandler(deps.Pool)
 		r.Get("/api/me", meHandler.Get)
 		r.Put("/api/me/username", meHandler.SetUsername)
+		r.Put("/api/me/password", meHandler.ChangePassword)
+		r.Put("/api/me/profile", meHandler.UpdateProfile)
 
 		watchHandler := NewWatchHandler(deps.Pool)
 		r.Post("/api/watches", watchHandler.Create)

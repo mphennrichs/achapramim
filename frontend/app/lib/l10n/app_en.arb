@@ -1,0 +1,135 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Achapramim",
+
+  "loginEmailOrUsernameLabel": "Email or username",
+  "loginEmailOrUsernameRequired": "Enter your email or username",
+  "loginPasswordLabel": "Password",
+  "loginPasswordRequired": "Enter your password",
+  "loginSubmit": "Sign in",
+  "loginInvalidCredentials": "Invalid email/username or password.",
+  "loginGenericError": "Could not connect. Please try again.",
+
+  "setUsernameTitle": "Choose your username",
+  "setUsernameDescription": "Unique and permanent identifier — cannot be changed later. You'll be able to use it to sign in, along with your email.",
+  "setUsernameLabel": "Username",
+  "setUsernameHelper": "Lowercase letters, numbers and underscore. 3 to 30 characters.",
+  "setUsernameValidationError": "Use 3 to 30 lowercase letters, numbers or _",
+  "setUsernameConfirm": "Confirm",
+  "setUsernameTaken": "This username is already taken. Choose another one.",
+  "setUsernameGenericError": "Could not save. Please try again.",
+
+  "navMyWatches": "My Watches",
+  "navNewWatch": "New Search",
+  "navProfile": "Profile",
+  "navLogout": "Logout",
+  "navUserDashboard": "User Dashboard",
+
+  "watchListTitle": "My Watches",
+  "watchListEmpty": "No Watch created yet.",
+  "watchListCreateFirst": "Create your first Watch",
+  "watchListLoadError": "Failed to load Watches: {error}",
+  "@watchListLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "watchTolerance": "Tolerance {percent}%",
+  "@watchTolerance": {
+    "placeholders": { "percent": { "type": "String" } }
+  },
+
+  "newWatchTitle": "New Search",
+  "newWatchFromLinkTitle": "Create from Link",
+  "newWatchFromLinkDescription": "Paste a listing URL to generate a Prefill Proposal — always editable, never creates the Watch on its own.",
+  "newWatchLinkHint": "https://www.olx.com.br/...",
+  "newWatchAnalyze": "Analyze",
+  "newWatchPartialFailure": "The analysis was partial — review the filled fields and complete the rest manually.",
+  "newWatchLinkAnalysisError": "Could not analyze the link right now. Please fill in manually.",
+  "newWatchIdentification": "Watch Identification",
+  "newWatchAiSuggested": "AI suggested",
+  "newWatchNameLabel": "Watch name",
+  "newWatchKeywords": "Keywords",
+  "newWatchBlockedWords": "Blocked Words",
+  "newWatchAddWordHint": "Add...",
+  "newWatchActiveMarketplaces": "Active Marketplaces",
+  "newWatchFinanceAndLimits": "Finance and Limits",
+  "newWatchTargetPriceLabel": "Target Price (BRL)",
+  "newWatchToleranceLabel": "Tolerance (%)",
+  "newWatchDropThresholdLabel": "Drop Trigger (%)",
+  "newWatchMaxOffersLabel": "Max Offers",
+  "newWatchValidationError": "Fill in the name, target price and at least one marketplace.",
+  "newWatchSaveError": "Failed to save Watch: {details}",
+  "@newWatchSaveError": {
+    "placeholders": { "details": { "type": "String" } }
+  },
+  "newWatchSubmit": "Activate Monitoring",
+  "marketplaceOlx": "OLX Brasil",
+  "marketplaceMercadoLivre": "Mercado Livre",
+  "marketplaceFacebook": "FB Marketplace",
+
+  "watchDetailFallbackTitle": "Watch",
+  "watchDetailLoadError": "Failed to load Watch: {error}",
+  "@watchDetailLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "watchDetailTabOffers": "Offers",
+  "watchDetailTabScans": "Scan History",
+  "watchDetailTarget": "Target: {price}",
+  "@watchDetailTarget": {
+    "placeholders": { "price": { "type": "String" } }
+  },
+  "watchDetailTolerance": "Tolerance: {percent}%",
+  "@watchDetailTolerance": {
+    "placeholders": { "percent": { "type": "String" } }
+  },
+  "watchDetailDropThreshold": "Drop trigger: {percent}%",
+  "@watchDetailDropThreshold": {
+    "placeholders": { "percent": { "type": "String" } }
+  },
+  "watchDetailMaxOffers": "Max. offers: {count}",
+  "@watchDetailMaxOffers": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "watchDetailActive": "Active",
+  "watchDetailInactive": "Inactive",
+  "watchDetailOffersLoadError": "Failed to load Offers: {error}",
+  "@watchDetailOffersLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "watchDetailNoOffers": "No Offer found yet.",
+  "watchDetailOfferUnavailable": "Unavailable",
+  "watchDetailOpenListing": "Open listing",
+  "watchDetailScansLoadError": "Failed to load Scans: {error}",
+  "@watchDetailScansLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "watchDetailNoScans": "No Scan run yet.",
+  "watchDetailScanFailures": "Failures: {marketplaces}",
+  "@watchDetailScanFailures": {
+    "placeholders": { "marketplaces": { "type": "String" } }
+  },
+  "watchDetailOffersFound": "{count} offers",
+  "@watchDetailOffersFound": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "profileTitle": "Profile",
+  "profileLoadError": "Failed to load profile: {error}",
+  "@profileLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "profileEmailLabel": "Email",
+  "profileUsernameLabel": "Username",
+  "profileUsernameNotSet": "Not set",
+  "profileNameLabel": "Name",
+  "profileChangePasswordTitle": "Change password",
+  "profileCurrentPasswordLabel": "Current password",
+  "profileNewPasswordLabel": "New password",
+  "profileConfirmNewPasswordLabel": "Confirm new password",
+  "profilePasswordMismatch": "Passwords don't match",
+  "profilePasswordTooShort": "Password must be at least 6 characters",
+  "profileCurrentPasswordWrong": "Current password is incorrect.",
+  "profilePasswordChangeError": "Could not change password. Please try again.",
+  "profilePasswordChangeSuccess": "Password changed successfully.",
+  "profileSaveChanges": "Save"
+}

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 import 'app_shell.dart';
 
 final watchListProvider = FutureProvider.autoDispose<List<Watch>>((ref) {
@@ -16,19 +17,20 @@ class WatchListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final watchesAsync = ref.watch(watchListProvider);
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return AppShell(
-      title: 'Meus Watches',
+      title: l10n.watchListTitle,
       selectedIndex: 0,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).pushNamed('/watches/new'),
         icon: const Icon(Icons.add),
-        label: const Text('Nova Consulta'),
+        label: Text(l10n.navNewWatch),
       ),
       body: watchesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
-          child: Text('Falha ao carregar Watches: $error'),
+          child: Text(l10n.watchListLoadError(error.toString())),
         ),
         data: (watches) {
           if (watches.isEmpty) {
@@ -39,13 +41,13 @@ class WatchListScreen extends ConsumerWidget {
                   Icon(Icons.search_off, size: 48, color: scheme.onSurfaceVariant),
                   const SizedBox(height: 12),
                   Text(
-                    'Nenhum Watch cadastrado ainda.',
+                    l10n.watchListEmpty,
                     style: TextStyle(color: scheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: () => Navigator.of(context).pushNamed('/watches/new'),
-                    child: const Text('Criar o primeiro Watch'),
+                    child: Text(l10n.watchListCreateFirst),
                   ),
                 ],
               ),
@@ -78,6 +80,7 @@ class _WatchCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final priceLabel =
         'R\$ ${(watch.targetPriceCents / 100).toStringAsFixed(2).replaceAll('.', ',')}';
 
@@ -118,7 +121,7 @@ class _WatchCard extends ConsumerWidget {
                 runSpacing: 8,
                 children: [
                   Chip(label: Text(priceLabel)),
-                  Chip(label: Text('Tolerância ${watch.tolerancePercent}%')),
+                  Chip(label: Text(l10n.watchTolerance(watch.tolerancePercent))),
                   for (final marketplace in watch.marketplaces)
                     Chip(label: Text(marketplace)),
                 ],

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -44,10 +45,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     } on DioException catch (e) {
       final status = e.response?.statusCode;
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _errorMessage = status == 401
-            ? 'E-mail/username ou senha inválidos.'
-            : 'Não foi possível conectar. Tente novamente.';
+            ? l10n.loginInvalidCredentials
+            : l10n.loginGenericError;
       });
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -57,6 +59,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Center(
@@ -70,10 +73,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(Icons.visibility, color: scheme.primary, size: 40),
+                  Image.asset('assets/images/logo.png', width: 56, height: 56),
                   const SizedBox(height: 12),
                   Text(
-                    'Achapramim',
+                    l10n.appTitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w700,
@@ -82,18 +85,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 32),
                   TextFormField(
                     controller: _emailOrUsernameController,
-                    decoration: const InputDecoration(labelText: 'E-mail ou username'),
+                    decoration: InputDecoration(labelText: l10n.loginEmailOrUsernameLabel),
                     validator: (value) => (value == null || value.isEmpty)
-                        ? 'Informe o e-mail ou username'
+                        ? l10n.loginEmailOrUsernameRequired
                         : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: const InputDecoration(labelText: 'Senha'),
+                    decoration: InputDecoration(labelText: l10n.loginPasswordLabel),
                     validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Informe a senha' : null,
+                        (value == null || value.isEmpty) ? l10n.loginPasswordRequired : null,
                     onFieldSubmitted: (_) => _submit(),
                   ),
                   if (_errorMessage != null) ...[
@@ -112,7 +115,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Entrar'),
+                        : Text(l10n.loginSubmit),
                   ),
                 ],
               ),

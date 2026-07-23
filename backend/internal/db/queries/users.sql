@@ -22,8 +22,21 @@ UPDATE users SET role = $2, updated_at = now() WHERE id = $1 RETURNING *;
 UPDATE users SET active = $2, updated_at = now() WHERE id = $1 RETURNING *;
 
 -- name: SetUsername :one
--- Só aplica se o User ainda não tiver username (Primeiro Acesso é
--- one-shot — trocar depois de definido não é suportado por esta query).
+-- Só aplica se o User ainda não tiver username — usada pelo Primeiro Acesso.
 UPDATE users SET username = $2, updated_at = now()
 WHERE id = $1 AND username IS NULL
 RETURNING *;
+
+-- name: UpdateUsername :one
+-- Troca o username já definido — usada pela tela de Perfil. Sem a restrição
+-- username IS NULL do Primeiro Acesso; a unicidade continua garantida pela
+-- constraint users_username_key.
+UPDATE users SET username = $2, updated_at = now()
+WHERE id = $1
+RETURNING *;
+
+-- name: SetPasswordHash :one
+UPDATE users SET password_hash = $2, updated_at = now() WHERE id = $1 RETURNING *;
+
+-- name: SetName :one
+UPDATE users SET name = $2, updated_at = now() WHERE id = $1 RETURNING *;

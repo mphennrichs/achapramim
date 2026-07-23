@@ -143,6 +143,58 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const setName = `-- name: SetName :one
+UPDATE users SET name = $2, updated_at = now() WHERE id = $1 RETURNING id, name, email, password_hash, role, active, created_at, updated_at, username
+`
+
+type SetNameParams struct {
+	ID   pgtype.UUID `json:"id"`
+	Name string      `json:"name"`
+}
+
+func (q *Queries) SetName(ctx context.Context, arg SetNameParams) (User, error) {
+	row := q.db.QueryRow(ctx, setName, arg.ID, arg.Name)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Role,
+		&i.Active,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Username,
+	)
+	return i, err
+}
+
+const setPasswordHash = `-- name: SetPasswordHash :one
+UPDATE users SET password_hash = $2, updated_at = now() WHERE id = $1 RETURNING id, name, email, password_hash, role, active, created_at, updated_at, username
+`
+
+type SetPasswordHashParams struct {
+	ID           pgtype.UUID `json:"id"`
+	PasswordHash string      `json:"password_hash"`
+}
+
+func (q *Queries) SetPasswordHash(ctx context.Context, arg SetPasswordHashParams) (User, error) {
+	row := q.db.QueryRow(ctx, setPasswordHash, arg.ID, arg.PasswordHash)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Role,
+		&i.Active,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Username,
+	)
+	return i, err
+}
+
 const setUserActive = `-- name: SetUserActive :one
 UPDATE users SET active = $2, updated_at = now() WHERE id = $1 RETURNING id, name, email, password_hash, role, active, created_at, updated_at, username
 `
@@ -206,10 +258,40 @@ type SetUsernameParams struct {
 	Username *string     `json:"username"`
 }
 
-// Só aplica se o User ainda não tiver username (Primeiro Acesso é
-// one-shot — trocar depois de definido não é suportado por esta query).
+// Só aplica se o User ainda não tiver username — usada pelo Primeiro Acesso.
 func (q *Queries) SetUsername(ctx context.Context, arg SetUsernameParams) (User, error) {
 	row := q.db.QueryRow(ctx, setUsername, arg.ID, arg.Username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Role,
+		&i.Active,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Username,
+	)
+	return i, err
+}
+
+const updateUsername = `-- name: UpdateUsername :one
+UPDATE users SET username = $2, updated_at = now()
+WHERE id = $1
+RETURNING id, name, email, password_hash, role, active, created_at, updated_at, username
+`
+
+type UpdateUsernameParams struct {
+	ID       pgtype.UUID `json:"id"`
+	Username *string     `json:"username"`
+}
+
+// Troca o username já definido — usada pela tela de Perfil. Sem a restrição
+// username IS NULL do Primeiro Acesso; a unicidade continua garantida pela
+// constraint users_username_key.
+func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUsername, arg.ID, arg.Username)
 	var i User
 	err := row.Scan(
 		&i.ID,
