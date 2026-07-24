@@ -356,12 +356,6 @@ abstract class AppLocalizations {
   /// **'Adicionar...'**
   String get newWatchAddWordHint;
 
-  /// No description provided for @newWatchActiveMarketplaces.
-  ///
-  /// In pt, this message translates to:
-  /// **'Marketplaces Ativos'**
-  String get newWatchActiveMarketplaces;
-
   /// No description provided for @newWatchFinanceAndLimits.
   ///
   /// In pt, this message translates to:
@@ -409,24 +403,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ativar Monitoramento'**
   String get newWatchSubmit;
-
-  /// No description provided for @marketplaceOlx.
-  ///
-  /// In pt, this message translates to:
-  /// **'OLX Brasil'**
-  String get marketplaceOlx;
-
-  /// No description provided for @marketplaceMercadoLivre.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mercado Livre'**
-  String get marketplaceMercadoLivre;
-
-  /// No description provided for @marketplaceFacebook.
-  ///
-  /// In pt, this message translates to:
-  /// **'FB Marketplace'**
-  String get marketplaceFacebook;
 
   /// No description provided for @watchDetailFallbackTitle.
   ///
@@ -572,6 +548,30 @@ abstract class AppLocalizations {
   /// **'Nome'**
   String get profileNameLabel;
 
+  /// No description provided for @profileThemeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tema'**
+  String get profileThemeTitle;
+
+  /// No description provided for @profileThemeLight.
+  ///
+  /// In pt, this message translates to:
+  /// **'Claro'**
+  String get profileThemeLight;
+
+  /// No description provided for @profileThemeDark.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escuro'**
+  String get profileThemeDark;
+
+  /// No description provided for @profileThemeSystem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sistema'**
+  String get profileThemeSystem;
+
   /// No description provided for @profileChangePasswordTitle.
   ///
   /// In pt, this message translates to:
@@ -686,6 +686,42 @@ abstract class AppLocalizations {
   /// **'Senha inicial'**
   String get adminUsersPasswordLabel;
 
+  /// No description provided for @adminUsersUsernameLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Username (opcional)'**
+  String get adminUsersUsernameLabel;
+
+  /// No description provided for @adminUsersUsernameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deixe em branco para o usuário definir no Primeiro Acesso'**
+  String get adminUsersUsernameHint;
+
+  /// No description provided for @adminUsersUsernameInvalid.
+  ///
+  /// In pt, this message translates to:
+  /// **'3-30 caracteres: minúsculas, números ou _'**
+  String get adminUsersUsernameInvalid;
+
+  /// No description provided for @adminUsersUsernameTaken.
+  ///
+  /// In pt, this message translates to:
+  /// **'Username já em uso'**
+  String get adminUsersUsernameTaken;
+
+  /// No description provided for @adminUsersUsernameAvailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Disponível'**
+  String get adminUsersUsernameAvailable;
+
+  /// No description provided for @adminUsersUsernameChecking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Verificando...'**
+  String get adminUsersUsernameChecking;
+
   /// No description provided for @adminUsersRoleLabel.
   ///
   /// In pt, this message translates to:
@@ -745,6 +781,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Cancelar'**
   String get adminUsersCancel;
+
+  /// No description provided for @adminUsersEditUsername.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar username'**
+  String get adminUsersEditUsername;
+
+  /// No description provided for @adminUsersSetUsername.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir username'**
+  String get adminUsersSetUsername;
+
+  /// No description provided for @adminUsersUsernameDialogTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Username de {name}'**
+  String adminUsersUsernameDialogTitle(String name);
+
+  /// No description provided for @adminUsersUsernameSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar'**
+  String get adminUsersUsernameSave;
+
+  /// No description provided for @adminUsersUsernameSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao salvar username: {details}'**
+  String adminUsersUsernameSaveError(String details);
 
   /// No description provided for @adminWatchesTitle.
   ///

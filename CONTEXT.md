@@ -17,7 +17,7 @@ Uma execução pontual de um Alerta: consulta todos os marketplaces configurados
 _Avoid_: Execução, consulta, run
 
 **Marketplace**:
-Uma fonte externa de ofertas (Mercado Livre, OLX, Facebook Marketplace). Um Alerta pode monitorar vários Marketplaces ao mesmo tempo.
+Uma fonte externa de ofertas. Hoje só OLX é suportado (ver ADR 0003 — Mercado Livre e Facebook Marketplace foram removidos por nunca terem tido um Fetcher viável). Um Alerta pode monitorar vários Marketplaces ao mesmo tempo, quando mais de um estiver disponível.
 
 **Offer**:
 Um anúncio encontrado em um Marketplace durante um Scan, que atende aos critérios do Alerta. Contém valor, link, ao menos 1 imagem e uma classificação. Ofertas de diferentes Marketplaces competem pelo mesmo limite de "quantidade de ofertas listadas" do Alerta — o corte é total, não por Marketplace. Uma Offer permanece disponível na listagem enquanto o anúncio original seguir ativo no Marketplace; a cada novo Scan, as Offers atualmente exibidas (dentro do top-N) são reverificadas, e as que não estão mais disponíveis (vendidas/removidas) saem da lista. Offers fora do top-N não são reverificadas. A mesma reverificação também observa o valor atual do anúncio, alimentando o Histórico de Preço da Offer.

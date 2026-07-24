@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/user_profile.dart';
 import '../../core/providers.dart';
+import '../../core/theme_mode_provider.dart';
 import '../../l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -168,6 +169,46 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(l10n.profileSaveChanges),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(l10n.profileThemeTitle, style: Theme.of(context).textTheme.labelLarge),
+                    const SizedBox(height: 16),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final themeMode = ref.watch(themeModeProvider);
+                        return SegmentedButton<ThemeMode>(
+                          segments: [
+                            ButtonSegment(
+                              value: ThemeMode.light,
+                              icon: const Icon(Icons.light_mode),
+                              label: Text(l10n.profileThemeLight),
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.dark,
+                              icon: const Icon(Icons.dark_mode),
+                              label: Text(l10n.profileThemeDark),
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.system,
+                              icon: const Icon(Icons.brightness_auto),
+                              label: Text(l10n.profileThemeSystem),
+                            ),
+                          ],
+                          selected: {themeMode},
+                          onSelectionChanged: (selection) =>
+                              ref.read(themeModeProvider.notifier).setThemeMode(selection.first),
+                        );
+                      },
                     ),
                   ],
                 ),

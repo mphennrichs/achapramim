@@ -151,9 +151,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newWatchAddWordHint => 'Add...';
 
   @override
-  String get newWatchActiveMarketplaces => 'Active Marketplaces';
-
-  @override
   String get newWatchFinanceAndLimits => 'Finance and Limits';
 
   @override
@@ -179,15 +176,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newWatchSubmit => 'Activate Monitoring';
-
-  @override
-  String get marketplaceOlx => 'OLX Brasil';
-
-  @override
-  String get marketplaceMercadoLivre => 'Mercado Livre';
-
-  @override
-  String get marketplaceFacebook => 'FB Marketplace';
 
   @override
   String get watchDetailFallbackTitle => 'Watch';
@@ -282,6 +270,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileNameLabel => 'Name';
 
   @override
+  String get profileThemeTitle => 'Theme';
+
+  @override
+  String get profileThemeLight => 'Light';
+
+  @override
+  String get profileThemeDark => 'Dark';
+
+  @override
+  String get profileThemeSystem => 'System';
+
+  @override
   String get profileChangePasswordTitle => 'Change password';
 
   @override
@@ -343,6 +343,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminUsersPasswordLabel => 'Initial password';
 
   @override
+  String get adminUsersUsernameLabel => 'Username (optional)';
+
+  @override
+  String get adminUsersUsernameHint =>
+      'Leave blank for the user to set it on First Access';
+
+  @override
+  String get adminUsersUsernameInvalid =>
+      '3-30 characters: lowercase letters, numbers or _';
+
+  @override
+  String get adminUsersUsernameTaken => 'Username already taken';
+
+  @override
+  String get adminUsersUsernameAvailable => 'Available';
+
+  @override
+  String get adminUsersUsernameChecking => 'Checking...';
+
+  @override
   String get adminUsersRoleLabel => 'Role';
 
   @override
@@ -374,6 +394,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminUsersCancel => 'Cancel';
+
+  @override
+  String get adminUsersEditUsername => 'Edit username';
+
+  @override
+  String get adminUsersSetUsername => 'Set username';
+
+  @override
+  String adminUsersUsernameDialogTitle(String name) {
+    return '$name\'s username';
+  }
+
+  @override
+  String get adminUsersUsernameSave => 'Save';
+
+  @override
+  String adminUsersUsernameSaveError(String details) {
+    return 'Failed to save username: $details';
+  }
 
   @override
   String get adminWatchesTitle => 'All Watches';

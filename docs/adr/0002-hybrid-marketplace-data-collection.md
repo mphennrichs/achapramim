@@ -1,3 +1,8 @@
+> **Superseded by [ADR 0003](0003-olx-only-marketplace.md)**: Mercado Livre e
+> Facebook Marketplace foram removidos do sistema (schema, backend e
+> frontend). Este documento permanece como registro histórico de por que os
+> três foram considerados originalmente e por que os dois ficaram pendentes.
+
 # Coleta por scraping nos três marketplaces
 
 Mercado Livre, OLX e Facebook Marketplace precisam ser consultados a cada Scan. A intenção original era usar a API oficial do Mercado Livre para busca (por ele ser o único dos três a expor uma API pública) e scraping como fallback só para OLX e Facebook Marketplace. Na prática, a API do Mercado Livre para terceiros hoje só concede escopo de gestão da própria loja do desenvolvedor da aplicação (itens, vendas, faturamento) — não existe mais um escopo de busca aberta a anúncios de qualquer vendedor no marketplace, mesmo autenticado via OAuth2. Não há alternativa de API oficial nos três marketplaces para este caso de uso.

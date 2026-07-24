@@ -72,8 +72,10 @@ func NewRouter(deps Deps) http.Handler {
 			userHandler := NewUserHandler(deps.Pool)
 			r.Post("/api/users", userHandler.Create)
 			r.Get("/api/users", userHandler.List)
+			r.Get("/api/users/username-available", userHandler.UsernameAvailable)
 			r.Patch("/api/users/{id}/role", userHandler.SetRole)
 			r.Patch("/api/users/{id}/active", userHandler.SetActive)
+			r.Patch("/api/users/{id}/username", userHandler.SetUsername)
 
 			r.Put("/api/scan-settings", scanSettingsHandler.Update)
 		})

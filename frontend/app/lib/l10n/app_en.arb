@@ -58,7 +58,6 @@
   "newWatchKeywords": "Keywords",
   "newWatchBlockedWords": "Blocked Words",
   "newWatchAddWordHint": "Add...",
-  "newWatchActiveMarketplaces": "Active Marketplaces",
   "newWatchFinanceAndLimits": "Finance and Limits",
   "newWatchTargetPriceLabel": "Target Price (BRL)",
   "newWatchToleranceLabel": "Tolerance (%)",
@@ -70,9 +69,6 @@
     "placeholders": { "details": { "type": "String" } }
   },
   "newWatchSubmit": "Activate Monitoring",
-  "marketplaceOlx": "OLX Brasil",
-  "marketplaceMercadoLivre": "Mercado Livre",
-  "marketplaceFacebook": "FB Marketplace",
 
   "watchDetailFallbackTitle": "Watch",
   "watchDetailLoadError": "Failed to load Watch: {error}",
@@ -129,6 +125,10 @@
   "profileUsernameLabel": "Username",
   "profileUsernameNotSet": "Not set",
   "profileNameLabel": "Name",
+  "profileThemeTitle": "Theme",
+  "profileThemeLight": "Light",
+  "profileThemeDark": "Dark",
+  "profileThemeSystem": "System",
   "profileChangePasswordTitle": "Change password",
   "profileCurrentPasswordLabel": "Current password",
   "profileNewPasswordLabel": "New password",
@@ -153,6 +153,12 @@
   "adminUsersNameLabel": "Name",
   "adminUsersEmailLabel": "Email",
   "adminUsersPasswordLabel": "Initial password",
+  "adminUsersUsernameLabel": "Username (optional)",
+  "adminUsersUsernameHint": "Leave blank for the user to set it on First Access",
+  "adminUsersUsernameInvalid": "3-30 characters: lowercase letters, numbers or _",
+  "adminUsersUsernameTaken": "Username already taken",
+  "adminUsersUsernameAvailable": "Available",
+  "adminUsersUsernameChecking": "Checking...",
   "adminUsersRoleLabel": "Role",
   "adminUsersRoleAdmin": "Admin",
   "adminUsersRoleUser": "User",
@@ -166,6 +172,17 @@
   "adminUsersUsernamePending": "Username pending",
   "adminUsersUpdateError": "Failed to update user. Please try again.",
   "adminUsersCancel": "Cancel",
+  "adminUsersEditUsername": "Edit username",
+  "adminUsersSetUsername": "Set username",
+  "adminUsersUsernameDialogTitle": "{name}'s username",
+  "@adminUsersUsernameDialogTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "adminUsersUsernameSave": "Save",
+  "adminUsersUsernameSaveError": "Failed to save username: {details}",
+  "@adminUsersUsernameSaveError": {
+    "placeholders": { "details": { "type": "String" } }
+  },
 
   "adminWatchesTitle": "All Watches",
   "adminWatchesLoadError": "Failed to load Watches: {error}",

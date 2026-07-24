@@ -112,25 +112,30 @@ func TestRunner_RunWatch_PersistsOffersAndPricePoint(t *testing.T) {
 	require.True(t, offers[0].Available)
 }
 
-func TestRunner_RunWatch_PartialSuccessOnFetcherError(t *testing.T) {
+// TestRunner_RunWatch_FailsScanWhenOnlyFetcherErrors cobre o caso de falha
+// total: hoje só existe um marketplace (OLX) disponível, então um Watch tem
+// no máximo um slug configurado — "sucesso parcial" (um marketplace falha,
+// outro funciona) fica inatingível na prática enquanto isso for verdade; o
+// enum ScanStatusPartial permanece no código para quando um segundo
+// marketplace real existir, mas sem cobertura de teste ativa por ora.
+func TestRunner_RunWatch_FailsScanWhenOnlyFetcherErrors(t *testing.T) {
 	pool := newTestPool(t)
-	watch := createTestUserAndWatch(t, pool, []string{"olx", "mercado_livre"}, []string{"playstation"}, nil)
+	watch := createTestUserAndWatch(t, pool, []string{"olx"}, []string{"playstation"}, nil)
 
-	workingFetcher := &fakeFetcher{
-		slug: "olx",
-		listings: []marketplace.Listing{
-			{ExternalID: "123", URL: "https://olx.com.br/123", Title: "PlayStation 5", ImageURL: "https://img/1.jpg", PriceCents: 250000},
-		},
-	}
-	failingFetcher := &fakeFetcher{slug: "mercado_livre", err: errors.New("blocked by anti-bot")}
+	failingFetcher := &fakeFetcher{slug: "olx", err: errors.New("blocked by anti-bot")}
 
-	runner := NewRunner(pool, []marketplace.Fetcher{workingFetcher, failingFetcher})
+	runner := NewRunner(pool, []marketplace.Fetcher{failingFetcher})
 	require.NoError(t, runner.RunWatch(context.Background(), watch))
 
 	q := sqlcgen.New(pool)
 	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
 	require.NoError(t, err)
-	require.Len(t, offers, 1)
+	require.Empty(t, offers)
+
+	scans, err := q.ListScansByWatch(context.Background(), sqlcgen.ListScansByWatchParams{WatchID: watch.ID, Limit: 20})
+	require.NoError(t, err)
+	require.Len(t, scans, 1)
+	require.Equal(t, sqlcgen.ScanStatusFailed, scans[0].Status)
 }
 
 func TestRunner_RunWatch_MarksMissingOfferUnavailable(t *testing.T) {

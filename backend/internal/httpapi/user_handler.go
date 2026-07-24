@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
@@ -22,10 +23,11 @@ func NewUserHandler(pool *pgxpool.Pool) *UserHandler {
 }
 
 type createUserRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
+	Name     string  `json:"name"`
+	Email    string  `json:"email"`
+	Password string  `json:"password"`
+	Role     string  `json:"role"`
+	Username *string `json:"username"`
 }
 
 type setUserRoleRequest struct {
@@ -34,6 +36,14 @@ type setUserRoleRequest struct {
 
 type setUserActiveRequest struct {
 	Active bool `json:"active"`
+}
+
+type setUserUsernameRequest struct {
+	Username string `json:"username"`
+}
+
+type usernameAvailableResponse struct {
+	Available bool `json:"available"`
 }
 
 type userResponse struct {
@@ -58,6 +68,10 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "password too short")
 		return
 	}
+	if req.Username != nil && !usernamePattern.MatchString(*req.Username) {
+		writeError(w, http.StatusBadRequest, "username must be 3-30 characters, lowercase letters, numbers or underscore")
+		return
+	}
 
 	hash, err := auth.HashPassword(req.Password)
 	if err != nil {
@@ -70,13 +84,72 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Email:        req.Email,
 		PasswordHash: hash,
 		Role:         req.Role,
+		Username:     req.Username,
 	})
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			writeError(w, http.StatusConflict, "email or username already taken")
+			return
+		}
 		writeError(w, http.StatusBadRequest, "failed to create user: "+err.Error())
 		return
 	}
 
 	writeJSON(w, http.StatusCreated, toUserResponse(user))
+}
+
+// SetUsername define/troca o username de qualquer User (admin). Reaproveita
+// a mesma query UpdateUsername usada pela tela de Perfil (troca livre, sem a
+// restrição username IS NULL do Primeiro Acesso) — só a unicidade é
+// garantida pela constraint users_username_key.
+func (h *UserHandler) SetUsername(w http.ResponseWriter, r *http.Request) {
+	var req setUserUsernameRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if !usernamePattern.MatchString(req.Username) {
+		writeError(w, http.StatusBadRequest, "username must be 3-30 characters, lowercase letters, numbers or underscore")
+		return
+	}
+
+	ctx := r.Context()
+	userID := parseUUID(chi.URLParam(r, "id"))
+
+	user, err := h.queries.UpdateUsername(ctx, sqlcgen.UpdateUsernameParams{ID: userID, Username: &req.Username})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			writeError(w, http.StatusConflict, "username already taken")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	writeJSON(w, http.StatusOK, toUserResponse(user))
+}
+
+// UsernameAvailable checa se um username está disponível — usado pela UI
+// (admin criando/editando um User) para validar em tempo real antes de
+// submeter, evitando um round-trip de erro 409 desnecessário.
+func (h *UserHandler) UsernameAvailable(w http.ResponseWriter, r *http.Request) {
+	username := r.URL.Query().Get("u")
+	if !usernamePattern.MatchString(username) {
+		writeJSON(w, http.StatusOK, usernameAvailableResponse{Available: false})
+		return
+	}
+
+	taken, err := h.queries.IsUsernameTaken(r.Context(), &username)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	writeJSON(w, http.StatusOK, usernameAvailableResponse{Available: !taken})
 }
 
 // List retorna todos os Users cadastrados.

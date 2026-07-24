@@ -39,7 +39,7 @@ Um Watch é a configuração salva de um monitoramento. Contém:
 Tanto palavras-chave quanto palavras bloqueadas podem ser expandidas com **Sugestão de Sinônimos**: uma ação explícita (não automática) que consulta o LLM e propõe variações, sempre revisadas e aceitas manualmente antes de entrar na lista. Uma vez aceito, um sinônimo vira uma entrada solta na lista, sem vínculo rastreável com a palavra que o originou.
 - Quantidade de ofertas listadas (limite total exibido, somado entre todos os marketplaces do Watch — não é um limite por marketplace)
 - Limiar mínimo de queda de preço para notificação (%)
-- Um ou mais marketplaces a monitorar (Mercado Livre, OLX, Facebook Marketplace, para começar)
+- Um ou mais marketplaces a monitorar (hoje só OLX é suportado — ver [ADR 0003](./docs/adr/0003-olx-only-marketplace.md))
 
 Um Watch pertence a um User e pode ser inativado (interrompendo Scans e notificações) individualmente, sem afetar os outros Watches do mesmo User.
 
@@ -51,14 +51,14 @@ Além da criação manual, um Watch pode ser criado colando um link de anúncio:
 - A proposta nunca é salva diretamente: sempre abre como formulário de Watch pré-preenchido e editável, exigindo confirmação explícita do usuário antes de persistir.
 - A tolerância % não é sugerida pelo LLM — vem sempre do padrão do sistema, ajustável manualmente.
 - Se o link falhar ou só puder ser analisado parcialmente, o formulário abre com o que foi possível extrair e em branco no restante (nunca bloqueia a criação manual).
-- O link não define automaticamente os marketplaces do Watch — isso continua sendo escolhido explicitamente pelo usuário.
+- O marketplace do Watch não é escolhido pelo usuário — com só OLX suportado, todo Watch é criado com esse marketplace automaticamente (ver [ADR 0003](./docs/adr/0003-olx-only-marketplace.md)).
 
 ## Scan (execução do monitoramento)
 
 - Cada Watch roda em seu próprio ritmo: o próximo Scan é sorteado dentro de um intervalo mínimo/máximo global, definido pelo admin.
 - Um Scan é sempre agregado por Watch: consulta todos os marketplaces configurados naquele Watch em uma única execução (não existe um Scan por marketplace).
 - Um Scan pode ter sucesso parcial — se um marketplace falhar, os demais seguem sendo processados e notificados normalmente.
-- Coleta de dados é por scraping de páginas públicas de busca nos três marketplaces (Mercado Livre, OLX, Facebook Marketplace) — nenhum oferece API oficial de busca de terceiros para este caso de uso. Detalhes em [ADR 0002](./docs/adr/0002-hybrid-marketplace-data-collection.md).
+- Coleta de dados é por scraping da página pública de busca do OLX — não há API oficial de busca de terceiros para este caso de uso. Detalhes em [ADR 0002](./docs/adr/0002-hybrid-marketplace-data-collection.md) (histórico) e [ADR 0003](./docs/adr/0003-olx-only-marketplace.md) (decisão atual).
 
 ## Offer (oferta encontrada)
 

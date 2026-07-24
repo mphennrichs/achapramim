@@ -1,7 +1,12 @@
 -- name: CreateUser :one
-INSERT INTO users (name, email, password_hash, role)
-VALUES ($1, $2, $3, $4)
+-- username é opcional (NULL): se ausente, o User completa via Primeiro
+-- Acesso no primeiro login (ver SetUsername).
+INSERT INTO users (name, email, password_hash, role, username)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
+
+-- name: IsUsernameTaken :one
+SELECT EXISTS (SELECT 1 FROM users WHERE username = $1) AS taken;
 
 -- name: GetUserByEmail :one
 SELECT * FROM users WHERE email = $1;

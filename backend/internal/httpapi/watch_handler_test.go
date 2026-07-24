@@ -66,7 +66,7 @@ func sampleWatchBody() watchRequest {
 		PriceDropThresholdPercent: "10.00",
 		Keywords:                  []string{"playstation", "ps5"},
 		BlockedWords:              []string{"quebrado"},
-		Marketplaces:              []string{"mercado_livre", "olx"},
+		Marketplaces:              []string{"olx"},
 	}
 }
 
@@ -89,7 +89,7 @@ func TestWatchHandler_CreateAndGet(t *testing.T) {
 	// final é a união com o seed, não apenas o que foi enviado no request.
 	require.Contains(t, created.BlockedWords, "quebrado")
 	require.Contains(t, created.BlockedWords, "sucata")
-	require.ElementsMatch(t, []string{"mercado_livre", "olx"}, created.Marketplaces)
+	require.ElementsMatch(t, []string{"olx"}, created.Marketplaces)
 	require.True(t, created.Active)
 
 	getReq := withChiParam(newWatchRequest(t, http.MethodGet, "/api/watches/"+created.ID, claims, nil), "id", created.ID)
@@ -158,7 +158,7 @@ func TestWatchHandler_Update(t *testing.T) {
 	updated.Name = "PS5 mais barato ainda"
 	updated.Keywords = []string{"playstation 5"}
 	updated.BlockedWords = nil
-	updated.Marketplaces = []string{"facebook_marketplace"}
+	updated.Marketplaces = []string{"olx"}
 
 	updateReq := withChiParam(newWatchRequest(t, http.MethodPut, "/api/watches/"+created.ID, claims, updated), "id", created.ID)
 	updateRec := httptest.NewRecorder()
@@ -170,7 +170,7 @@ func TestWatchHandler_Update(t *testing.T) {
 	require.Equal(t, "PS5 mais barato ainda", result.Name)
 	require.ElementsMatch(t, []string{"playstation 5"}, result.Keywords)
 	require.Empty(t, result.BlockedWords)
-	require.ElementsMatch(t, []string{"facebook_marketplace"}, result.Marketplaces)
+	require.ElementsMatch(t, []string{"olx"}, result.Marketplaces)
 }
 
 func TestWatchHandler_SetActiveAndDelete(t *testing.T) {

@@ -8,20 +8,10 @@ import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
 import 'watch_list_screen.dart';
 
-const _availableMarketplaces = ['olx', 'mercado_livre', 'facebook_marketplace'];
-
-String _marketplaceLabel(AppLocalizations l10n, String slug) {
-  switch (slug) {
-    case 'olx':
-      return l10n.marketplaceOlx;
-    case 'mercado_livre':
-      return l10n.marketplaceMercadoLivre;
-    case 'facebook_marketplace':
-      return l10n.marketplaceFacebook;
-    default:
-      return slug;
-  }
-}
+// OLX é o único Marketplace disponível hoje (ver ADR 0003) — não há escolha
+// real a fazer, então todo Alerta é criado com esse marketplace fixo, sem
+// expor uma seção de seleção na UI.
+const _onlyAvailableMarketplace = 'olx';
 
 class NewWatchScreen extends ConsumerStatefulWidget {
   const NewWatchScreen({super.key});
@@ -43,7 +33,6 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
 
   final List<String> _keywords = [];
   final List<String> _blockedWords = [];
-  final Set<String> _selectedMarketplaces = {'olx'};
 
   bool _saving = false;
   String? _errorMessage;
@@ -84,7 +73,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
     final name = _nameController.text.trim();
     final targetPrice = double.tryParse(_targetPriceController.text.replaceAll(',', '.'));
 
-    if (name.isEmpty || targetPrice == null || _selectedMarketplaces.isEmpty) {
+    if (name.isEmpty || targetPrice == null) {
       setState(() {
         _errorMessage = AppLocalizations.of(context)!.newWatchValidationError;
       });
@@ -110,7 +99,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
       active: true,
       keywords: _keywords,
       blockedWords: _blockedWords,
-      marketplaces: _selectedMarketplaces.toList(),
+      marketplaces: const [_onlyAvailableMarketplace],
       // Vazio = usa o padrão global (ver ScanSettingsHandler/OLXFetcher).
       city: city.isEmpty ? null : city,
       state: state.isEmpty ? null : state,
@@ -246,39 +235,6 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 16),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(l10n.newWatchActiveMarketplaces, style: Theme.of(context).textTheme.labelLarge),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          for (final slug in _availableMarketplaces)
-                            FilterChip(
-                              label: Text(_marketplaceLabel(l10n, slug)),
-                              selected: _selectedMarketplaces.contains(slug),
-                              onSelected: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    _selectedMarketplaces.add(slug);
-                                  } else {
-                                    _selectedMarketplaces.remove(slug);
-                                  }
-                                });
-                              },
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
               ),
               const SizedBox(height: 16),
               Card(

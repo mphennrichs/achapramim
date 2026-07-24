@@ -58,7 +58,6 @@
   "newWatchKeywords": "Palavras-Chave",
   "newWatchBlockedWords": "Palavras Bloqueadas",
   "newWatchAddWordHint": "Adicionar...",
-  "newWatchActiveMarketplaces": "Marketplaces Ativos",
   "newWatchFinanceAndLimits": "Financeiro e Limites",
   "newWatchTargetPriceLabel": "Preço-Alvo (BRL)",
   "newWatchToleranceLabel": "Tolerância (%)",
@@ -70,9 +69,6 @@
     "placeholders": { "details": { "type": "String" } }
   },
   "newWatchSubmit": "Ativar Monitoramento",
-  "marketplaceOlx": "OLX Brasil",
-  "marketplaceMercadoLivre": "Mercado Livre",
-  "marketplaceFacebook": "FB Marketplace",
 
   "watchDetailFallbackTitle": "Alerta",
   "watchDetailLoadError": "Falha ao carregar Alerta: {error}",
@@ -129,6 +125,10 @@
   "profileUsernameLabel": "Username",
   "profileUsernameNotSet": "Não definido",
   "profileNameLabel": "Nome",
+  "profileThemeTitle": "Tema",
+  "profileThemeLight": "Claro",
+  "profileThemeDark": "Escuro",
+  "profileThemeSystem": "Sistema",
   "profileChangePasswordTitle": "Trocar senha",
   "profileCurrentPasswordLabel": "Senha atual",
   "profileNewPasswordLabel": "Nova senha",
@@ -153,6 +153,12 @@
   "adminUsersNameLabel": "Nome",
   "adminUsersEmailLabel": "E-mail",
   "adminUsersPasswordLabel": "Senha inicial",
+  "adminUsersUsernameLabel": "Username (opcional)",
+  "adminUsersUsernameHint": "Deixe em branco para o usuário definir no Primeiro Acesso",
+  "adminUsersUsernameInvalid": "3-30 caracteres: minúsculas, números ou _",
+  "adminUsersUsernameTaken": "Username já em uso",
+  "adminUsersUsernameAvailable": "Disponível",
+  "adminUsersUsernameChecking": "Verificando...",
   "adminUsersRoleLabel": "Role",
   "adminUsersRoleAdmin": "Admin",
   "adminUsersRoleUser": "Usuário",
@@ -166,6 +172,17 @@
   "adminUsersUsernamePending": "Username pendente",
   "adminUsersUpdateError": "Falha ao atualizar usuário. Tente novamente.",
   "adminUsersCancel": "Cancelar",
+  "adminUsersEditUsername": "Editar username",
+  "adminUsersSetUsername": "Definir username",
+  "adminUsersUsernameDialogTitle": "Username de {name}",
+  "@adminUsersUsernameDialogTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "adminUsersUsernameSave": "Salvar",
+  "adminUsersUsernameSaveError": "Falha ao salvar username: {details}",
+  "@adminUsersUsernameSaveError": {
+    "placeholders": { "details": { "type": "String" } }
+  },
 
   "adminWatchesTitle": "Todos os Alertas",
   "adminWatchesLoadError": "Falha ao carregar Alertas: {error}",

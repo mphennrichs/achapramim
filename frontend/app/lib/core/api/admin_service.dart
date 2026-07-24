@@ -22,10 +22,17 @@ class AdminService {
     required String email,
     required String password,
     required String role,
+    String? username,
   }) async {
     final response = await _client.dio.post(
       '/api/users',
-      data: {'name': name, 'email': email, 'password': password, 'role': role},
+      data: {
+        'name': name,
+        'email': email,
+        'password': password,
+        'role': role,
+        'username': username,
+      },
     );
     return UserProfile.fromJson(response.data as Map<String, dynamic>);
   }
@@ -36,6 +43,24 @@ class AdminService {
       data: {'role': role},
     );
     return UserProfile.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<UserProfile> setUsername(String userId, String username) async {
+    final response = await _client.dio.patch(
+      '/api/users/$userId/username',
+      data: {'username': username},
+    );
+    return UserProfile.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Checagem de disponibilidade em tempo real (criação/edição de username
+  /// pelo admin) — evita depender só do 409 do backend pra dar feedback.
+  Future<bool> isUsernameAvailable(String username) async {
+    final response = await _client.dio.get(
+      '/api/users/username-available',
+      queryParameters: {'u': username},
+    );
+    return (response.data as Map<String, dynamic>)['available'] as bool;
   }
 
   Future<UserProfile> setUserActive(String userId, bool active) async {

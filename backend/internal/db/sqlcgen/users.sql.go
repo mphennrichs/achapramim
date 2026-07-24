@@ -12,24 +12,28 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (name, email, password_hash, role)
-VALUES ($1, $2, $3, $4)
+INSERT INTO users (name, email, password_hash, role, username)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id, name, email, password_hash, role, active, created_at, updated_at, username
 `
 
 type CreateUserParams struct {
-	Name         string `json:"name"`
-	Email        string `json:"email"`
-	PasswordHash string `json:"password_hash"`
-	Role         string `json:"role"`
+	Name         string  `json:"name"`
+	Email        string  `json:"email"`
+	PasswordHash string  `json:"password_hash"`
+	Role         string  `json:"role"`
+	Username     *string `json:"username"`
 }
 
+// username é opcional (NULL): se ausente, o User completa via Primeiro
+// Acesso no primeiro login (ver SetUsername).
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser,
 		arg.Name,
 		arg.Email,
 		arg.PasswordHash,
 		arg.Role,
+		arg.Username,
 	)
 	var i User
 	err := row.Scan(
@@ -107,6 +111,17 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 		&i.Username,
 	)
 	return i, err
+}
+
+const isUsernameTaken = `-- name: IsUsernameTaken :one
+SELECT EXISTS (SELECT 1 FROM users WHERE username = $1) AS taken
+`
+
+func (q *Queries) IsUsernameTaken(ctx context.Context, username *string) (bool, error) {
+	row := q.db.QueryRow(ctx, isUsernameTaken, username)
+	var taken bool
+	err := row.Scan(&taken)
+	return taken, err
 }
 
 const listUsers = `-- name: ListUsers :many
