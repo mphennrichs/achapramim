@@ -66,6 +66,8 @@ class ScanSummary {
   final DateTime startedAt;
   final DateTime? finishedAt;
   final int offersFound;
+  final int newOffersCount;
+  final int seenOffersCount;
   final List<String> failedMarketplaces;
 
   ScanSummary({
@@ -74,6 +76,8 @@ class ScanSummary {
     required this.startedAt,
     required this.finishedAt,
     required this.offersFound,
+    required this.newOffersCount,
+    required this.seenOffersCount,
     required this.failedMarketplaces,
   });
 
@@ -86,6 +90,8 @@ class ScanSummary {
           ? DateTime.parse(json['finished_at'] as String)
           : null,
       offersFound: json['offers_found'] as int,
+      newOffersCount: json['new_offers_count'] as int? ?? 0,
+      seenOffersCount: json['seen_offers_count'] as int? ?? 0,
       failedMarketplaces: (json['failed_marketplaces'] as List<dynamic>? ?? [])
           .cast<String>(),
     );

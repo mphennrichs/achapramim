@@ -194,12 +194,14 @@ func (h *OfferHandler) PriceHistory(w http.ResponseWriter, r *http.Request) {
 }
 
 type scanResponse struct {
-	ID          string   `json:"id"`
-	Status      string   `json:"status"`
-	StartedAt   string   `json:"started_at"`
-	FinishedAt  *string  `json:"finished_at"`
-	OffersFound int32    `json:"offers_found"`
-	Failures    []string `json:"failed_marketplaces"`
+	ID              string   `json:"id"`
+	Status          string   `json:"status"`
+	StartedAt       string   `json:"started_at"`
+	FinishedAt      *string  `json:"finished_at"`
+	OffersFound     int32    `json:"offers_found"`
+	NewOffersCount  int32    `json:"new_offers_count"`
+	SeenOffersCount int32    `json:"seen_offers_count"`
+	Failures        []string `json:"failed_marketplaces"`
 }
 
 // ListScans retorna o histórico de Scans de um Watch, mais recentes
@@ -251,12 +253,14 @@ func (h *OfferHandler) ListScans(w http.ResponseWriter, r *http.Request) {
 		}
 
 		resp[i] = scanResponse{
-			ID:          uuidString(s.ID),
-			Status:      string(s.Status),
-			StartedAt:   s.StartedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
-			FinishedAt:  finishedAt,
-			OffersFound: s.OffersFound,
-			Failures:    failedSlugs,
+			ID:              uuidString(s.ID),
+			Status:          string(s.Status),
+			StartedAt:       s.StartedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+			FinishedAt:      finishedAt,
+			OffersFound:     s.OffersFound,
+			NewOffersCount:  s.NewOffersCount,
+			SeenOffersCount: s.SeenOffersCount,
+			Failures:        failedSlugs,
 		}
 	}
 	writeJSON(w, http.StatusOK, resp)

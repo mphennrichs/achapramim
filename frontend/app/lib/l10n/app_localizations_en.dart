@@ -327,6 +327,41 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String watchDetailScanNewAndSeen(int newCount, int seenCount) {
+    return '$newCount new, $seenCount already seen';
+  }
+
+  @override
+  String get notificationsTooltip => 'Notifications';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsEmpty => 'No notifications yet.';
+
+  @override
+  String notificationsLoadError(String error) {
+    return 'Failed to load notifications: $error';
+  }
+
+  @override
+  String get notificationsMarkAllRead => 'Mark all as read';
+
+  @override
+  String get notificationsClose => 'Close';
+
+  @override
+  String notificationsPriceDropTitle(String watchName) {
+    return 'Price dropped: $watchName';
+  }
+
+  @override
+  String notificationsPriceDropBody(String offerTitle, String price) {
+    return '$offerTitle now at $price';
+  }
+
+  @override
   String watchDetailOffersFound(int count) {
     return '$count offers';
   }

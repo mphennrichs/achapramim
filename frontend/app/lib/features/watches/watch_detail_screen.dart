@@ -669,11 +669,12 @@ class _ScansTab extends ConsumerWidget {
               title: Text(dateFormat.format(scan.startedAt.toLocal())),
               subtitle: Text(
                 scan.failedMarketplaces.isNotEmpty
-                    ? l10n.watchDetailScanFailures(
-                        scan.failedMarketplaces.join(', '),
-                      )
-                    : _scanStatusLabel(l10n, scan.status),
+                    ? '${l10n.watchDetailScanFailures(scan.failedMarketplaces.join(', '))}\n'
+                          '${l10n.watchDetailScanNewAndSeen(scan.newOffersCount, scan.seenOffersCount)}'
+                    : '${_scanStatusLabel(l10n, scan.status)}\n'
+                          '${l10n.watchDetailScanNewAndSeen(scan.newOffersCount, scan.seenOffersCount)}',
               ),
+              isThreeLine: true,
               trailing: Text(l10n.watchDetailOffersFound(scan.offersFound)),
             );
           },

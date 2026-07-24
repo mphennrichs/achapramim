@@ -17,6 +17,7 @@ const (
 	ChannelTypeWhatsapp ChannelType = "whatsapp"
 	ChannelTypeTelegram ChannelType = "telegram"
 	ChannelTypeEmail    ChannelType = "email"
+	ChannelTypeInApp    ChannelType = "in_app"
 )
 
 func (e *ChannelType) Scan(src interface{}) error {
@@ -202,6 +203,7 @@ type Notification struct {
 	LastError   *string             `json:"last_error"`
 	CreatedAt   pgtype.Timestamptz  `json:"created_at"`
 	SentAt      pgtype.Timestamptz  `json:"sent_at"`
+	ReadAt      pgtype.Timestamptz  `json:"read_at"`
 }
 
 type Offer struct {
@@ -244,12 +246,14 @@ type Role struct {
 }
 
 type Scan struct {
-	ID          pgtype.UUID        `json:"id"`
-	WatchID     pgtype.UUID        `json:"watch_id"`
-	Status      ScanStatus         `json:"status"`
-	StartedAt   pgtype.Timestamptz `json:"started_at"`
-	FinishedAt  pgtype.Timestamptz `json:"finished_at"`
-	OffersFound int32              `json:"offers_found"`
+	ID              pgtype.UUID        `json:"id"`
+	WatchID         pgtype.UUID        `json:"watch_id"`
+	Status          ScanStatus         `json:"status"`
+	StartedAt       pgtype.Timestamptz `json:"started_at"`
+	FinishedAt      pgtype.Timestamptz `json:"finished_at"`
+	OffersFound     int32              `json:"offers_found"`
+	NewOffersCount  int32              `json:"new_offers_count"`
+	SeenOffersCount int32              `json:"seen_offers_count"`
 }
 
 type ScanMarketplaceFailure struct {

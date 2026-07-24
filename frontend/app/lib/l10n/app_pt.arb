@@ -142,6 +142,33 @@
   "@watchDetailScanFailures": {
     "placeholders": { "marketplaces": { "type": "String" } }
   },
+  "watchDetailScanNewAndSeen": "{newCount} novos, {seenCount} já vistos",
+  "@watchDetailScanNewAndSeen": {
+    "placeholders": {
+      "newCount": { "type": "int" },
+      "seenCount": { "type": "int" }
+    }
+  },
+  "notificationsTooltip": "Notificações",
+  "notificationsTitle": "Notificações",
+  "notificationsEmpty": "Nenhuma notificação ainda.",
+  "notificationsLoadError": "Falha ao carregar notificações: {error}",
+  "@notificationsLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "notificationsMarkAllRead": "Marcar todas como lidas",
+  "notificationsClose": "Fechar",
+  "notificationsPriceDropTitle": "Preço baixou: {watchName}",
+  "@notificationsPriceDropTitle": {
+    "placeholders": { "watchName": { "type": "String" } }
+  },
+  "notificationsPriceDropBody": "{offerTitle} agora por {price}",
+  "@notificationsPriceDropBody": {
+    "placeholders": {
+      "offerTitle": { "type": "String" },
+      "price": { "type": "String" }
+    }
+  },
   "watchDetailOffersFound": "{count} ofertas",
   "@watchDetailOffersFound": {
     "placeholders": { "count": { "type": "int" } }

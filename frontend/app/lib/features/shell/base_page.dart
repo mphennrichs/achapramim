@@ -6,6 +6,7 @@ import '../../core/auth_state.dart';
 import '../../core/navigation_pages.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
+import '../notifications/notifications_dialog.dart';
 
 /// Casco persistente das telas autenticadas: sidebar fixa em telas largas
 /// (desktop/tablet), drawer em telas estreitas (mobile). Diferente do
@@ -78,7 +79,9 @@ class BasePage extends ConsumerWidget {
     final isSubRoute = !branchPaths.contains(currentLocation);
 
     return Scaffold(
-      appBar: (isWide || isSubRoute) ? null : AppBar(title: Text(title)),
+      appBar: (isWide || isSubRoute)
+          ? null
+          : AppBar(title: Text(title), actions: const [_NotificationBell()]),
       drawer: isWide ? null : Drawer(child: navigation),
       body: Row(
         children: [
@@ -101,11 +104,17 @@ class BasePage extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    child: Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        const _NotificationBell(),
+                      ],
                     ),
                   ),
                 Expanded(child: navigationShell),
@@ -302,6 +311,26 @@ class _NavTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _NotificationBell extends ConsumerWidget {
+  const _NotificationBell();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final unreadCount = ref.watch(unreadNotificationCountProvider).valueOrNull ?? 0;
+
+    return IconButton(
+      tooltip: l10n.notificationsTooltip,
+      onPressed: () => showNotificationsDialog(context),
+      icon: Badge(
+        isLabelVisible: unreadCount > 0,
+        label: Text('$unreadCount'),
+        child: const Icon(Icons.notifications_outlined),
       ),
     );
   }

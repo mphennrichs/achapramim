@@ -656,6 +656,60 @@ abstract class AppLocalizations {
   /// **'Falhas: {marketplaces}'**
   String watchDetailScanFailures(String marketplaces);
 
+  /// No description provided for @watchDetailScanNewAndSeen.
+  ///
+  /// In pt, this message translates to:
+  /// **'{newCount} novos, {seenCount} já vistos'**
+  String watchDetailScanNewAndSeen(int newCount, int seenCount);
+
+  /// No description provided for @notificationsTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notificações'**
+  String get notificationsTooltip;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notificações'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma notificação ainda.'**
+  String get notificationsEmpty;
+
+  /// No description provided for @notificationsLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao carregar notificações: {error}'**
+  String notificationsLoadError(String error);
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar todas como lidas'**
+  String get notificationsMarkAllRead;
+
+  /// No description provided for @notificationsClose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fechar'**
+  String get notificationsClose;
+
+  /// No description provided for @notificationsPriceDropTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço baixou: {watchName}'**
+  String notificationsPriceDropTitle(String watchName);
+
+  /// No description provided for @notificationsPriceDropBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'{offerTitle} agora por {price}'**
+  String notificationsPriceDropBody(String offerTitle, String price);
+
   /// No description provided for @watchDetailOffersFound.
   ///
   /// In pt, this message translates to:

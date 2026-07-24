@@ -142,6 +142,33 @@
   "@watchDetailScanFailures": {
     "placeholders": { "marketplaces": { "type": "String" } }
   },
+  "watchDetailScanNewAndSeen": "{newCount} new, {seenCount} already seen",
+  "@watchDetailScanNewAndSeen": {
+    "placeholders": {
+      "newCount": { "type": "int" },
+      "seenCount": { "type": "int" }
+    }
+  },
+  "notificationsTooltip": "Notifications",
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "No notifications yet.",
+  "notificationsLoadError": "Failed to load notifications: {error}",
+  "@notificationsLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "notificationsMarkAllRead": "Mark all as read",
+  "notificationsClose": "Close",
+  "notificationsPriceDropTitle": "Price dropped: {watchName}",
+  "@notificationsPriceDropTitle": {
+    "placeholders": { "watchName": { "type": "String" } }
+  },
+  "notificationsPriceDropBody": "{offerTitle} now at {price}",
+  "@notificationsPriceDropBody": {
+    "placeholders": {
+      "offerTitle": { "type": "String" },
+      "price": { "type": "String" }
+    }
+  },
   "watchDetailOffersFound": "{count} offers",
   "@watchDetailOffersFound": {
     "placeholders": { "count": { "type": "int" } }

@@ -6,6 +6,7 @@ import 'api/api_client.dart';
 import 'api/auth_service.dart';
 import 'api/link_preview_service.dart';
 import 'api/me_service.dart';
+import 'api/notification_service.dart';
 import 'api/watch_service.dart';
 import 'models/scan_settings.dart';
 import 'models/user_profile.dart';
@@ -48,6 +49,18 @@ final meServiceProvider = Provider<MeService>((ref) {
 
 final adminServiceProvider = Provider<AdminService>((ref) {
   return AdminService(ref.watch(apiClientProvider));
+});
+
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return NotificationService(ref.watch(apiClientProvider));
+});
+
+/// Contagem de Notifications não lidas — usada pelo badge do sino no Shell.
+/// autoDispose: só é observada enquanto o Shell está montado (toda a sessão
+/// autenticada), então não há necessidade de manter viva além disso; a tela
+/// de Notifications invalida este provider ao marcar como lida.
+final unreadNotificationCountProvider = FutureProvider.autoDispose<int>((ref) {
+  return ref.watch(notificationServiceProvider).unreadCount();
 });
 
 /// Perfil do User autenticado — usado pela sidebar para decidir se mostra os

@@ -2,7 +2,8 @@
 INSERT INTO scans (watch_id, status) VALUES ($1, 'success') RETURNING *;
 
 -- name: FinishScan :one
-UPDATE scans SET status = $2, finished_at = now(), offers_found = $3
+UPDATE scans SET status = $2, finished_at = now(), offers_found = $3,
+    new_offers_count = $4, seen_offers_count = $5
 WHERE id = $1
 RETURNING *;
 

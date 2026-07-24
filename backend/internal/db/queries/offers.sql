@@ -46,6 +46,11 @@ WHERE watch_id = $1
 -- name: GetOfferByID :one
 SELECT * FROM offers WHERE id = $1;
 
+-- name: GetOfferByExternalID :one
+-- Lê o estado da Offer antes do Upsert da reverificação (ex: preço
+-- anterior, pra detectar queda de preço) — mesma chave natural do Upsert.
+SELECT * FROM offers WHERE watch_id = $1 AND marketplace_slug = $2 AND external_id = $3;
+
 -- name: ListOfferPricePoints :many
 SELECT * FROM offer_price_points WHERE offer_id = $1 ORDER BY observed_at ASC;
 

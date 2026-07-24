@@ -161,6 +161,108 @@ func TestRunner_RunWatch_MarksMissingOfferUnavailable(t *testing.T) {
 	require.Empty(t, offers, "offer no longer returned by fetcher should become unavailable")
 }
 
+func TestRunner_RunWatch_TracksNewAndSeenOfferCounts(t *testing.T) {
+	pool := newTestPool(t)
+	watch := createTestUserAndWatch(t, pool, []string{"olx"}, nil, nil)
+
+	firstRunFetcher := &fakeFetcher{
+		slug: "olx",
+		listings: []marketplace.Listing{
+			{ExternalID: "123", URL: "https://olx.com.br/123", Title: "Item A", ImageURL: "https://img/a.jpg", PriceCents: 250000},
+		},
+	}
+	runner := NewRunner(pool, []marketplace.Fetcher{firstRunFetcher})
+	require.NoError(t, runner.RunWatch(context.Background(), watch))
+
+	q := sqlcgen.New(pool)
+	scans, err := q.ListScansByWatch(context.Background(), sqlcgen.ListScansByWatchParams{WatchID: watch.ID, Limit: 20})
+	require.NoError(t, err)
+	require.Len(t, scans, 1)
+	require.Equal(t, int32(1), scans[0].NewOffersCount)
+	require.Equal(t, int32(0), scans[0].SeenOffersCount)
+
+	secondRunFetcher := &fakeFetcher{
+		slug: "olx",
+		listings: []marketplace.Listing{
+			{ExternalID: "123", URL: "https://olx.com.br/123", Title: "Item A", ImageURL: "https://img/a.jpg", PriceCents: 250000},
+			{ExternalID: "456", URL: "https://olx.com.br/456", Title: "Item B", ImageURL: "https://img/b.jpg", PriceCents: 300000},
+		},
+	}
+	runner2 := NewRunner(pool, []marketplace.Fetcher{secondRunFetcher})
+	require.NoError(t, runner2.RunWatch(context.Background(), watch))
+
+	scans, err = q.ListScansByWatch(context.Background(), sqlcgen.ListScansByWatchParams{WatchID: watch.ID, Limit: 20})
+	require.NoError(t, err)
+	require.Len(t, scans, 2)
+	require.Equal(t, int32(1), scans[0].NewOffersCount, "item B is new in the second scan")
+	require.Equal(t, int32(1), scans[0].SeenOffersCount, "item A was already known")
+}
+
+func TestRunner_RunWatch_NotifiesPriceDropForMonitoredOfferBelowTarget(t *testing.T) {
+	pool := newTestPool(t)
+	watch := createTestUserAndWatch(t, pool, []string{"olx"}, nil, nil) // target_price_cents = 250000
+
+	firstRunFetcher := &fakeFetcher{
+		slug: "olx",
+		listings: []marketplace.Listing{
+			{ExternalID: "123", URL: "https://olx.com.br/123", Title: "Item A", ImageURL: "https://img/a.jpg", PriceCents: 300000},
+		},
+	}
+	runner := NewRunner(pool, []marketplace.Fetcher{firstRunFetcher})
+	require.NoError(t, runner.RunWatch(context.Background(), watch))
+
+	q := sqlcgen.New(pool)
+	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
+	require.NoError(t, err)
+	require.Len(t, offers, 1)
+
+	_, err = q.SetOfferMonitored(context.Background(), sqlcgen.SetOfferMonitoredParams{ID: offers[0].ID, Monitored: true})
+	require.NoError(t, err)
+
+	secondRunFetcher := &fakeFetcher{
+		slug: "olx",
+		listings: []marketplace.Listing{
+			{ExternalID: "123", URL: "https://olx.com.br/123", Title: "Item A", ImageURL: "https://img/a.jpg", PriceCents: 200000},
+		},
+	}
+	runner2 := NewRunner(pool, []marketplace.Fetcher{secondRunFetcher})
+	require.NoError(t, runner2.RunWatch(context.Background(), watch))
+
+	notifications, err := q.ListNotificationsByUser(context.Background(), sqlcgen.ListNotificationsByUserParams{UserID: watch.UserID, Limit: 20})
+	require.NoError(t, err)
+	require.Len(t, notifications, 1)
+	require.Equal(t, sqlcgen.NotificationTriggerPriceDrop, notifications[0].Trigger)
+	require.Equal(t, "Item A", notifications[0].OfferTitle)
+}
+
+func TestRunner_RunWatch_DoesNotNotifyWhenOfferNotMonitored(t *testing.T) {
+	pool := newTestPool(t)
+	watch := createTestUserAndWatch(t, pool, []string{"olx"}, nil, nil)
+
+	firstRunFetcher := &fakeFetcher{
+		slug: "olx",
+		listings: []marketplace.Listing{
+			{ExternalID: "123", URL: "https://olx.com.br/123", Title: "Item A", ImageURL: "https://img/a.jpg", PriceCents: 300000},
+		},
+	}
+	runner := NewRunner(pool, []marketplace.Fetcher{firstRunFetcher})
+	require.NoError(t, runner.RunWatch(context.Background(), watch))
+
+	secondRunFetcher := &fakeFetcher{
+		slug: "olx",
+		listings: []marketplace.Listing{
+			{ExternalID: "123", URL: "https://olx.com.br/123", Title: "Item A", ImageURL: "https://img/a.jpg", PriceCents: 200000},
+		},
+	}
+	runner2 := NewRunner(pool, []marketplace.Fetcher{secondRunFetcher})
+	require.NoError(t, runner2.RunWatch(context.Background(), watch))
+
+	q := sqlcgen.New(pool)
+	notifications, err := q.ListNotificationsByUser(context.Background(), sqlcgen.ListNotificationsByUserParams{UserID: watch.UserID, Limit: 20})
+	require.NoError(t, err)
+	require.Empty(t, notifications)
+}
+
 func TestRunner_RunWatch_UsesGlobalDefaultRegionWhenWatchHasNone(t *testing.T) {
 	pool := newTestPool(t)
 	watch := createTestUserAndWatch(t, pool, []string{"olx"}, nil, nil)

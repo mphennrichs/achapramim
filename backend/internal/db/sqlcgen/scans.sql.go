@@ -12,7 +12,7 @@ import (
 )
 
 const createScan = `-- name: CreateScan :one
-INSERT INTO scans (watch_id, status) VALUES ($1, 'success') RETURNING id, watch_id, status, started_at, finished_at, offers_found
+INSERT INTO scans (watch_id, status) VALUES ($1, 'success') RETURNING id, watch_id, status, started_at, finished_at, offers_found, new_offers_count, seen_offers_count
 `
 
 func (q *Queries) CreateScan(ctx context.Context, watchID pgtype.UUID) (Scan, error) {
@@ -25,24 +25,35 @@ func (q *Queries) CreateScan(ctx context.Context, watchID pgtype.UUID) (Scan, er
 		&i.StartedAt,
 		&i.FinishedAt,
 		&i.OffersFound,
+		&i.NewOffersCount,
+		&i.SeenOffersCount,
 	)
 	return i, err
 }
 
 const finishScan = `-- name: FinishScan :one
-UPDATE scans SET status = $2, finished_at = now(), offers_found = $3
+UPDATE scans SET status = $2, finished_at = now(), offers_found = $3,
+    new_offers_count = $4, seen_offers_count = $5
 WHERE id = $1
-RETURNING id, watch_id, status, started_at, finished_at, offers_found
+RETURNING id, watch_id, status, started_at, finished_at, offers_found, new_offers_count, seen_offers_count
 `
 
 type FinishScanParams struct {
-	ID          pgtype.UUID `json:"id"`
-	Status      ScanStatus  `json:"status"`
-	OffersFound int32       `json:"offers_found"`
+	ID              pgtype.UUID `json:"id"`
+	Status          ScanStatus  `json:"status"`
+	OffersFound     int32       `json:"offers_found"`
+	NewOffersCount  int32       `json:"new_offers_count"`
+	SeenOffersCount int32       `json:"seen_offers_count"`
 }
 
 func (q *Queries) FinishScan(ctx context.Context, arg FinishScanParams) (Scan, error) {
-	row := q.db.QueryRow(ctx, finishScan, arg.ID, arg.Status, arg.OffersFound)
+	row := q.db.QueryRow(ctx, finishScan,
+		arg.ID,
+		arg.Status,
+		arg.OffersFound,
+		arg.NewOffersCount,
+		arg.SeenOffersCount,
+	)
 	var i Scan
 	err := row.Scan(
 		&i.ID,
@@ -51,6 +62,8 @@ func (q *Queries) FinishScan(ctx context.Context, arg FinishScanParams) (Scan, e
 		&i.StartedAt,
 		&i.FinishedAt,
 		&i.OffersFound,
+		&i.NewOffersCount,
+		&i.SeenOffersCount,
 	)
 	return i, err
 }
@@ -80,7 +93,7 @@ func (q *Queries) ListScanMarketplaceFailures(ctx context.Context, scanID pgtype
 }
 
 const listScansByWatch = `-- name: ListScansByWatch :many
-SELECT id, watch_id, status, started_at, finished_at, offers_found FROM scans WHERE watch_id = $1 ORDER BY started_at DESC LIMIT $2
+SELECT id, watch_id, status, started_at, finished_at, offers_found, new_offers_count, seen_offers_count FROM scans WHERE watch_id = $1 ORDER BY started_at DESC LIMIT $2
 `
 
 type ListScansByWatchParams struct {
@@ -104,6 +117,8 @@ func (q *Queries) ListScansByWatch(ctx context.Context, arg ListScansByWatchPara
 			&i.StartedAt,
 			&i.FinishedAt,
 			&i.OffersFound,
+			&i.NewOffersCount,
+			&i.SeenOffersCount,
 		); err != nil {
 			return nil, err
 		}

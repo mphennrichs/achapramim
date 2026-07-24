@@ -67,6 +67,12 @@ func NewRouter(deps Deps) http.Handler {
 		scanSettingsHandler := NewScanSettingsHandler(deps.Pool)
 		r.Get("/api/scan-settings", scanSettingsHandler.Get)
 
+		notificationHandler := NewNotificationHandler(deps.Pool)
+		r.Get("/api/notifications", notificationHandler.List)
+		r.Get("/api/notifications/unread-count", notificationHandler.UnreadCount)
+		r.Patch("/api/notifications/{id}/read", notificationHandler.MarkRead)
+		r.Post("/api/notifications/read-all", notificationHandler.MarkAllRead)
+
 		linkPreviewHandler := NewLinkPreviewHandler(deps.Proposer)
 		r.Post("/api/watches/link-preview", linkPreviewHandler.Preview)
 

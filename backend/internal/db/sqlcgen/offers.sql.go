@@ -11,6 +11,41 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getOfferByExternalID = `-- name: GetOfferByExternalID :one
+SELECT id, watch_id, marketplace_slug, external_id, url, title, image_url, price_cents, classification, available, first_seen_scan_id, last_checked_scan_id, created_at, updated_at, monitored FROM offers WHERE watch_id = $1 AND marketplace_slug = $2 AND external_id = $3
+`
+
+type GetOfferByExternalIDParams struct {
+	WatchID         pgtype.UUID `json:"watch_id"`
+	MarketplaceSlug string      `json:"marketplace_slug"`
+	ExternalID      string      `json:"external_id"`
+}
+
+// Lê o estado da Offer antes do Upsert da reverificação (ex: preço
+// anterior, pra detectar queda de preço) — mesma chave natural do Upsert.
+func (q *Queries) GetOfferByExternalID(ctx context.Context, arg GetOfferByExternalIDParams) (Offer, error) {
+	row := q.db.QueryRow(ctx, getOfferByExternalID, arg.WatchID, arg.MarketplaceSlug, arg.ExternalID)
+	var i Offer
+	err := row.Scan(
+		&i.ID,
+		&i.WatchID,
+		&i.MarketplaceSlug,
+		&i.ExternalID,
+		&i.Url,
+		&i.Title,
+		&i.ImageUrl,
+		&i.PriceCents,
+		&i.Classification,
+		&i.Available,
+		&i.FirstSeenScanID,
+		&i.LastCheckedScanID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Monitored,
+	)
+	return i, err
+}
+
 const getOfferByID = `-- name: GetOfferByID :one
 SELECT id, watch_id, marketplace_slug, external_id, url, title, image_url, price_cents, classification, available, first_seen_scan_id, last_checked_scan_id, created_at, updated_at, monitored FROM offers WHERE id = $1
 `

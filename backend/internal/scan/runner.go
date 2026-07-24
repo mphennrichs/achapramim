@@ -72,6 +72,8 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 
 	seenExternalIDs := make([]string, 0)
 	totalOffersFound := 0
+	newOffersCount := 0
+	seenOffersCount := 0
 	anyFailure := false
 	allFailed := true
 
@@ -114,6 +116,21 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 				continue
 			}
 
+			// Preço anterior precisa ser lido antes do Upsert (que já
+			// sobrescreve price_cents) — só busca quando existe uma Offer
+			// prévia monitorada, para não pagar essa consulta extra no caso
+			// comum (Offer nova ou não monitorada).
+			var previous sqlcgen.Offer
+			hasPrevious := false
+			if existing, err := q.GetOfferByExternalID(ctx, sqlcgen.GetOfferByExternalIDParams{
+				WatchID:         watch.ID,
+				MarketplaceSlug: slug,
+				ExternalID:      listing.ExternalID,
+			}); err == nil {
+				previous = existing
+				hasPrevious = true
+			}
+
 			row, err := q.UpsertOffer(ctx, sqlcgen.UpsertOfferParams{
 				WatchID:         watch.ID,
 				MarketplaceSlug: slug,
@@ -138,6 +155,28 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 				slog.Error("failed to insert price point", "error", err)
 			}
 
+			if row.IsNew {
+				newOffersCount++
+			} else {
+				seenOffersCount++
+			}
+
+			// Dispara notificação de queda de preço só quando a Offer é
+			// monitorada, já existia antes (queda pressupõe um preço
+			// anterior pra comparar) e cruzou de acima para dentro/abaixo
+			// do preço-alvo do Watch — evita repetir a cada Scan reverificado
+			// sem mudança real de faixa.
+			if hasPrevious && row.Monitored &&
+				previous.PriceCents > targetPriceCents &&
+				listing.PriceCents <= targetPriceCents {
+				if _, err := q.CreatePriceDropNotification(ctx, sqlcgen.CreatePriceDropNotificationParams{
+					UserID:  watch.UserID,
+					OfferID: row.ID,
+				}); err != nil {
+					slog.Error("failed to create price drop notification", "error", err)
+				}
+			}
+
 			seenExternalIDs = append(seenExternalIDs, listing.ExternalID)
 			totalOffersFound++
 		}
@@ -158,9 +197,11 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 	}
 
 	if _, err := q.FinishScan(ctx, sqlcgen.FinishScanParams{
-		ID:          scan.ID,
-		Status:      status,
-		OffersFound: int32(totalOffersFound),
+		ID:              scan.ID,
+		Status:          status,
+		OffersFound:     int32(totalOffersFound),
+		NewOffersCount:  int32(newOffersCount),
+		SeenOffersCount: int32(seenOffersCount),
 	}); err != nil {
 		return err
 	}
