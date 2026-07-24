@@ -54,7 +54,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           // a URL diretamente. Enquanto o perfil ainda carrega (valueOrNull
           // null), deixa passar sem bloquear; AuthRouterRefresh reavalia este
           // redirect assim que currentUserProfileProvider resolver a role real.
-          final isAdminRoute = state.matchedLocation.startsWith(_adminPathPrefix);
+          final isAdminRoute = state.matchedLocation.startsWith(
+            _adminPathPrefix,
+          );
           if (isAdminRoute) {
             final profile = ref.read(currentUserProfileProvider).valueOrNull;
             if (profile != null && profile.role != 'admin') {
@@ -71,9 +73,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             const Scaffold(body: Center(child: CircularProgressIndicator())),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(path: '/set-username', builder: (context, state) => const SetUsernameScreen()),
+      GoRoute(
+        path: '/set-username',
+        builder: (context, state) => const SetUsernameScreen(),
+      ),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => BasePage(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) =>
+            BasePage(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
             routes: [

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/models/scan_settings.dart';
 import '../../core/providers.dart';
@@ -387,12 +388,12 @@ class _ApifyUsageCard extends ConsumerWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        '${run.startedAt.toLocal()}'
-                                            .split('.')
-                                            .first,
+                                        DateFormat(
+                                          'dd/MM/yyyy HH:mm',
+                                        ).format(run.startedAt.toLocal()),
                                       ),
                                       Text(
-                                        run.status,
+                                        _apifyRunStatusLabel(l10n, run.status),
                                         style: TextStyle(
                                           color: scheme.onSurfaceVariant,
                                           fontSize: 12,
@@ -420,5 +421,28 @@ class _ApifyUsageCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+String _apifyRunStatusLabel(AppLocalizations l10n, String status) {
+  switch (status) {
+    case 'READY':
+      return l10n.apifyRunStatusReady;
+    case 'RUNNING':
+      return l10n.apifyRunStatusRunning;
+    case 'SUCCEEDED':
+      return l10n.apifyRunStatusSucceeded;
+    case 'FAILED':
+      return l10n.apifyRunStatusFailed;
+    case 'ABORTING':
+      return l10n.apifyRunStatusAborting;
+    case 'ABORTED':
+      return l10n.apifyRunStatusAborted;
+    case 'TIMING-OUT':
+      return l10n.apifyRunStatusTimingOut;
+    case 'TIMED-OUT':
+      return l10n.apifyRunStatusTimedOut;
+    default:
+      return status;
   }
 }

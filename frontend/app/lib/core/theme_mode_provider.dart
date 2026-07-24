@@ -26,6 +26,8 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
 
 final themeStorageProvider = Provider<ThemeStorage>((ref) => ThemeStorage());
 
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((
+  ref,
+) {
   return ThemeModeNotifier(ref.watch(themeStorageProvider));
 });

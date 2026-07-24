@@ -40,7 +40,9 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
     });
 
     try {
-      await ref.read(meServiceProvider).setUsername(_usernameController.text.trim());
+      await ref
+          .read(meServiceProvider)
+          .setUsername(_usernameController.text.trim());
       if (!mounted) return;
       ref.read(authStateProvider.notifier).completeUsernameSetup();
       // Não navega aqui: o redirect do GoRouter reage à mudança de
@@ -81,8 +83,8 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                     l10n.setUsernameTitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(

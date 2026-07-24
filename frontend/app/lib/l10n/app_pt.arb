@@ -37,6 +37,15 @@
   "@watchTolerance": {
     "placeholders": { "percent": { "type": "String" } }
   },
+  "watchDeleteTooltip": "Excluir Alerta",
+  "watchDeleteConfirmTitle": "Excluir Alerta?",
+  "watchDeleteConfirmMessage": "Esta ação não pode ser desfeita. Todas as Offers e o histórico de Scans deste Alerta serão perdidos.",
+  "watchDeleteConfirmCancel": "Cancelar",
+  "watchDeleteConfirmConfirm": "Excluir",
+  "watchDeleteError": "Falha ao excluir Alerta: {error}",
+  "@watchDeleteError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
 
   "newWatchTitle": "Novo Alerta",
   "newWatchFromLinkTitle": "Criar a partir de Link",
@@ -74,7 +83,7 @@
   "@watchDetailLoadError": {
     "placeholders": { "error": { "type": "String" } }
   },
-  "watchDetailTabOffers": "Offers",
+  "watchDetailTabOffers": "Ofertas",
   "watchDetailTabScans": "Histórico de Scans",
   "watchDetailTarget": "Alvo: {price}",
   "@watchDetailTarget": {
@@ -114,6 +123,10 @@
   "@watchDetailOffersFound": {
     "placeholders": { "count": { "type": "int" } }
   },
+  "scanStatusSuccess": "Sucesso",
+  "scanStatusPartial": "Parcial",
+  "scanStatusFailed": "Falhou",
+  "scanStatusPending": "Pendente",
 
   "profileTitle": "Perfil",
   "profileLoadError": "Falha ao carregar perfil: {error}",
@@ -223,5 +236,13 @@
   "adminSettingsApifyUsageError": "Falha ao carregar custo do Apify: {error}",
   "@adminSettingsApifyUsageError": {
     "placeholders": { "error": { "type": "String" } }
-  }
+  },
+  "apifyRunStatusReady": "Pronto",
+  "apifyRunStatusRunning": "Em execução",
+  "apifyRunStatusSucceeded": "Concluído",
+  "apifyRunStatusFailed": "Falhou",
+  "apifyRunStatusAborting": "Cancelando",
+  "apifyRunStatusAborted": "Cancelado",
+  "apifyRunStatusTimingOut": "Expirando",
+  "apifyRunStatusTimedOut": "Expirou"
 }

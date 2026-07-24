@@ -3,26 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/marketplace_labels.dart';
 import '../../core/models/scan_settings.dart';
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
 import 'watch_list_screen.dart';
-
-// OLX e Facebook Marketplace são os Marketplaces disponíveis hoje (ver ADR
-// 0006) — Mercado Livre segue sem Fetcher viável (ver ADR 0003).
-const _availableMarketplaces = ['olx', 'facebook_marketplace'];
-
-String _marketplaceLabel(AppLocalizations l10n, String slug) {
-  switch (slug) {
-    case 'olx':
-      return l10n.marketplaceOlx;
-    case 'facebook_marketplace':
-      return l10n.marketplaceFacebook;
-    default:
-      return slug;
-  }
-}
 
 class NewWatchScreen extends ConsumerStatefulWidget {
   const NewWatchScreen({super.key});
@@ -215,9 +201,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                         spacing: 12,
                         runSpacing: 12,
                         children: [
-                          for (final slug in _availableMarketplaces)
+                          for (final slug in availableMarketplaces)
                             FilterChip(
-                              label: Text(_marketplaceLabel(l10n, slug)),
+                              label: Text(marketplaceLabel(l10n, slug)),
                               selected: _selectedMarketplaces.contains(slug),
                               onSelected: (selected) {
                                 setState(() {

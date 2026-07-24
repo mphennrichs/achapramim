@@ -47,8 +47,10 @@ class Watch {
       priceDropThresholdPercent: json['price_drop_threshold_percent'] as String,
       active: json['active'] as bool,
       keywords: (json['keywords'] as List<dynamic>? ?? []).cast<String>(),
-      blockedWords: (json['blocked_words'] as List<dynamic>? ?? []).cast<String>(),
-      marketplaces: (json['marketplaces'] as List<dynamic>? ?? []).cast<String>(),
+      blockedWords: (json['blocked_words'] as List<dynamic>? ?? [])
+          .cast<String>(),
+      marketplaces: (json['marketplaces'] as List<dynamic>? ?? [])
+          .cast<String>(),
       city: json['city'] as String?,
       state: json['state'] as String?,
       ownerName: json['owner_name'] as String?,

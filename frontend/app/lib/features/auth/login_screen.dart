@@ -35,7 +35,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authStateProvider.notifier).login(
+      await ref
+          .read(authStateProvider.notifier)
+          .login(
             emailOrUsername: _emailOrUsernameController.text.trim(),
             password: _passwordController.text,
           );
@@ -78,13 +80,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     l10n.appTitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
                     controller: _emailOrUsernameController,
-                    decoration: InputDecoration(labelText: l10n.loginEmailOrUsernameLabel),
+                    decoration: InputDecoration(
+                      labelText: l10n.loginEmailOrUsernameLabel,
+                    ),
                     validator: (value) => (value == null || value.isEmpty)
                         ? l10n.loginEmailOrUsernameRequired
                         : null,
@@ -93,17 +97,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(labelText: l10n.loginPasswordLabel),
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? l10n.loginPasswordRequired : null,
+                    decoration: InputDecoration(
+                      labelText: l10n.loginPasswordLabel,
+                    ),
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? l10n.loginPasswordRequired
+                        : null,
                     onFieldSubmitted: (_) => _submit(),
                   ),
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 16),
-                    Text(
-                      _errorMessage!,
-                      style: TextStyle(color: scheme.error),
-                    ),
+                    Text(_errorMessage!, style: TextStyle(color: scheme.error)),
                   ],
                   const SizedBox(height: 24),
                   FilledButton(

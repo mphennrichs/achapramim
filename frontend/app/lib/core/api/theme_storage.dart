@@ -7,7 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class ThemeStorage {
   final FlutterSecureStorage _storage;
 
-  ThemeStorage({FlutterSecureStorage? storage}) : _storage = storage ?? const FlutterSecureStorage();
+  ThemeStorage({FlutterSecureStorage? storage})
+    : _storage = storage ?? const FlutterSecureStorage();
 
   static const _themeModeKey = 'theme_mode';
 

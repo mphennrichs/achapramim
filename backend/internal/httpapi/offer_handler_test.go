@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/mphennrichs/achapramim/backend/internal/db/sqlcgen"
+	"github.com/mphennrichs/achapramim/backend/internal/scan"
 )
 
 func seedOfferAndScan(t *testing.T, q *sqlcgen.Queries, watch sqlcgen.Watch) (sqlcgen.Scan, sqlcgen.Offer) {
@@ -55,7 +56,7 @@ func TestOfferHandler_ListOffers(t *testing.T) {
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
 
-	watchHandler := NewWatchHandler(pool)
+	watchHandler := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
 	createRec := httptest.NewRecorder()
 	watchHandler.Create(createRec, createReq)
@@ -85,7 +86,7 @@ func TestOfferHandler_ListOffersDeniedForOtherUser(t *testing.T) {
 	owner := createTestUser(t, pool, "user")
 	other := createTestUser(t, pool, "user")
 
-	watchHandler := NewWatchHandler(pool)
+	watchHandler := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
 	createRec := httptest.NewRecorder()
 	watchHandler.Create(createRec, createReq)
@@ -104,7 +105,7 @@ func TestOfferHandler_PriceHistory(t *testing.T) {
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
 
-	watchHandler := NewWatchHandler(pool)
+	watchHandler := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
 	createRec := httptest.NewRecorder()
 	watchHandler.Create(createRec, createReq)
@@ -136,7 +137,7 @@ func TestOfferHandler_ListScans(t *testing.T) {
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
 
-	watchHandler := NewWatchHandler(pool)
+	watchHandler := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
 	createRec := httptest.NewRecorder()
 	watchHandler.Create(createRec, createReq)

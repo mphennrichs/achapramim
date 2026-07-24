@@ -95,6 +95,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get watchDeleteTooltip => 'Delete Watch';
+
+  @override
+  String get watchDeleteConfirmTitle => 'Delete Watch?';
+
+  @override
+  String get watchDeleteConfirmMessage =>
+      'This action cannot be undone. All Offers and Scan history for this Watch will be lost.';
+
+  @override
+  String get watchDeleteConfirmCancel => 'Cancel';
+
+  @override
+  String get watchDeleteConfirmConfirm => 'Delete';
+
+  @override
+  String watchDeleteError(String error) {
+    return 'Failed to delete Watch: $error';
+  }
+
+  @override
   String get newWatchTitle => 'New Search';
 
   @override
@@ -252,6 +273,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String watchDetailOffersFound(int count) {
     return '$count offers';
   }
+
+  @override
+  String get scanStatusSuccess => 'Success';
+
+  @override
+  String get scanStatusPartial => 'Partial';
+
+  @override
+  String get scanStatusFailed => 'Failed';
+
+  @override
+  String get scanStatusPending => 'Pending';
 
   @override
   String get profileTitle => 'Profile';
@@ -509,4 +542,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String adminSettingsApifyUsageError(String error) {
     return 'Failed to load Apify usage: $error';
   }
+
+  @override
+  String get apifyRunStatusReady => 'Ready';
+
+  @override
+  String get apifyRunStatusRunning => 'Running';
+
+  @override
+  String get apifyRunStatusSucceeded => 'Succeeded';
+
+  @override
+  String get apifyRunStatusFailed => 'Failed';
+
+  @override
+  String get apifyRunStatusAborting => 'Aborting';
+
+  @override
+  String get apifyRunStatusAborted => 'Aborted';
+
+  @override
+  String get apifyRunStatusTimingOut => 'Timing out';
+
+  @override
+  String get apifyRunStatusTimedOut => 'Timed out';
 }

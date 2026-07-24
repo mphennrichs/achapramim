@@ -68,6 +68,7 @@ func main() {
 		RefreshTokenTTL: cfg.RefreshTokenTTL,
 		Proposer:        linkpreview.NewProposer(cfg.AnthropicAPIKey),
 		ApifyAPIToken:   cfg.ApifyAPIToken,
+		Runner:          runner,
 	})
 
 	server := &http.Server{

@@ -254,6 +254,42 @@ abstract class AppLocalizations {
   /// **'Tolerância {percent}%'**
   String watchTolerance(String percent);
 
+  /// No description provided for @watchDeleteTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir Alerta'**
+  String get watchDeleteTooltip;
+
+  /// No description provided for @watchDeleteConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir Alerta?'**
+  String get watchDeleteConfirmTitle;
+
+  /// No description provided for @watchDeleteConfirmMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta ação não pode ser desfeita. Todas as Offers e o histórico de Scans deste Alerta serão perdidos.'**
+  String get watchDeleteConfirmMessage;
+
+  /// No description provided for @watchDeleteConfirmCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get watchDeleteConfirmCancel;
+
+  /// No description provided for @watchDeleteConfirmConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir'**
+  String get watchDeleteConfirmConfirm;
+
+  /// No description provided for @watchDeleteError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao excluir Alerta: {error}'**
+  String watchDeleteError(String error);
+
   /// No description provided for @newWatchTitle.
   ///
   /// In pt, this message translates to:
@@ -431,7 +467,7 @@ abstract class AppLocalizations {
   /// No description provided for @watchDetailTabOffers.
   ///
   /// In pt, this message translates to:
-  /// **'Offers'**
+  /// **'Ofertas'**
   String get watchDetailTabOffers;
 
   /// No description provided for @watchDetailTabScans.
@@ -523,6 +559,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count} ofertas'**
   String watchDetailOffersFound(int count);
+
+  /// No description provided for @scanStatusSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sucesso'**
+  String get scanStatusSuccess;
+
+  /// No description provided for @scanStatusPartial.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parcial'**
+  String get scanStatusPartial;
+
+  /// No description provided for @scanStatusFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falhou'**
+  String get scanStatusFailed;
+
+  /// No description provided for @scanStatusPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendente'**
+  String get scanStatusPending;
 
   /// No description provided for @profileTitle.
   ///
@@ -973,6 +1033,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Falha ao carregar custo do Apify: {error}'**
   String adminSettingsApifyUsageError(String error);
+
+  /// No description provided for @apifyRunStatusReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get apifyRunStatusReady;
+
+  /// No description provided for @apifyRunStatusRunning.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em execução'**
+  String get apifyRunStatusRunning;
+
+  /// No description provided for @apifyRunStatusSucceeded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluído'**
+  String get apifyRunStatusSucceeded;
+
+  /// No description provided for @apifyRunStatusFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falhou'**
+  String get apifyRunStatusFailed;
+
+  /// No description provided for @apifyRunStatusAborting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelando'**
+  String get apifyRunStatusAborting;
+
+  /// No description provided for @apifyRunStatusAborted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelado'**
+  String get apifyRunStatusAborted;
+
+  /// No description provided for @apifyRunStatusTimingOut.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expirando'**
+  String get apifyRunStatusTimingOut;
+
+  /// No description provided for @apifyRunStatusTimedOut.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expirou'**
+  String get apifyRunStatusTimedOut;
 }
 
 class _AppLocalizationsDelegate

@@ -14,6 +14,7 @@ import (
 
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
 	"github.com/mphennrichs/achapramim/backend/internal/linkpreview"
+	"github.com/mphennrichs/achapramim/backend/internal/scan"
 )
 
 type Deps struct {
@@ -22,6 +23,7 @@ type Deps struct {
 	RefreshTokenTTL time.Duration
 	Proposer        *linkpreview.Proposer
 	ApifyAPIToken   string
+	Runner          *scan.Runner
 }
 
 func NewRouter(deps Deps) http.Handler {
@@ -48,7 +50,7 @@ func NewRouter(deps Deps) http.Handler {
 		r.Put("/api/me/password", meHandler.ChangePassword)
 		r.Put("/api/me/profile", meHandler.UpdateProfile)
 
-		watchHandler := NewWatchHandler(deps.Pool)
+		watchHandler := NewWatchHandler(deps.Pool, deps.Runner)
 		r.Post("/api/watches", watchHandler.Create)
 		r.Get("/api/watches", watchHandler.List)
 		r.Get("/api/watches/{id}", watchHandler.Get)

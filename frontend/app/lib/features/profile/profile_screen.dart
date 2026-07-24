@@ -18,7 +18,8 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(l10n.profileLoadError(error.toString()))),
+        error: (error, _) =>
+            Center(child: Text(l10n.profileLoadError(error.toString()))),
         data: (profile) => _ProfileBody(profile: profile),
       ),
     );
@@ -36,7 +37,9 @@ class _ProfileBody extends ConsumerStatefulWidget {
 
 class _ProfileBodyState extends ConsumerState<_ProfileBody> {
   late final _nameController = TextEditingController(text: widget.profile.name);
-  late final _usernameController = TextEditingController(text: widget.profile.username);
+  late final _usernameController = TextEditingController(
+    text: widget.profile.username,
+  );
 
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
@@ -70,7 +73,9 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
     });
 
     try {
-      await ref.read(meServiceProvider).updateProfile(name: name, username: username);
+      await ref
+          .read(meServiceProvider)
+          .updateProfile(name: name, username: username);
       ref.invalidate(currentUserProfileProvider);
     } on DioException catch (e) {
       setState(() {
@@ -103,7 +108,9 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
     });
 
     try {
-      await ref.read(meServiceProvider).changePassword(
+      await ref
+          .read(meServiceProvider)
+          .changePassword(
             currentPassword: _currentPasswordController.text,
             newPassword: newPassword,
           );
@@ -142,22 +149,33 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
                   children: [
                     TextField(
                       readOnly: true,
-                      controller: TextEditingController(text: widget.profile.email),
-                      decoration: InputDecoration(labelText: l10n.profileEmailLabel),
+                      controller: TextEditingController(
+                        text: widget.profile.email,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: l10n.profileEmailLabel,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _nameController,
-                      decoration: InputDecoration(labelText: l10n.profileNameLabel),
+                      decoration: InputDecoration(
+                        labelText: l10n.profileNameLabel,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _usernameController,
-                      decoration: InputDecoration(labelText: l10n.profileUsernameLabel),
+                      decoration: InputDecoration(
+                        labelText: l10n.profileUsernameLabel,
+                      ),
                     ),
                     if (_profileError != null) ...[
                       const SizedBox(height: 12),
-                      Text(_profileError!, style: TextStyle(color: scheme.error)),
+                      Text(
+                        _profileError!,
+                        style: TextStyle(color: scheme.error),
+                      ),
                     ],
                     const SizedBox(height: 20),
                     FilledButton(
@@ -181,7 +199,10 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(l10n.profileThemeTitle, style: Theme.of(context).textTheme.labelLarge),
+                    Text(
+                      l10n.profileThemeTitle,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
                     const SizedBox(height: 16),
                     Consumer(
                       builder: (context, ref, _) {
@@ -205,8 +226,9 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
                             ),
                           ],
                           selected: {themeMode},
-                          onSelectionChanged: (selection) =>
-                              ref.read(themeModeProvider.notifier).setThemeMode(selection.first),
+                          onSelectionChanged: (selection) => ref
+                              .read(themeModeProvider.notifier)
+                              .setThemeMode(selection.first),
                         );
                       },
                     ),
@@ -221,33 +243,48 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(l10n.profileChangePasswordTitle, style: Theme.of(context).textTheme.labelLarge),
+                    Text(
+                      l10n.profileChangePasswordTitle,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _currentPasswordController,
                       obscureText: true,
-                      decoration: InputDecoration(labelText: l10n.profileCurrentPasswordLabel),
+                      decoration: InputDecoration(
+                        labelText: l10n.profileCurrentPasswordLabel,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _newPasswordController,
                       obscureText: true,
-                      decoration: InputDecoration(labelText: l10n.profileNewPasswordLabel),
+                      decoration: InputDecoration(
+                        labelText: l10n.profileNewPasswordLabel,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: _confirmPasswordController,
                       obscureText: true,
-                      decoration: InputDecoration(labelText: l10n.profileConfirmNewPasswordLabel),
+                      decoration: InputDecoration(
+                        labelText: l10n.profileConfirmNewPasswordLabel,
+                      ),
                       onSubmitted: (_) => _changePassword(),
                     ),
                     if (_passwordError != null) ...[
                       const SizedBox(height: 12),
-                      Text(_passwordError!, style: TextStyle(color: scheme.error)),
+                      Text(
+                        _passwordError!,
+                        style: TextStyle(color: scheme.error),
+                      ),
                     ],
                     if (_passwordSuccess != null) ...[
                       const SizedBox(height: 12),
-                      Text(_passwordSuccess!, style: TextStyle(color: scheme.primary)),
+                      Text(
+                        _passwordSuccess!,
+                        style: TextStyle(color: scheme.primary),
+                      ),
                     ],
                     const SizedBox(height: 20),
                     FilledButton(

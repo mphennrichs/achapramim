@@ -49,12 +49,18 @@ class BasePage extends ConsumerWidget {
       currentPage: _pageByBranchIndex[navigationShell.currentIndex]!,
       onDestinationSelected: (page) {
         final index = _branchIndexByPage[page]!;
-        navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
+        navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
+        );
       },
       onLogout: () => ref.read(authStateProvider.notifier).logout(),
     );
 
-    final title = _titleFor(context, _pageByBranchIndex[navigationShell.currentIndex]!);
+    final title = _titleFor(
+      context,
+      _pageByBranchIndex[navigationShell.currentIndex]!,
+    );
     // Uma sub-rota do branch (hoje só watch detail, /watches/:watchId) traz
     // seu próprio Scaffold+AppBar — some com o cabeçalho fixo do Shell aqui
     // pra não duplicar título/voltar. Compara contra os paths exatos dos
@@ -86,16 +92,20 @@ class BasePage extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerLowest,
                       border: Border(
-                        bottom: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                        bottom: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
                       ),
                     ),
                     child: Text(
                       title,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 Expanded(child: navigationShell),
@@ -195,13 +205,15 @@ class _SideNav extends ConsumerWidget {
                     children: [
                       Text(
                         l10n.appTitle,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       Text(
                         userProfile?.name ?? l10n.navUserDashboard,
-                        style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
+                        style: TextStyle(
+                          color: scheme.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -235,7 +247,11 @@ class _NavDestination {
   final IconData icon;
   final String label;
 
-  const _NavDestination({required this.page, required this.icon, required this.label});
+  const _NavDestination({
+    required this.page,
+    required this.icon,
+    required this.label,
+  });
 }
 
 class _NavTile extends StatelessWidget {
@@ -243,7 +259,11 @@ class _NavTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _NavTile({required this.destination, required this.selected, required this.onTap});
+  const _NavTile({
+    required this.destination,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -264,13 +284,17 @@ class _NavTile extends StatelessWidget {
                 Icon(
                   destination.icon,
                   size: 20,
-                  color: selected ? scheme.onPrimaryContainer : scheme.onSurfaceVariant,
+                  color: selected
+                      ? scheme.onPrimaryContainer
+                      : scheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 12),
                 Text(
                   destination.label,
                   style: TextStyle(
-                    color: selected ? scheme.onPrimaryContainer : scheme.onSurfaceVariant,
+                    color: selected
+                        ? scheme.onPrimaryContainer
+                        : scheme.onSurfaceVariant,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),

@@ -27,10 +27,7 @@ class MeService {
   }) async {
     await _client.dio.put(
       '/api/me/password',
-      data: {
-        'current_password': currentPassword,
-        'new_password': newPassword,
-      },
+      data: {'current_password': currentPassword, 'new_password': newPassword},
     );
   }
 
@@ -40,10 +37,8 @@ class MeService {
   Future<UserProfile> updateProfile({String? name, String? username}) async {
     final response = await _client.dio.put(
       '/api/me/profile',
-      data: {
-        'name': name,
-        'username': username,
-      }..removeWhere((_, value) => value == null),
+      data: {'name': name, 'username': username}
+        ..removeWhere((_, value) => value == null),
     );
     return UserProfile.fromJson(response.data as Map<String, dynamic>);
   }

@@ -29,7 +29,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService _authService;
   final MeService _meService;
 
-  AuthNotifier(this._ref, this._authService, this._meService) : super(AuthState.unknown) {
+  AuthNotifier(this._ref, this._authService, this._meService)
+    : super(AuthState.unknown) {
     _checkSession();
   }
 
@@ -40,13 +41,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
     try {
       final profile = await _meService.get();
-      state = profile.usernamePending ? AuthState.usernamePending : AuthState.authenticated;
+      state = profile.usernamePending
+          ? AuthState.usernamePending
+          : AuthState.authenticated;
     } on DioException {
       state = AuthState.unauthenticated;
     }
   }
 
-  Future<void> login({required String emailOrUsername, required String password}) async {
+  Future<void> login({
+    required String emailOrUsername,
+    required String password,
+  }) async {
     final usernamePending = await _authService.login(
       emailOrUsername: emailOrUsername,
       password: password,
@@ -56,7 +62,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     // valor ainda vazio) — sem invalidar aqui, ele ficaria travado
     // permanentemente no erro 401 daquela primeira tentativa sem sessão.
     _ref.invalidate(currentUserProfileProvider);
-    state = usernamePending ? AuthState.usernamePending : AuthState.authenticated;
+    state = usernamePending
+        ? AuthState.usernamePending
+        : AuthState.authenticated;
   }
 
   void completeUsernameSetup() {
@@ -72,5 +80,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 }
 
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref, ref.watch(authServiceProvider), ref.watch(meServiceProvider));
+  return AuthNotifier(
+    ref,
+    ref.watch(authServiceProvider),
+    ref.watch(meServiceProvider),
+  );
 });

@@ -13,8 +13,8 @@ class ApiClient {
   final AuthStorage authStorage;
 
   ApiClient({required String baseUrl, AuthStorage? authStorage})
-      : dio = Dio(BaseOptions(baseUrl: baseUrl)),
-        authStorage = authStorage ?? AuthStorage() {
+    : dio = Dio(BaseOptions(baseUrl: baseUrl)),
+      authStorage = authStorage ?? AuthStorage() {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {

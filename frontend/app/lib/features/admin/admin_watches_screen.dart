@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/marketplace_labels.dart';
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
@@ -21,18 +22,23 @@ class AdminWatchesScreen extends ConsumerWidget {
     return Scaffold(
       body: watchesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(l10n.adminWatchesLoadError(error.toString()))),
+        error: (error, _) =>
+            Center(child: Text(l10n.adminWatchesLoadError(error.toString()))),
         data: (watches) {
           if (watches.isEmpty) {
             return Center(
-              child: Text(l10n.adminWatchesEmpty, style: TextStyle(color: scheme.onSurfaceVariant)),
+              child: Text(
+                l10n.adminWatchesEmpty,
+                style: TextStyle(color: scheme.onSurfaceVariant),
+              ),
             );
           }
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: watches.length,
             separatorBuilder: (context, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) => _AdminWatchCard(watch: watches[index]),
+            itemBuilder: (context, index) =>
+                _AdminWatchCard(watch: watches[index]),
           );
         },
       ),
@@ -63,22 +69,26 @@ class _AdminWatchCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     watch.name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 Icon(
                   watch.active ? Icons.check_circle : Icons.pause_circle,
-                  color: watch.active ? scheme.primary : scheme.onSurfaceVariant,
+                  color: watch.active
+                      ? scheme.primary
+                      : scheme.onSurfaceVariant,
                 ),
               ],
             ),
             if (watch.ownerName != null && watch.ownerEmail != null) ...[
               const SizedBox(height: 4),
               Text(
-                l10n.adminWatchesOwnerLabel(watch.ownerName!, watch.ownerEmail!),
+                l10n.adminWatchesOwnerLabel(
+                  watch.ownerName!,
+                  watch.ownerEmail!,
+                ),
                 style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
               ),
             ],
@@ -89,7 +99,8 @@ class _AdminWatchCard extends StatelessWidget {
               children: [
                 Chip(label: Text(priceLabel)),
                 Chip(label: Text(l10n.watchTolerance(watch.tolerancePercent))),
-                for (final marketplace in watch.marketplaces) Chip(label: Text(marketplace)),
+                for (final marketplace in watch.marketplaces)
+                  Chip(label: Text(marketplaceLabel(l10n, marketplace))),
               ],
             ),
           ],

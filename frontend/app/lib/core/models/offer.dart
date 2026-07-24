@@ -73,8 +73,8 @@ class ScanSummary {
           ? DateTime.parse(json['finished_at'] as String)
           : null,
       offersFound: json['offers_found'] as int,
-      failedMarketplaces:
-          (json['failed_marketplaces'] as List<dynamic>? ?? []).cast<String>(),
+      failedMarketplaces: (json['failed_marketplaces'] as List<dynamic>? ?? [])
+          .cast<String>(),
     );
   }
 }

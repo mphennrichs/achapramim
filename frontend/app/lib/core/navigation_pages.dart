@@ -10,12 +10,12 @@ enum NavigationPage {
   adminSettings;
 
   String get path => switch (this) {
-        NavigationPage.watches => '/watches',
-        NavigationPage.watchDetail => ':watchId',
-        NavigationPage.newWatch => '/watches/new',
-        NavigationPage.profile => '/profile',
-        NavigationPage.adminUsers => '/admin/users',
-        NavigationPage.adminWatches => '/admin/watches',
-        NavigationPage.adminSettings => '/admin/settings',
-      };
+    NavigationPage.watches => '/watches',
+    NavigationPage.watchDetail => ':watchId',
+    NavigationPage.newWatch => '/watches/new',
+    NavigationPage.profile => '/profile',
+    NavigationPage.adminUsers => '/admin/users',
+    NavigationPage.adminWatches => '/admin/watches',
+    NavigationPage.adminSettings => '/admin/settings',
+  };
 }

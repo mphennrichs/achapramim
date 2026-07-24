@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/user_profile.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
+import '../../theme/status_colors.dart';
 
 /// Mesmo padrão do backend (username_format) — validação client-side só
 /// para feedback imediato, o backend permanece a fonte de verdade.
@@ -32,7 +33,8 @@ class AdminUsersScreen extends ConsumerWidget {
       ),
       body: usersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(l10n.adminUsersLoadError(error.toString()))),
+        error: (error, _) =>
+            Center(child: Text(l10n.adminUsersLoadError(error.toString()))),
         data: (users) => ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: users.length,
@@ -46,9 +48,8 @@ class AdminUsersScreen extends ConsumerWidget {
   void _openCreateDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => _CreateUserDialog(
-        onCreated: () => ref.invalidate(_usersProvider),
-      ),
+      builder: (context) =>
+          _CreateUserDialog(onCreated: () => ref.invalidate(_usersProvider)),
     );
   }
 }
@@ -74,24 +75,32 @@ class _UserCard extends ConsumerWidget {
                 children: [
                   Text(
                     user.name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  Text(user.email, style: TextStyle(color: scheme.onSurfaceVariant)),
+                  Text(
+                    user.email,
+                    style: TextStyle(color: scheme.onSurfaceVariant),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
                       Chip(
-                        label: Text(user.role == 'admin' ? l10n.adminUsersRoleAdmin : l10n.adminUsersRoleUser),
+                        label: Text(
+                          user.role == 'admin'
+                              ? l10n.adminUsersRoleAdmin
+                              : l10n.adminUsersRoleUser,
+                        ),
                       ),
                       Chip(
                         label: Text(
-                          user.active ? l10n.adminUsersActive : l10n.adminUsersInactive,
+                          user.active
+                              ? l10n.adminUsersActive
+                              : l10n.adminUsersInactive,
                           style: TextStyle(
                             color: user.active
                                 ? scheme.onPrimaryContainer
@@ -126,13 +135,20 @@ class _UserCard extends ConsumerWidget {
                   if (value == 'toggle_active') {
                     await admin.setUserActive(user.id, !user.active);
                   } else if (value == 'toggle_role') {
-                    await admin.setUserRole(user.id, user.role == 'admin' ? 'user' : 'admin');
+                    await admin.setUserRole(
+                      user.id,
+                      user.role == 'admin' ? 'user' : 'admin',
+                    );
                   }
                   ref.invalidate(_usersProvider);
                 } on DioException {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.adminUsersUpdateError)),
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.adminUsersUpdateError,
+                        ),
+                      ),
                     );
                   }
                 }
@@ -140,15 +156,27 @@ class _UserCard extends ConsumerWidget {
               itemBuilder: (context) => [
                 PopupMenuItem(
                   value: 'toggle_active',
-                  child: Text(user.active ? l10n.adminUsersInactive : l10n.adminUsersActive),
+                  child: Text(
+                    user.active
+                        ? l10n.adminUsersInactive
+                        : l10n.adminUsersActive,
+                  ),
                 ),
                 PopupMenuItem(
                   value: 'toggle_role',
-                  child: Text(user.role == 'admin' ? l10n.adminUsersRoleUser : l10n.adminUsersRoleAdmin),
+                  child: Text(
+                    user.role == 'admin'
+                        ? l10n.adminUsersRoleUser
+                        : l10n.adminUsersRoleAdmin,
+                  ),
                 ),
                 PopupMenuItem(
                   value: 'edit_username',
-                  child: Text(user.usernamePending ? l10n.adminUsersSetUsername : l10n.adminUsersEditUsername),
+                  child: Text(
+                    user.usernamePending
+                        ? l10n.adminUsersSetUsername
+                        : l10n.adminUsersEditUsername,
+                  ),
                 ),
               ],
             ),
@@ -220,9 +248,15 @@ class _UsernameFieldState extends ConsumerState<_UsernameField> {
     widget.onValidityChanged(false);
     _debounce = Timer(const Duration(milliseconds: 400), () async {
       try {
-        final available = await ref.read(adminServiceProvider).isUsernameAvailable(value);
+        final available = await ref
+            .read(adminServiceProvider)
+            .isUsernameAvailable(value);
         if (!mounted || widget.controller.text.trim() != value) return;
-        setState(() => _state = available ? _UsernameCheckState.available : _UsernameCheckState.taken);
+        setState(
+          () => _state = available
+              ? _UsernameCheckState.available
+              : _UsernameCheckState.taken,
+        );
         widget.onValidityChanged(available);
       } on DioException {
         if (!mounted) return;
@@ -238,11 +272,23 @@ class _UsernameFieldState extends ConsumerState<_UsernameField> {
     final scheme = Theme.of(context).colorScheme;
 
     final (helperText, helperColor) = switch (_state) {
-      _UsernameCheckState.idle => (l10n.adminUsersUsernameHint, scheme.onSurfaceVariant),
-      _UsernameCheckState.checking => (l10n.adminUsersUsernameChecking, scheme.onSurfaceVariant),
-      _UsernameCheckState.available => (l10n.adminUsersUsernameAvailable, Colors.green),
+      _UsernameCheckState.idle => (
+        l10n.adminUsersUsernameHint,
+        scheme.onSurfaceVariant,
+      ),
+      _UsernameCheckState.checking => (
+        l10n.adminUsersUsernameChecking,
+        scheme.onSurfaceVariant,
+      ),
+      _UsernameCheckState.available => (
+        l10n.adminUsersUsernameAvailable,
+        successColor,
+      ),
       _UsernameCheckState.taken => (l10n.adminUsersUsernameTaken, scheme.error),
-      _UsernameCheckState.invalid => (l10n.adminUsersUsernameInvalid, scheme.error),
+      _UsernameCheckState.invalid => (
+        l10n.adminUsersUsernameInvalid,
+        scheme.error,
+      ),
     };
 
     return TextField(
@@ -255,7 +301,11 @@ class _UsernameFieldState extends ConsumerState<_UsernameField> {
         suffixIcon: _state == _UsernameCheckState.checking
             ? const Padding(
                 padding: EdgeInsets.all(12),
-                child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
               )
             : null,
       ),
@@ -274,7 +324,9 @@ class _SetUsernameDialog extends ConsumerStatefulWidget {
 }
 
 class _SetUsernameDialogState extends ConsumerState<_SetUsernameDialog> {
-  late final _usernameController = TextEditingController(text: widget.user.username ?? '');
+  late final _usernameController = TextEditingController(
+    text: widget.user.username ?? '',
+  );
   bool _valid = true;
   bool _saving = false;
   String? _errorMessage;
@@ -295,13 +347,16 @@ class _SetUsernameDialogState extends ConsumerState<_SetUsernameDialog> {
     });
 
     try {
-      await ref.read(adminServiceProvider).setUsername(widget.user.id, username);
+      await ref
+          .read(adminServiceProvider)
+          .setUsername(widget.user.id, username);
       widget.onSaved();
       if (mounted) Navigator.of(context).pop();
     } on DioException catch (e) {
       setState(() {
-        _errorMessage = AppLocalizations.of(context)!
-            .adminUsersUsernameSaveError('${e.response?.data ?? e.message}');
+        _errorMessage = AppLocalizations.of(
+          context,
+        )!.adminUsersUsernameSaveError('${e.response?.data ?? e.message}');
       });
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -339,7 +394,10 @@ class _SetUsernameDialogState extends ConsumerState<_SetUsernameDialog> {
           child: Text(l10n.adminUsersCancel),
         ),
         FilledButton(
-          onPressed: _saving || !_valid || _usernameController.text.trim().isEmpty ? null : _submit,
+          onPressed:
+              _saving || !_valid || _usernameController.text.trim().isEmpty
+              ? null
+              : _submit,
           child: _saving
               ? const SizedBox(
                   width: 20,
@@ -391,7 +449,9 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
 
     final username = _usernameController.text.trim();
     try {
-      await ref.read(adminServiceProvider).createUser(
+      await ref
+          .read(adminServiceProvider)
+          .createUser(
             name: _nameController.text.trim(),
             email: _emailController.text.trim(),
             password: _passwordController.text,
@@ -402,8 +462,9 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
       if (mounted) Navigator.of(context).pop();
     } on DioException catch (e) {
       setState(() {
-        _errorMessage = AppLocalizations.of(context)!
-            .adminUsersCreateError('${e.response?.data ?? e.message}');
+        _errorMessage = AppLocalizations.of(
+          context,
+        )!.adminUsersCreateError('${e.response?.data ?? e.message}');
       });
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -436,20 +497,29 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: l10n.adminUsersPasswordLabel),
+              decoration: InputDecoration(
+                labelText: l10n.adminUsersPasswordLabel,
+              ),
             ),
             const SizedBox(height: 12),
             _UsernameField(
               controller: _usernameController,
-              onValidityChanged: (valid) => setState(() => _usernameValid = valid),
+              onValidityChanged: (valid) =>
+                  setState(() => _usernameValid = valid),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _role,
               decoration: InputDecoration(labelText: l10n.adminUsersRoleLabel),
               items: [
-                DropdownMenuItem(value: 'user', child: Text(l10n.adminUsersRoleUser)),
-                DropdownMenuItem(value: 'admin', child: Text(l10n.adminUsersRoleAdmin)),
+                DropdownMenuItem(
+                  value: 'user',
+                  child: Text(l10n.adminUsersRoleUser),
+                ),
+                DropdownMenuItem(
+                  value: 'admin',
+                  child: Text(l10n.adminUsersRoleAdmin),
+                ),
               ],
               onChanged: (value) => setState(() => _role = value ?? 'user'),
             ),

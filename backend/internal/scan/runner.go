@@ -3,7 +3,9 @@ package scan
 import (
 	"context"
 	"log/slog"
+	"math/rand/v2"
 	"strconv"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -193,4 +195,39 @@ func floatToNumeric(f float64) (pgtype.Numeric, error) {
 	var n pgtype.Numeric
 	err := n.Scan(strconv.FormatFloat(f, 'f', 4, 64))
 	return n, err
+}
+
+// RunWatchAndReschedule executa um Scan do Watch e agenda o próximo para um
+// instante aleatório dentro do intervalo mín/máx global — mesma lógica
+// usada pelo Scheduler a cada tick, reaproveitada aqui para a primeira
+// execução (disparada direto na criação do Watch, ver WatchHandler.Create,
+// em vez de esperar o próximo tick do Scheduler).
+func (r *Runner) RunWatchAndReschedule(ctx context.Context, watch sqlcgen.Watch) {
+	if err := r.RunWatch(ctx, watch); err != nil {
+		slog.Error("scan run failed", "watch_id", watch.ID, "error", err)
+	}
+
+	q := sqlcgen.New(r.pool)
+	settings, err := q.GetScanSettings(ctx)
+	if err != nil {
+		slog.Error("failed to load scan settings for reschedule", "watch_id", watch.ID, "error", err)
+		return
+	}
+
+	next := nextScanTime(settings.MinIntervalMinutes, settings.MaxIntervalMinutes)
+	if err := q.RescheduleWatch(ctx, sqlcgen.RescheduleWatchParams{
+		ID:         watch.ID,
+		NextScanAt: pgtype.Timestamptz{Time: next, Valid: true},
+	}); err != nil {
+		slog.Error("failed to reschedule watch", "watch_id", watch.ID, "error", err)
+	}
+}
+
+func nextScanTime(minMinutes, maxMinutes int32) time.Time {
+	span := maxMinutes - minMinutes
+	offset := minMinutes
+	if span > 0 {
+		offset += rand.Int32N(span + 1)
+	}
+	return time.Now().Add(time.Duration(offset) * time.Minute)
 }

@@ -13,14 +13,16 @@ import (
 
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
 	"github.com/mphennrichs/achapramim/backend/internal/db/sqlcgen"
+	"github.com/mphennrichs/achapramim/backend/internal/scan"
 )
 
 type WatchHandler struct {
-	pool *pgxpool.Pool
+	pool   *pgxpool.Pool
+	runner *scan.Runner
 }
 
-func NewWatchHandler(pool *pgxpool.Pool) *WatchHandler {
-	return &WatchHandler{pool: pool}
+func NewWatchHandler(pool *pgxpool.Pool, runner *scan.Runner) *WatchHandler {
+	return &WatchHandler{pool: pool, runner: runner}
 }
 
 type watchRequest struct {
@@ -132,6 +134,15 @@ func (h *WatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal error")
 		return
 	}
+
+	// Primeiro Scan roda imediatamente ao criar o Alerta, em vez de esperar
+	// o próximo tick do Scheduler (até ScanPollInterval de atraso) — os
+	// seguintes seguem o intervalo aleatório normal (ver
+	// RunWatchAndReschedule). Em goroutine própria com contexto
+	// independente do request HTTP: a resposta não deve esperar o Scan
+	// (chamadas de rede a Fetchers podem levar dezenas de segundos), e o
+	// ctx do request morre assim que a resposta é enviada.
+	go h.runner.RunWatchAndReschedule(context.Background(), watch)
 
 	writeJSON(w, http.StatusCreated, watchResponse{
 		ID:                        uuidString(watch.ID),

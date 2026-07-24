@@ -21,8 +21,8 @@ class LinkPreviewProposal {
       name: json['name'] as String? ?? '',
       targetPriceCents: json['target_price_cents'] as int? ?? 0,
       keywords: (json['keywords'] as List<dynamic>? ?? []).cast<String>(),
-      blockedWords:
-          (json['blocked_words'] as List<dynamic>? ?? []).cast<String>(),
+      blockedWords: (json['blocked_words'] as List<dynamic>? ?? [])
+          .cast<String>(),
       partialFailure: json['partial_failure'] as bool? ?? false,
     );
   }

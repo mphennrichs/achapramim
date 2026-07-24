@@ -15,6 +15,7 @@ import (
 
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
 	"github.com/mphennrichs/achapramim/backend/internal/db/sqlcgen"
+	"github.com/mphennrichs/achapramim/backend/internal/scan"
 )
 
 func createTestUser(t *testing.T, pool *pgxpool.Pool, role string) sqlcgen.User {
@@ -74,7 +75,7 @@ func TestWatchHandler_CreateAndGet(t *testing.T) {
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	req := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
 	rec := httptest.NewRecorder()
@@ -106,7 +107,7 @@ func TestWatchHandler_GetDeniedForOtherUser(t *testing.T) {
 	pool := newTestPool(t)
 	owner := createTestUser(t, pool, "user")
 	other := createTestUser(t, pool, "user")
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
 	createRec := httptest.NewRecorder()
@@ -126,7 +127,7 @@ func TestWatchHandler_AdminCanAccessOthersWatch(t *testing.T) {
 	pool := newTestPool(t)
 	owner := createTestUser(t, pool, "user")
 	admin := createTestUser(t, pool, "admin")
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
 	createRec := httptest.NewRecorder()
@@ -146,7 +147,7 @@ func TestWatchHandler_Update(t *testing.T) {
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
 	createRec := httptest.NewRecorder()
@@ -177,7 +178,7 @@ func TestWatchHandler_SetActiveAndDelete(t *testing.T) {
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
 	createRec := httptest.NewRecorder()
@@ -210,7 +211,7 @@ func TestWatchHandler_List(t *testing.T) {
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	for i := 0; i < 2; i++ {
 		req := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
@@ -233,7 +234,7 @@ func TestWatchHandler_ListAllForAdmin(t *testing.T) {
 	pool := newTestPool(t)
 	owner := createTestUser(t, pool, "user")
 	admin := createTestUser(t, pool, "admin")
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
 	createRec := httptest.NewRecorder()
@@ -258,7 +259,7 @@ func TestWatchHandler_CreateMergesDefaultBlockedWordsWithoutDuplicates(t *testin
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	body := sampleWatchBody()
 	// "Quebrado" (maiúsculo) e "sucata" já estão no seed global — a união
@@ -289,7 +290,7 @@ func TestWatchHandler_UpdateDoesNotReapplyDefaultBlockedWordsSeed(t *testing.T) 
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
 	createRec := httptest.NewRecorder()
@@ -317,7 +318,7 @@ func TestWatchHandler_CreateWithRegionOverridesGlobalDefault(t *testing.T) {
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	city := "Curitiba"
 	state := "PR"
@@ -342,7 +343,7 @@ func TestWatchHandler_CreateWithoutRegionLeavesFieldsNil(t *testing.T) {
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")
 	claims := claimsFor(user)
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	req := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
 	rec := httptest.NewRecorder()
@@ -359,7 +360,7 @@ func TestWatchHandler_ListAllIgnoredForNonAdmin(t *testing.T) {
 	pool := newTestPool(t)
 	owner := createTestUser(t, pool, "user")
 	other := createTestUser(t, pool, "user")
-	h := NewWatchHandler(pool)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
 
 	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
 	createRec := httptest.NewRecorder()

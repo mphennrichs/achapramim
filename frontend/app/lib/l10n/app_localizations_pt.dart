@@ -95,6 +95,27 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get watchDeleteTooltip => 'Excluir Alerta';
+
+  @override
+  String get watchDeleteConfirmTitle => 'Excluir Alerta?';
+
+  @override
+  String get watchDeleteConfirmMessage =>
+      'Esta ação não pode ser desfeita. Todas as Offers e o histórico de Scans deste Alerta serão perdidos.';
+
+  @override
+  String get watchDeleteConfirmCancel => 'Cancelar';
+
+  @override
+  String get watchDeleteConfirmConfirm => 'Excluir';
+
+  @override
+  String watchDeleteError(String error) {
+    return 'Falha ao excluir Alerta: $error';
+  }
+
+  @override
   String get newWatchTitle => 'Novo Alerta';
 
   @override
@@ -190,7 +211,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get watchDetailTabOffers => 'Offers';
+  String get watchDetailTabOffers => 'Ofertas';
 
   @override
   String get watchDetailTabScans => 'Histórico de Scans';
@@ -252,6 +273,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String watchDetailOffersFound(int count) {
     return '$count ofertas';
   }
+
+  @override
+  String get scanStatusSuccess => 'Sucesso';
+
+  @override
+  String get scanStatusPartial => 'Parcial';
+
+  @override
+  String get scanStatusFailed => 'Falhou';
+
+  @override
+  String get scanStatusPending => 'Pendente';
 
   @override
   String get profileTitle => 'Perfil';
@@ -510,4 +543,28 @@ class AppLocalizationsPt extends AppLocalizations {
   String adminSettingsApifyUsageError(String error) {
     return 'Falha ao carregar custo do Apify: $error';
   }
+
+  @override
+  String get apifyRunStatusReady => 'Pronto';
+
+  @override
+  String get apifyRunStatusRunning => 'Em execução';
+
+  @override
+  String get apifyRunStatusSucceeded => 'Concluído';
+
+  @override
+  String get apifyRunStatusFailed => 'Falhou';
+
+  @override
+  String get apifyRunStatusAborting => 'Cancelando';
+
+  @override
+  String get apifyRunStatusAborted => 'Cancelado';
+
+  @override
+  String get apifyRunStatusTimingOut => 'Expirando';
+
+  @override
+  String get apifyRunStatusTimedOut => 'Expirou';
 }

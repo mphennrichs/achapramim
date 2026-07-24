@@ -24,7 +24,8 @@ class ScanSettings {
       defaultCity: json['default_city'] as String,
       defaultState: json['default_state'] as String,
       defaultBlockedWords:
-          (json['default_blocked_words'] as List<dynamic>? ?? []).cast<String>(),
+          (json['default_blocked_words'] as List<dynamic>? ?? [])
+              .cast<String>(),
     );
   }
 }

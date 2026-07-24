@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/marketplace_labels.dart';
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
@@ -27,16 +28,19 @@ class WatchListScreen extends ConsumerWidget {
       ),
       body: watchesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Text(l10n.watchListLoadError(error.toString())),
-        ),
+        error: (error, _) =>
+            Center(child: Text(l10n.watchListLoadError(error.toString()))),
         data: (watches) {
           if (watches.isEmpty) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.search_off, size: 48, color: scheme.onSurfaceVariant),
+                  Icon(
+                    Icons.search_off,
+                    size: 48,
+                    color: scheme.onSurfaceVariant,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     l10n.watchListEmpty,
@@ -75,6 +79,43 @@ class _WatchCard extends ConsumerWidget {
 
   const _WatchCard({required this.watch});
 
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.watchDeleteConfirmTitle),
+        content: Text(l10n.watchDeleteConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.watchDeleteConfirmCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: Text(l10n.watchDeleteConfirmConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await ref.read(watchServiceProvider).delete(watch.id);
+      ref.invalidate(watchListProvider);
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.watchDeleteError(error.toString()))),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
@@ -96,10 +137,9 @@ class _WatchCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       watch.name,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   Switch(
@@ -111,6 +151,11 @@ class _WatchCard extends ConsumerWidget {
                       ref.invalidate(watchListProvider);
                     },
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    tooltip: l10n.watchDeleteTooltip,
+                    onPressed: () => _confirmDelete(context, ref),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -119,16 +164,21 @@ class _WatchCard extends ConsumerWidget {
                 runSpacing: 8,
                 children: [
                   Chip(label: Text(priceLabel)),
-                  Chip(label: Text(l10n.watchTolerance(watch.tolerancePercent))),
+                  Chip(
+                    label: Text(l10n.watchTolerance(watch.tolerancePercent)),
+                  ),
                   for (final marketplace in watch.marketplaces)
-                    Chip(label: Text(marketplace)),
+                    Chip(label: Text(marketplaceLabel(l10n, marketplace))),
                 ],
               ),
               if (watch.keywords.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
                   watch.keywords.join(', '),
-                  style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
+                  style: TextStyle(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 13,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

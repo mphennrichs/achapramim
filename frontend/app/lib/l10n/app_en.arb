@@ -37,6 +37,15 @@
   "@watchTolerance": {
     "placeholders": { "percent": { "type": "String" } }
   },
+  "watchDeleteTooltip": "Delete Watch",
+  "watchDeleteConfirmTitle": "Delete Watch?",
+  "watchDeleteConfirmMessage": "This action cannot be undone. All Offers and Scan history for this Watch will be lost.",
+  "watchDeleteConfirmCancel": "Cancel",
+  "watchDeleteConfirmConfirm": "Delete",
+  "watchDeleteError": "Failed to delete Watch: {error}",
+  "@watchDeleteError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
 
   "newWatchTitle": "New Search",
   "newWatchFromLinkTitle": "Create from Link",
@@ -114,6 +123,10 @@
   "@watchDetailOffersFound": {
     "placeholders": { "count": { "type": "int" } }
   },
+  "scanStatusSuccess": "Success",
+  "scanStatusPartial": "Partial",
+  "scanStatusFailed": "Failed",
+  "scanStatusPending": "Pending",
 
   "profileTitle": "Profile",
   "profileLoadError": "Failed to load profile: {error}",
@@ -223,5 +236,13 @@
   "adminSettingsApifyUsageError": "Failed to load Apify usage: {error}",
   "@adminSettingsApifyUsageError": {
     "placeholders": { "error": { "type": "String" } }
-  }
+  },
+  "apifyRunStatusReady": "Ready",
+  "apifyRunStatusRunning": "Running",
+  "apifyRunStatusSucceeded": "Succeeded",
+  "apifyRunStatusFailed": "Failed",
+  "apifyRunStatusAborting": "Aborting",
+  "apifyRunStatusAborted": "Aborted",
+  "apifyRunStatusTimingOut": "Timing out",
+  "apifyRunStatusTimedOut": "Timed out"
 }
