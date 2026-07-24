@@ -28,6 +28,9 @@ type offerResponse struct {
 	PriceCents      int64  `json:"price_cents"`
 	Classification  string `json:"classification"`
 	Available       bool   `json:"available"`
+	// Quando a Offer foi vista pela primeira vez (ver offers.created_at) —
+	// usado pela UI para ordenar por "mais recentes".
+	CreatedAt string `json:"created_at"`
 }
 
 type pricePointResponse struct {
@@ -74,6 +77,7 @@ func (h *OfferHandler) List(w http.ResponseWriter, r *http.Request) {
 			PriceCents:      o.PriceCents,
 			Classification:  numericString(o.Classification),
 			Available:       o.Available,
+			CreatedAt:       o.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
 		}
 	}
 	writeJSON(w, http.StatusOK, resp)

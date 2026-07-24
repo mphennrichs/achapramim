@@ -111,6 +111,11 @@
     "placeholders": { "error": { "type": "String" } }
   },
   "watchDetailNoOffers": "No Offer found yet.",
+  "watchDetailSortLabel": "Sort by",
+  "watchDetailSortRecommended": "Recommended",
+  "watchDetailSortPriceAsc": "Lowest price",
+  "watchDetailSortPriceDesc": "Highest price",
+  "watchDetailSortNewest": "Newest",
   "watchDetailOfferUnavailable": "Unavailable",
   "watchDetailOpenListing": "Open listing",
   "watchDetailOpenListingError": "Could not open the listing. The link may be invalid.",

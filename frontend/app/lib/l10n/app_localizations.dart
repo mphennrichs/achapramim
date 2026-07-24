@@ -542,6 +542,36 @@ abstract class AppLocalizations {
   /// **'Nenhuma Offer encontrada ainda.'**
   String get watchDetailNoOffers;
 
+  /// No description provided for @watchDetailSortLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ordenar por'**
+  String get watchDetailSortLabel;
+
+  /// No description provided for @watchDetailSortRecommended.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recomendados'**
+  String get watchDetailSortRecommended;
+
+  /// No description provided for @watchDetailSortPriceAsc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menor preço'**
+  String get watchDetailSortPriceAsc;
+
+  /// No description provided for @watchDetailSortPriceDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Maior preço'**
+  String get watchDetailSortPriceDesc;
+
+  /// No description provided for @watchDetailSortNewest.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais recentes'**
+  String get watchDetailSortNewest;
+
   /// No description provided for @watchDetailOfferUnavailable.
   ///
   /// In pt, this message translates to:

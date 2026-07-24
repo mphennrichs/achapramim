@@ -7,6 +7,9 @@ class Offer {
   final int priceCents;
   final String classification;
   final bool available;
+  // Quando a Offer foi vista pela primeira vez — usado para ordenar por
+  // "mais recentes" na tela de detalhes do Alerta.
+  final DateTime createdAt;
 
   Offer({
     required this.id,
@@ -17,7 +20,13 @@ class Offer {
     required this.priceCents,
     required this.classification,
     required this.available,
+    required this.createdAt,
   });
+
+  /// Classification vem do backend como string decimal (NUMERIC do
+  /// Postgres) — parseada aqui só para permitir ordenação numérica na UI,
+  /// sem afetar a exibição (que usa o campo String original, se exibida).
+  double get classificationValue => double.tryParse(classification) ?? 0;
 
   factory Offer.fromJson(Map<String, dynamic> json) {
     return Offer(
@@ -29,6 +38,7 @@ class Offer {
       priceCents: json['price_cents'] as int,
       classification: json['classification'] as String,
       available: json['available'] as bool,
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
 }

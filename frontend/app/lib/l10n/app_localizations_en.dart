@@ -260,6 +260,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get watchDetailNoOffers => 'No Offer found yet.';
 
   @override
+  String get watchDetailSortLabel => 'Sort by';
+
+  @override
+  String get watchDetailSortRecommended => 'Recommended';
+
+  @override
+  String get watchDetailSortPriceAsc => 'Lowest price';
+
+  @override
+  String get watchDetailSortPriceDesc => 'Highest price';
+
+  @override
+  String get watchDetailSortNewest => 'Newest';
+
+  @override
   String get watchDetailOfferUnavailable => 'Unavailable';
 
   @override

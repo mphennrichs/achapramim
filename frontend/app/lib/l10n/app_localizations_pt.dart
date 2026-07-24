@@ -260,6 +260,21 @@ class AppLocalizationsPt extends AppLocalizations {
   String get watchDetailNoOffers => 'Nenhuma Offer encontrada ainda.';
 
   @override
+  String get watchDetailSortLabel => 'Ordenar por';
+
+  @override
+  String get watchDetailSortRecommended => 'Recomendados';
+
+  @override
+  String get watchDetailSortPriceAsc => 'Menor preço';
+
+  @override
+  String get watchDetailSortPriceDesc => 'Maior preço';
+
+  @override
+  String get watchDetailSortNewest => 'Mais recentes';
+
+  @override
   String get watchDetailOfferUnavailable => 'Indisponível';
 
   @override

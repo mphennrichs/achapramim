@@ -198,14 +198,49 @@ class _WatchSummaryHeader extends StatelessWidget {
   }
 }
 
-class _OffersTab extends ConsumerWidget {
+enum _OfferSortCriterion { recommended, priceAsc, priceDesc, newest }
+
+class _OffersTab extends ConsumerStatefulWidget {
   final String watchId;
 
   const _OffersTab({required this.watchId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final offersAsync = ref.watch(_offersProvider(watchId));
+  ConsumerState<_OffersTab> createState() => _OffersTabState();
+}
+
+class _OffersTabState extends ConsumerState<_OffersTab> {
+  _OfferSortCriterion _sort = _OfferSortCriterion.recommended;
+
+  List<Offer> _sorted(List<Offer> offers) {
+    final sorted = List.of(offers);
+    switch (_sort) {
+      case _OfferSortCriterion.recommended:
+        sorted.sort(
+          (a, b) => b.classificationValue.compareTo(a.classificationValue),
+        );
+      case _OfferSortCriterion.priceAsc:
+        sorted.sort((a, b) => a.priceCents.compareTo(b.priceCents));
+      case _OfferSortCriterion.priceDesc:
+        sorted.sort((a, b) => b.priceCents.compareTo(a.priceCents));
+      case _OfferSortCriterion.newest:
+        sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+    return sorted;
+  }
+
+  String _sortLabel(AppLocalizations l10n, _OfferSortCriterion criterion) {
+    return switch (criterion) {
+      _OfferSortCriterion.recommended => l10n.watchDetailSortRecommended,
+      _OfferSortCriterion.priceAsc => l10n.watchDetailSortPriceAsc,
+      _OfferSortCriterion.priceDesc => l10n.watchDetailSortPriceDesc,
+      _OfferSortCriterion.newest => l10n.watchDetailSortNewest,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final offersAsync = ref.watch(_offersProvider(widget.watchId));
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
 
@@ -223,11 +258,45 @@ class _OffersTab extends ConsumerWidget {
             ),
           );
         }
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: offers.length,
-          separatorBuilder: (context, _) => const SizedBox(height: 12),
-          itemBuilder: (context, index) => _OfferCard(offer: offers[index]),
+        final sortedOffers = _sorted(offers);
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(
+                children: [
+                  Text(
+                    l10n.watchDetailSortLabel,
+                    style: TextStyle(color: scheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(width: 12),
+                  DropdownButton<_OfferSortCriterion>(
+                    value: _sort,
+                    underline: const SizedBox.shrink(),
+                    items: [
+                      for (final criterion in _OfferSortCriterion.values)
+                        DropdownMenuItem(
+                          value: criterion,
+                          child: Text(_sortLabel(l10n, criterion)),
+                        ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) setState(() => _sort = value);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: sortedOffers.length,
+                separatorBuilder: (context, _) => const SizedBox(height: 12),
+                itemBuilder: (context, index) =>
+                    _OfferCard(offer: sortedOffers[index]),
+              ),
+            ),
+          ],
         );
       },
     );

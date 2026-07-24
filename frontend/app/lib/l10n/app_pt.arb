@@ -111,6 +111,11 @@
     "placeholders": { "error": { "type": "String" } }
   },
   "watchDetailNoOffers": "Nenhuma Offer encontrada ainda.",
+  "watchDetailSortLabel": "Ordenar por",
+  "watchDetailSortRecommended": "Recomendados",
+  "watchDetailSortPriceAsc": "Menor preço",
+  "watchDetailSortPriceDesc": "Maior preço",
+  "watchDetailSortNewest": "Mais recentes",
   "watchDetailOfferUnavailable": "Indisponível",
   "watchDetailOpenListing": "Abrir anúncio",
   "watchDetailOpenListingError": "Não foi possível abrir o anúncio. O link pode estar inválido.",
