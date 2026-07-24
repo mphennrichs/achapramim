@@ -92,6 +92,7 @@ func TestWatchHandler_CreateAndGet(t *testing.T) {
 	require.Contains(t, created.BlockedWords, "sucata")
 	require.ElementsMatch(t, []string{"olx"}, created.Marketplaces)
 	require.True(t, created.Active)
+	require.Equal(t, "any", created.KeywordMatchMode, "default mode when omitted from the request")
 
 	getReq := withChiParam(newWatchRequest(t, http.MethodGet, "/api/watches/"+created.ID, claims, nil), "id", created.ID)
 	getRec := httptest.NewRecorder()
@@ -101,6 +102,38 @@ func TestWatchHandler_CreateAndGet(t *testing.T) {
 	var fetched watchResponse
 	require.NoError(t, json.Unmarshal(getRec.Body.Bytes(), &fetched))
 	require.Equal(t, created.ID, fetched.ID)
+}
+
+func TestWatchHandler_CreateWithAllKeywordMatchMode(t *testing.T) {
+	pool := newTestPool(t)
+	user := createTestUser(t, pool, "user")
+	claims := claimsFor(user)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
+
+	body := sampleWatchBody()
+	body.KeywordMatchMode = "all"
+	req := newWatchRequest(t, http.MethodPost, "/api/watches", claims, body)
+	rec := httptest.NewRecorder()
+	h.Create(rec, req)
+	require.Equal(t, http.StatusCreated, rec.Code, rec.Body.String())
+
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &created))
+	require.Equal(t, "all", created.KeywordMatchMode)
+}
+
+func TestWatchHandler_CreateRejectsInvalidKeywordMatchMode(t *testing.T) {
+	pool := newTestPool(t)
+	user := createTestUser(t, pool, "user")
+	claims := claimsFor(user)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
+
+	body := sampleWatchBody()
+	body.KeywordMatchMode = "bogus"
+	req := newWatchRequest(t, http.MethodPost, "/api/watches", claims, body)
+	rec := httptest.NewRecorder()
+	h.Create(rec, req)
+	require.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
 func TestWatchHandler_GetDeniedForOtherUser(t *testing.T) {

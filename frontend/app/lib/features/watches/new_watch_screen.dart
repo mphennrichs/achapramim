@@ -95,6 +95,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
   late final Set<String> _selectedMarketplaces = Set.of(
     widget.initialWatch?.marketplaces ?? {'olx'},
   );
+  late String _keywordMatchMode = widget.initialWatch?.keywordMatchMode ?? 'any';
 
   bool _saving = false;
   String? _errorMessage;
@@ -182,6 +183,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
       // Vazio = usa o padrão global (ver ScanSettingsHandler/OLXFetcher).
       city: city.isEmpty ? null : city,
       state: state.isEmpty ? null : state,
+      keywordMatchMode: _keywordMatchMode,
     );
 
     try {
@@ -350,6 +352,25 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                       onAdd: _addKeyword,
                       onRemove: (word) =>
                           setState(() => _keywords.remove(word)),
+                      trailing: Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: SegmentedButton<String>(
+                          segments: [
+                            ButtonSegment(
+                              value: 'any',
+                              label: Text(l10n.newWatchKeywordModeAny),
+                            ),
+                            ButtonSegment(
+                              value: 'all',
+                              label: Text(l10n.newWatchKeywordModeAll),
+                            ),
+                          ],
+                          selected: {_keywordMatchMode},
+                          onSelectionChanged: (selection) => setState(
+                            () => _keywordMatchMode = selection.first,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -468,6 +489,7 @@ class _WordListCard extends StatelessWidget {
   final VoidCallback onAdd;
   final ValueChanged<String> onRemove;
   final bool isError;
+  final Widget? trailing;
 
   const _WordListCard({
     required this.label,
@@ -477,6 +499,7 @@ class _WordListCard extends StatelessWidget {
     required this.onAdd,
     required this.onRemove,
     this.isError = false,
+    this.trailing,
   });
 
   @override
@@ -518,6 +541,7 @@ class _WordListCard extends StatelessWidget {
                 IconButton(onPressed: onAdd, icon: const Icon(Icons.add)),
               ],
             ),
+            ?trailing,
           ],
         ),
       ),

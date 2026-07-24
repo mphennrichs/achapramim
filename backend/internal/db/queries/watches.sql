@@ -3,9 +3,9 @@
 -- global em scan_settings (default_city/default_state) — ver OLXFetcher.
 INSERT INTO watches (
     user_id, name, target_price_cents, tolerance_percent,
-    max_offers, price_drop_threshold_percent, city, state
+    max_offers, price_drop_threshold_percent, city, state, keyword_match_mode
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING *;
 
 -- name: GetWatchByID :one
@@ -32,6 +32,7 @@ UPDATE watches SET
     price_drop_threshold_percent = $6,
     city = $7,
     state = $8,
+    keyword_match_mode = $9,
     updated_at = now()
 WHERE id = $1
 RETURNING *;

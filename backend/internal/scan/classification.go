@@ -47,6 +47,25 @@ func containsBlockedWord(title string, blockedWords []string) bool {
 	return false
 }
 
+// matchesAllKeywords reporta se o título contém TODAS as keywords
+// informadas (case insensitive) — usado para filtrar de verdade quando
+// keyword_match_mode do Watch é 'all', diferente do modo 'any' (padrão),
+// em que nenhuma keyword é obrigatória e a fração batida só influencia a
+// Classificação (ver keywordMatchRatio). Lista vazia sempre passa (sem
+// keyword configurada, nada a exigir).
+func matchesAllKeywords(title string, keywords []string) bool {
+	lowerTitle := strings.ToLower(title)
+	for _, kw := range keywords {
+		if kw == "" {
+			continue
+		}
+		if !strings.Contains(lowerTitle, strings.ToLower(kw)) {
+			return false
+		}
+	}
+	return true
+}
+
 // priceProximityScore vale 1 quando o preço está exatamente no valor-alvo,
 // decaindo linearmente até 0 na borda da tolerância; preços fora da
 // tolerância recebem 0 (a filtragem por tolerância acontece em outro

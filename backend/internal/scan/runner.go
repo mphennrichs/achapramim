@@ -108,6 +108,9 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 			if containsBlockedWord(listing.Title, blockedWords) {
 				continue
 			}
+			if watch.KeywordMatchMode == sqlcgen.KeywordMatchModeAll && !matchesAllKeywords(listing.Title, keywords) {
+				continue
+			}
 
 			score := classify(listing.Title, keywords, targetPriceCents, tolerancePercent, listing.PriceCents)
 			classification, err := floatToNumeric(score)

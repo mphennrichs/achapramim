@@ -14,6 +14,9 @@ class Watch {
   // (ScanSettings.defaultCity/defaultState).
   final String? city;
   final String? state;
+  // "any" (padrão, nenhuma keyword obrigatória) ou "all" (todas precisam
+  // estar no título do anúncio) — ver keyword_match_mode no backend.
+  final String keywordMatchMode;
   // Só preenchidos na listagem admin (GET /api/watches?all=true).
   final String? ownerName;
   final String? ownerEmail;
@@ -32,6 +35,7 @@ class Watch {
     required this.marketplaces,
     this.city,
     this.state,
+    required this.keywordMatchMode,
     this.ownerName,
     this.ownerEmail,
   });
@@ -53,6 +57,7 @@ class Watch {
           .cast<String>(),
       city: json['city'] as String?,
       state: json['state'] as String?,
+      keywordMatchMode: json['keyword_match_mode'] as String? ?? 'any',
       ownerName: json['owner_name'] as String?,
       ownerEmail: json['owner_email'] as String?,
     );
@@ -70,6 +75,7 @@ class Watch {
       'marketplaces': marketplaces,
       'city': city,
       'state': state,
+      'keyword_match_mode': keywordMatchMode,
     };
   }
 }

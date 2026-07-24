@@ -38,6 +38,9 @@ type watchRequest struct {
 	// global (Configurações Globais). Ver resolveRegion em scan/runner.go.
 	City  *string `json:"city"`
 	State *string `json:"state"`
+	// "any" (padrão) ou "all" — ver keyword_match_mode na migration 000009 e
+	// containsAllKeywords em scan/classification.go.
+	KeywordMatchMode string `json:"keyword_match_mode"`
 }
 
 type setActiveRequest struct {
@@ -58,6 +61,7 @@ type watchResponse struct {
 	Marketplaces              []string `json:"marketplaces"`
 	City                      *string  `json:"city"`
 	State                     *string  `json:"state"`
+	KeywordMatchMode          string   `json:"keyword_match_mode"`
 	// Preenchidos só na listagem admin (GET /api/watches?all=true) — o dono
 	// de um Watch é irrelevante nas demais respostas (o próprio User já sabe
 	// quais Watches são seus).
@@ -90,6 +94,11 @@ func (h *WatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	keywordMatchMode, err := parseKeywordMatchMode(req.KeywordMatchMode)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	ctx := r.Context()
 	tx, err := h.pool.Begin(ctx)
@@ -108,6 +117,7 @@ func (h *WatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		TolerancePercent:          tolerance,
 		MaxOffers:                 req.MaxOffers,
 		PriceDropThresholdPercent: threshold,
+		KeywordMatchMode:          keywordMatchMode,
 		City:                      req.City,
 		State:                     req.State,
 	})
@@ -158,7 +168,22 @@ func (h *WatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Marketplaces:              req.Marketplaces,
 		City:                      watch.City,
 		State:                     watch.State,
+		KeywordMatchMode:          string(watch.KeywordMatchMode),
 	})
+}
+
+// parseKeywordMatchMode valida o modo informado, com "any" como padrão
+// quando o campo vem vazio (compatibilidade com clientes antigos que ainda
+// não enviam esse campo).
+func parseKeywordMatchMode(raw string) (sqlcgen.KeywordMatchMode, error) {
+	switch raw {
+	case "", string(sqlcgen.KeywordMatchModeAny):
+		return sqlcgen.KeywordMatchModeAny, nil
+	case string(sqlcgen.KeywordMatchModeAll):
+		return sqlcgen.KeywordMatchModeAll, nil
+	default:
+		return "", errors.New("invalid keyword_match_mode: " + raw)
+	}
 }
 
 // mergeWithDefaultBlockedWords retorna a união (sem duplicatas) entre as
@@ -239,6 +264,11 @@ func (h *WatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	keywordMatchMode, err := parseKeywordMatchMode(req.KeywordMatchMode)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	ctx := r.Context()
 	watchID := parseUUID(chi.URLParam(r, "id"))
@@ -263,6 +293,7 @@ func (h *WatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 		TolerancePercent:          tolerance,
 		MaxOffers:                 req.MaxOffers,
 		PriceDropThresholdPercent: threshold,
+		KeywordMatchMode:          keywordMatchMode,
 		City:                      req.City,
 		State:                     req.State,
 	})
@@ -307,6 +338,7 @@ func (h *WatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Marketplaces:              req.Marketplaces,
 		City:                      watch.City,
 		State:                     watch.State,
+		KeywordMatchMode:          string(watch.KeywordMatchMode),
 	})
 }
 
@@ -371,6 +403,7 @@ func (h *WatchHandler) List(w http.ResponseWriter, r *http.Request) {
 				UpdatedAt:                 row.UpdatedAt,
 				City:                      row.City,
 				State:                     row.State,
+				KeywordMatchMode:          row.KeywordMatchMode,
 			}
 			wr, err := loadWatchResponse(ctx, q, watch)
 			if err != nil {
@@ -503,5 +536,6 @@ func loadWatchResponse(ctx context.Context, q *sqlcgen.Queries, watch sqlcgen.Wa
 		Marketplaces:              marketplaces,
 		City:                      watch.City,
 		State:                     watch.State,
+		KeywordMatchMode:          string(watch.KeywordMatchMode),
 	}, nil
 }

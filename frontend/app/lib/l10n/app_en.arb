@@ -65,6 +65,8 @@
   "marketplaceOlx": "OLX",
   "marketplaceFacebook": "Facebook Marketplace",
   "newWatchKeywords": "Keywords",
+  "newWatchKeywordModeAny": "Any (OR)",
+  "newWatchKeywordModeAll": "All (AND)",
   "newWatchBlockedWords": "Blocked Words",
   "newWatchAddWordHint": "Add...",
   "newWatchFinanceAndLimits": "Finance and Limits",

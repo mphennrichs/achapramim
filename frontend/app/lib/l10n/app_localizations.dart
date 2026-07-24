@@ -398,6 +398,18 @@ abstract class AppLocalizations {
   /// **'Palavras-Chave'**
   String get newWatchKeywords;
 
+  /// No description provided for @newWatchKeywordModeAny.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qualquer uma (OU)'**
+  String get newWatchKeywordModeAny;
+
+  /// No description provided for @newWatchKeywordModeAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas (E)'**
+  String get newWatchKeywordModeAll;
+
   /// No description provided for @newWatchBlockedWords.
   ///
   /// In pt, this message translates to:

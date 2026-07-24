@@ -173,6 +173,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newWatchKeywords => 'Keywords';
 
   @override
+  String get newWatchKeywordModeAny => 'Any (OR)';
+
+  @override
+  String get newWatchKeywordModeAll => 'All (AND)';
+
+  @override
   String get newWatchBlockedWords => 'Blocked Words';
 
   @override

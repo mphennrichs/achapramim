@@ -173,6 +173,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newWatchKeywords => 'Palavras-Chave';
 
   @override
+  String get newWatchKeywordModeAny => 'Qualquer uma (OU)';
+
+  @override
+  String get newWatchKeywordModeAll => 'Todas (E)';
+
+  @override
   String get newWatchBlockedWords => 'Palavras Bloqueadas';
 
   @override

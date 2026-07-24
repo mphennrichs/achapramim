@@ -55,6 +55,48 @@ func (ns NullChannelType) Value() (driver.Value, error) {
 	return string(ns.ChannelType), nil
 }
 
+type KeywordMatchMode string
+
+const (
+	KeywordMatchModeAny KeywordMatchMode = "any"
+	KeywordMatchModeAll KeywordMatchMode = "all"
+)
+
+func (e *KeywordMatchMode) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = KeywordMatchMode(s)
+	case string:
+		*e = KeywordMatchMode(s)
+	default:
+		return fmt.Errorf("unsupported scan type for KeywordMatchMode: %T", src)
+	}
+	return nil
+}
+
+type NullKeywordMatchMode struct {
+	KeywordMatchMode KeywordMatchMode `json:"keyword_match_mode"`
+	Valid            bool             `json:"valid"` // Valid is true if KeywordMatchMode is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullKeywordMatchMode) Scan(value interface{}) error {
+	if value == nil {
+		ns.KeywordMatchMode, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.KeywordMatchMode.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullKeywordMatchMode) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.KeywordMatchMode), nil
+}
+
 type NotificationStatus string
 
 const (
@@ -306,6 +348,7 @@ type Watch struct {
 	UpdatedAt                 pgtype.Timestamptz `json:"updated_at"`
 	City                      *string            `json:"city"`
 	State                     *string            `json:"state"`
+	KeywordMatchMode          KeywordMatchMode   `json:"keyword_match_mode"`
 }
 
 type WatchBlockedWord struct {

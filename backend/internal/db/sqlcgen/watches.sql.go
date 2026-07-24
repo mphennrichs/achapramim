@@ -14,21 +14,22 @@ import (
 const createWatch = `-- name: CreateWatch :one
 INSERT INTO watches (
     user_id, name, target_price_cents, tolerance_percent,
-    max_offers, price_drop_threshold_percent, city, state
+    max_offers, price_drop_threshold_percent, city, state, keyword_match_mode
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state, keyword_match_mode
 `
 
 type CreateWatchParams struct {
-	UserID                    pgtype.UUID    `json:"user_id"`
-	Name                      string         `json:"name"`
-	TargetPriceCents          int64          `json:"target_price_cents"`
-	TolerancePercent          pgtype.Numeric `json:"tolerance_percent"`
-	MaxOffers                 int32          `json:"max_offers"`
-	PriceDropThresholdPercent pgtype.Numeric `json:"price_drop_threshold_percent"`
-	City                      *string        `json:"city"`
-	State                     *string        `json:"state"`
+	UserID                    pgtype.UUID      `json:"user_id"`
+	Name                      string           `json:"name"`
+	TargetPriceCents          int64            `json:"target_price_cents"`
+	TolerancePercent          pgtype.Numeric   `json:"tolerance_percent"`
+	MaxOffers                 int32            `json:"max_offers"`
+	PriceDropThresholdPercent pgtype.Numeric   `json:"price_drop_threshold_percent"`
+	City                      *string          `json:"city"`
+	State                     *string          `json:"state"`
+	KeywordMatchMode          KeywordMatchMode `json:"keyword_match_mode"`
 }
 
 // city/state são opcionais (NULL): quando ausentes, o Scan usa o padrão
@@ -43,6 +44,7 @@ func (q *Queries) CreateWatch(ctx context.Context, arg CreateWatchParams) (Watch
 		arg.PriceDropThresholdPercent,
 		arg.City,
 		arg.State,
+		arg.KeywordMatchMode,
 	)
 	var i Watch
 	err := row.Scan(
@@ -59,6 +61,7 @@ func (q *Queries) CreateWatch(ctx context.Context, arg CreateWatchParams) (Watch
 		&i.UpdatedAt,
 		&i.City,
 		&i.State,
+		&i.KeywordMatchMode,
 	)
 	return i, err
 }
@@ -73,7 +76,7 @@ func (q *Queries) DeleteWatch(ctx context.Context, id pgtype.UUID) error {
 }
 
 const dueWatches = `-- name: DueWatches :many
-SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, w.city, w.state
+SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, w.city, w.state, w.keyword_match_mode
 FROM watches w
 JOIN users u ON u.id = w.user_id
 WHERE w.active
@@ -107,6 +110,7 @@ func (q *Queries) DueWatches(ctx context.Context) ([]Watch, error) {
 			&i.UpdatedAt,
 			&i.City,
 			&i.State,
+			&i.KeywordMatchMode,
 		); err != nil {
 			return nil, err
 		}
@@ -119,7 +123,7 @@ func (q *Queries) DueWatches(ctx context.Context) ([]Watch, error) {
 }
 
 const getWatchByID = `-- name: GetWatchByID :one
-SELECT id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state FROM watches WHERE id = $1
+SELECT id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state, keyword_match_mode FROM watches WHERE id = $1
 `
 
 func (q *Queries) GetWatchByID(ctx context.Context, id pgtype.UUID) (Watch, error) {
@@ -139,12 +143,13 @@ func (q *Queries) GetWatchByID(ctx context.Context, id pgtype.UUID) (Watch, erro
 		&i.UpdatedAt,
 		&i.City,
 		&i.State,
+		&i.KeywordMatchMode,
 	)
 	return i, err
 }
 
 const listAllWatchesWithOwner = `-- name: ListAllWatchesWithOwner :many
-SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, w.city, w.state, u.name AS owner_name, u.email AS owner_email
+SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, w.city, w.state, w.keyword_match_mode, u.name AS owner_name, u.email AS owner_email
 FROM watches w
 JOIN users u ON u.id = w.user_id
 ORDER BY w.user_id, w.created_at DESC
@@ -164,6 +169,7 @@ type ListAllWatchesWithOwnerRow struct {
 	UpdatedAt                 pgtype.Timestamptz `json:"updated_at"`
 	City                      *string            `json:"city"`
 	State                     *string            `json:"state"`
+	KeywordMatchMode          KeywordMatchMode   `json:"keyword_match_mode"`
 	OwnerName                 string             `json:"owner_name"`
 	OwnerEmail                string             `json:"owner_email"`
 }
@@ -194,6 +200,7 @@ func (q *Queries) ListAllWatchesWithOwner(ctx context.Context) ([]ListAllWatches
 			&i.UpdatedAt,
 			&i.City,
 			&i.State,
+			&i.KeywordMatchMode,
 			&i.OwnerName,
 			&i.OwnerEmail,
 		); err != nil {
@@ -208,7 +215,7 @@ func (q *Queries) ListAllWatchesWithOwner(ctx context.Context) ([]ListAllWatches
 }
 
 const listWatchesByUser = `-- name: ListWatchesByUser :many
-SELECT id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state FROM watches WHERE user_id = $1 ORDER BY created_at DESC
+SELECT id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state, keyword_match_mode FROM watches WHERE user_id = $1 ORDER BY created_at DESC
 `
 
 func (q *Queries) ListWatchesByUser(ctx context.Context, userID pgtype.UUID) ([]Watch, error) {
@@ -234,6 +241,7 @@ func (q *Queries) ListWatchesByUser(ctx context.Context, userID pgtype.UUID) ([]
 			&i.UpdatedAt,
 			&i.City,
 			&i.State,
+			&i.KeywordMatchMode,
 		); err != nil {
 			return nil, err
 		}
@@ -260,7 +268,7 @@ func (q *Queries) RescheduleWatch(ctx context.Context, arg RescheduleWatchParams
 }
 
 const setWatchActive = `-- name: SetWatchActive :one
-UPDATE watches SET active = $2, updated_at = now() WHERE id = $1 RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state
+UPDATE watches SET active = $2, updated_at = now() WHERE id = $1 RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state, keyword_match_mode
 `
 
 type SetWatchActiveParams struct {
@@ -285,6 +293,7 @@ func (q *Queries) SetWatchActive(ctx context.Context, arg SetWatchActiveParams) 
 		&i.UpdatedAt,
 		&i.City,
 		&i.State,
+		&i.KeywordMatchMode,
 	)
 	return i, err
 }
@@ -298,20 +307,22 @@ UPDATE watches SET
     price_drop_threshold_percent = $6,
     city = $7,
     state = $8,
+    keyword_match_mode = $9,
     updated_at = now()
 WHERE id = $1
-RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state
+RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state, keyword_match_mode
 `
 
 type UpdateWatchParams struct {
-	ID                        pgtype.UUID    `json:"id"`
-	Name                      string         `json:"name"`
-	TargetPriceCents          int64          `json:"target_price_cents"`
-	TolerancePercent          pgtype.Numeric `json:"tolerance_percent"`
-	MaxOffers                 int32          `json:"max_offers"`
-	PriceDropThresholdPercent pgtype.Numeric `json:"price_drop_threshold_percent"`
-	City                      *string        `json:"city"`
-	State                     *string        `json:"state"`
+	ID                        pgtype.UUID      `json:"id"`
+	Name                      string           `json:"name"`
+	TargetPriceCents          int64            `json:"target_price_cents"`
+	TolerancePercent          pgtype.Numeric   `json:"tolerance_percent"`
+	MaxOffers                 int32            `json:"max_offers"`
+	PriceDropThresholdPercent pgtype.Numeric   `json:"price_drop_threshold_percent"`
+	City                      *string          `json:"city"`
+	State                     *string          `json:"state"`
+	KeywordMatchMode          KeywordMatchMode `json:"keyword_match_mode"`
 }
 
 func (q *Queries) UpdateWatch(ctx context.Context, arg UpdateWatchParams) (Watch, error) {
@@ -324,6 +335,7 @@ func (q *Queries) UpdateWatch(ctx context.Context, arg UpdateWatchParams) (Watch
 		arg.PriceDropThresholdPercent,
 		arg.City,
 		arg.State,
+		arg.KeywordMatchMode,
 	)
 	var i Watch
 	err := row.Scan(
@@ -340,6 +352,7 @@ func (q *Queries) UpdateWatch(ctx context.Context, arg UpdateWatchParams) (Watch
 		&i.UpdatedAt,
 		&i.City,
 		&i.State,
+		&i.KeywordMatchMode,
 	)
 	return i, err
 }

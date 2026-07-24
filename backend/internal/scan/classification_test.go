@@ -25,6 +25,29 @@ func TestKeywordMatchRatio(t *testing.T) {
 	}
 }
 
+func TestMatchesAllKeywords(t *testing.T) {
+	tests := []struct {
+		name     string
+		title    string
+		keywords []string
+		want     bool
+	}{
+		{"no keywords always matches", "qualquer coisa", nil, true},
+		{"all keywords present", "PlayStation 5 novo lacrado", []string{"playstation", "5"}, true},
+		{"missing one keyword", "PlayStation 4 usado", []string{"playstation", "5"}, false},
+		{"case insensitive", "PLAYSTATION 5", []string{"playstation", "5"}, true},
+		{"no match at all", "Xbox Series X", []string{"playstation"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := matchesAllKeywords(tt.title, tt.keywords)
+			if got != tt.want {
+				t.Errorf("matchesAllKeywords() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestContainsBlockedWord(t *testing.T) {
 	if !containsBlockedWord("PS5 quebrado, para peças", []string{"quebrado"}) {
 		t.Error("expected blocked word to be detected")
