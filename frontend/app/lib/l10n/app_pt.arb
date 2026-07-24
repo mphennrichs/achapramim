@@ -258,6 +258,12 @@
   "@adminWatchesOwnerLabel": {
     "placeholders": { "name": { "type": "String" }, "email": { "type": "String" } }
   },
+  "adminWatchesTriggerScan": "Rodar Scan agora",
+  "adminWatchesTriggerScanSuccess": "Scan concluído.",
+  "adminWatchesTriggerScanError": "Falha ao rodar Scan: {error}",
+  "@adminWatchesTriggerScanError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
 
   "adminSettingsTitle": "Configurações",
   "adminSettingsLoadError": "Falha ao carregar configurações: {error}",

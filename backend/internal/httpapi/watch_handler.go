@@ -473,6 +473,41 @@ func (h *WatchHandler) SetActive(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// TriggerScan roda um Scan do Watch imediatamente, fora do ciclo normal do
+// Scheduler — admin-only (ver router.go), para diagnosticar/forçar
+// atualização de um Watch específico sem esperar o próximo agendamento.
+// Síncrono (não em goroutine): o admin que disparou quer ver o resultado
+// na hora, diferente do primeiro Scan automático na criação do Watch (que
+// não deve atrasar a resposta HTTP de criação).
+func (h *WatchHandler) TriggerScan(w http.ResponseWriter, r *http.Request) {
+	claims, ok := auth.FromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing claims")
+		return
+	}
+
+	ctx := r.Context()
+	q := sqlcgen.New(h.pool)
+	watchID := parseUUID(chi.URLParam(r, "id"))
+
+	watch, ok := getOwnedWatch(ctx, w, q, watchID, claims)
+	if !ok {
+		return
+	}
+
+	if err := h.runner.RunWatch(ctx, watch); err != nil {
+		writeError(w, http.StatusInternalServerError, "scan failed: "+err.Error())
+		return
+	}
+
+	resp, err := loadWatchResponse(ctx, q, watch)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	writeJSON(w, http.StatusOK, resp)
+}
+
 // Delete remove um Watch permanentemente, junto de todo o histórico
 // vinculado (Scans, Offers, Histórico de Preço, Notifications) via cascade.
 // O dono pode excluir o próprio Watch; o admin pode excluir o de qualquer

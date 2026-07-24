@@ -566,6 +566,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get adminWatchesTriggerScan => 'Run Scan now';
+
+  @override
+  String get adminWatchesTriggerScanSuccess => 'Scan completed.';
+
+  @override
+  String adminWatchesTriggerScanError(String error) {
+    return 'Failed to run Scan: $error';
+  }
+
+  @override
   String get adminSettingsTitle => 'Settings';
 
   @override

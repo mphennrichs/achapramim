@@ -57,6 +57,13 @@ class WatchService {
 
   Future<void> delete(String id) => _client.dio.delete('/api/watches/$id');
 
+  /// Roda um Scan do Watch imediatamente, fora do ciclo normal do Scheduler
+  /// — admin-only (ver TriggerScan no backend).
+  Future<Watch> triggerScan(String id) async {
+    final response = await _client.dio.post('/api/watches/$id/scan');
+    return Watch.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<List<Offer>> offers(String watchId) async {
     final response = await _client.dio.get('/api/watches/$watchId/offers');
     return (response.data as List<dynamic>)

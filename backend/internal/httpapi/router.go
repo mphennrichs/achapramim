@@ -91,6 +91,8 @@ func NewRouter(deps Deps) http.Handler {
 
 			apifyUsageHandler := NewApifyUsageHandler(deps.ApifyAPIToken)
 			r.Get("/api/admin/apify-usage", apifyUsageHandler.List)
+
+			r.Post("/api/watches/{id}/scan", watchHandler.TriggerScan)
 		})
 	})
 

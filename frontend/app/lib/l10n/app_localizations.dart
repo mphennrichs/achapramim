@@ -1076,6 +1076,24 @@ abstract class AppLocalizations {
   /// **'Dono: {name} ({email})'**
   String adminWatchesOwnerLabel(String name, String email);
 
+  /// No description provided for @adminWatchesTriggerScan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rodar Scan agora'**
+  String get adminWatchesTriggerScan;
+
+  /// No description provided for @adminWatchesTriggerScanSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Scan concluído.'**
+  String get adminWatchesTriggerScanSuccess;
+
+  /// No description provided for @adminWatchesTriggerScanError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao rodar Scan: {error}'**
+  String adminWatchesTriggerScanError(String error);
+
   /// No description provided for @adminSettingsTitle.
   ///
   /// In pt, this message translates to:

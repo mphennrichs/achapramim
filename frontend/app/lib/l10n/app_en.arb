@@ -258,6 +258,12 @@
   "@adminWatchesOwnerLabel": {
     "placeholders": { "name": { "type": "String" }, "email": { "type": "String" } }
   },
+  "adminWatchesTriggerScan": "Run Scan now",
+  "adminWatchesTriggerScanSuccess": "Scan completed.",
+  "adminWatchesTriggerScanError": "Failed to run Scan: {error}",
+  "@adminWatchesTriggerScanError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
 
   "adminSettingsTitle": "Settings",
   "adminSettingsLoadError": "Failed to load settings: {error}",

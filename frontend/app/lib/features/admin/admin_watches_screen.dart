@@ -46,13 +46,47 @@ class AdminWatchesScreen extends ConsumerWidget {
   }
 }
 
-class _AdminWatchCard extends StatelessWidget {
+class _AdminWatchCard extends ConsumerStatefulWidget {
   final Watch watch;
 
   const _AdminWatchCard({required this.watch});
 
   @override
+  ConsumerState<_AdminWatchCard> createState() => _AdminWatchCardState();
+}
+
+class _AdminWatchCardState extends ConsumerState<_AdminWatchCard> {
+  bool _scanning = false;
+
+  Future<void> _triggerScan() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _scanning = true);
+    try {
+      await ref.read(watchServiceProvider).triggerScan(widget.watch.id);
+      ref.invalidate(_allWatchesProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.adminWatchesTriggerScanSuccess)),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.adminWatchesTriggerScanError(error.toString()),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _scanning = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final watch = widget.watch;
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final priceLabel =
@@ -102,6 +136,21 @@ class _AdminWatchCard extends StatelessWidget {
                 for (final marketplace in watch.marketplaces)
                   Chip(label: Text(marketplaceLabel(l10n, marketplace))),
               ],
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _scanning ? null : _triggerScan,
+                icon: _scanning
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.play_circle_outline),
+                label: Text(l10n.adminWatchesTriggerScan),
+              ),
             ),
           ],
         ),

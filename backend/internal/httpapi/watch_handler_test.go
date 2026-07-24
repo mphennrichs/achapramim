@@ -268,6 +268,51 @@ func TestWatchHandler_DeleteWithOffersAndPriceHistory(t *testing.T) {
 	require.Equal(t, http.StatusNoContent, deleteRec.Code, deleteRec.Body.String())
 }
 
+func TestWatchHandler_TriggerScan(t *testing.T) {
+	pool := newTestPool(t)
+	admin := createTestUser(t, pool, "admin")
+	owner := createTestUser(t, pool, "user")
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
+
+	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
+	createRec := httptest.NewRecorder()
+	h.Create(createRec, createReq)
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(createRec.Body.Bytes(), &created))
+
+	scanReq := withChiParam(newWatchRequest(t, http.MethodPost, "/api/watches/"+created.ID+"/scan", claimsFor(admin), nil), "id", created.ID)
+	scanRec := httptest.NewRecorder()
+	h.TriggerScan(scanRec, scanReq)
+	require.Equal(t, http.StatusOK, scanRec.Code, scanRec.Body.String())
+
+	q := sqlcgen.New(pool)
+	scans, err := q.ListScansByWatch(context.Background(), sqlcgen.ListScansByWatchParams{WatchID: parseUUID(created.ID), Limit: 20})
+	require.NoError(t, err)
+	require.Len(t, scans, 1, "TriggerScan should run a real Scan immediately, not just return the Watch")
+}
+
+func TestWatchHandler_TriggerScanDeniedForNonAdmin(t *testing.T) {
+	pool := newTestPool(t)
+	owner := createTestUser(t, pool, "user")
+	otherUser := createTestUser(t, pool, "user")
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
+
+	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
+	createRec := httptest.NewRecorder()
+	h.Create(createRec, createReq)
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(createRec.Body.Bytes(), &created))
+
+	// TriggerScan em si não checa role (a checagem de admin é feita pelo
+	// middleware RequireAdmin no router, fora do handler) — mas mesmo um
+	// User comum tentando disparar o Scan de um Watch de outro dono deve
+	// levar 404, igual a qualquer outro endpoint de Watch.
+	scanReq := withChiParam(newWatchRequest(t, http.MethodPost, "/api/watches/"+created.ID+"/scan", claimsFor(otherUser), nil), "id", created.ID)
+	scanRec := httptest.NewRecorder()
+	h.TriggerScan(scanRec, scanReq)
+	require.Equal(t, http.StatusNotFound, scanRec.Code)
+}
+
 func TestWatchHandler_List(t *testing.T) {
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")
