@@ -137,9 +137,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newWatchStateLabel => 'State';
 
   @override
-  String newWatchRegionHint(String city, String state) {
-    return 'Optional — leave blank to use the default: $city/$state';
-  }
+  String get newWatchActiveMarketplaces => 'Marketplaces';
+
+  @override
+  String get marketplaceOlx => 'OLX';
+
+  @override
+  String get marketplaceFacebook => 'Facebook Marketplace';
 
   @override
   String get newWatchKeywords => 'Keywords';

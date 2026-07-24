@@ -137,9 +137,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newWatchStateLabel => 'Estado (UF)';
 
   @override
-  String newWatchRegionHint(String city, String state) {
-    return 'Opcional — deixe em branco para usar o padrão: $city/$state';
-  }
+  String get newWatchActiveMarketplaces => 'Marketplaces';
+
+  @override
+  String get marketplaceOlx => 'OLX';
+
+  @override
+  String get marketplaceFacebook => 'Facebook Marketplace';
 
   @override
   String get newWatchKeywords => 'Palavras-Chave';

@@ -332,11 +332,23 @@ abstract class AppLocalizations {
   /// **'Estado (UF)'**
   String get newWatchStateLabel;
 
-  /// No description provided for @newWatchRegionHint.
+  /// No description provided for @newWatchActiveMarketplaces.
   ///
   /// In pt, this message translates to:
-  /// **'Opcional — deixe em branco para usar o padrão: {city}/{state}'**
-  String newWatchRegionHint(String city, String state);
+  /// **'Marketplaces'**
+  String get newWatchActiveMarketplaces;
+
+  /// No description provided for @marketplaceOlx.
+  ///
+  /// In pt, this message translates to:
+  /// **'OLX'**
+  String get marketplaceOlx;
+
+  /// No description provided for @marketplaceFacebook.
+  ///
+  /// In pt, this message translates to:
+  /// **'Facebook Marketplace'**
+  String get marketplaceFacebook;
 
   /// No description provided for @newWatchKeywords.
   ///

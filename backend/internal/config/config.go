@@ -18,6 +18,8 @@ type Config struct {
 
 	AnthropicAPIKey string
 
+	ApifyAPIToken string
+
 	// Intervalo entre verificações de Watches devidos a rodar um novo Scan
 	// (não confundir com o intervalo mín/máx por Watch, que fica em
 	// scan_settings no banco).
@@ -40,6 +42,7 @@ func Load() (Config, error) {
 		DatabaseURL:      os.Getenv("DATABASE_URL"),
 		JWTSecret:        os.Getenv("JWT_SECRET"),
 		AnthropicAPIKey:  os.Getenv("ANTHROPIC_API_KEY"),
+		ApifyAPIToken:    os.Getenv("APIFY_API_TOKEN"),
 		IbexBotBaseURL:   os.Getenv("IBEX_BOT_BASE_URL"),
 		IbexBotToken:     os.Getenv("IBEX_BOT_TOKEN"),
 		TelegramBotToken: os.Getenv("TELEGRAM_BOT_TOKEN"),

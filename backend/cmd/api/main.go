@@ -57,6 +57,7 @@ func main() {
 
 	runner := scan.NewRunner(pool, []marketplace.Fetcher{
 		marketplace.NewOLXFetcher(),
+		marketplace.NewFacebookMarketplaceFetcher(cfg.ApifyAPIToken),
 	})
 	scheduler := scan.NewScheduler(pool, runner, cfg.ScanPollInterval)
 	go scheduler.Run(ctx)

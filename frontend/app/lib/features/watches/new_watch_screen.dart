@@ -3,15 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/models/scan_settings.dart';
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
 import 'watch_list_screen.dart';
 
-// OLX é o único Marketplace disponível hoje (ver ADR 0003) — não há escolha
-// real a fazer, então todo Alerta é criado com esse marketplace fixo, sem
-// expor uma seção de seleção na UI.
-const _onlyAvailableMarketplace = 'olx';
+// OLX e Facebook Marketplace são os Marketplaces disponíveis hoje (ver ADR
+// 0006) — Mercado Livre segue sem Fetcher viável (ver ADR 0003).
+const _availableMarketplaces = ['olx', 'facebook_marketplace'];
+
+String _marketplaceLabel(AppLocalizations l10n, String slug) {
+  switch (slug) {
+    case 'olx':
+      return l10n.marketplaceOlx;
+    case 'facebook_marketplace':
+      return l10n.marketplaceFacebook;
+    default:
+      return slug;
+  }
+}
 
 class NewWatchScreen extends ConsumerStatefulWidget {
   const NewWatchScreen({super.key});
@@ -33,9 +44,23 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
 
   final List<String> _keywords = [];
   final List<String> _blockedWords = [];
+  final Set<String> _selectedMarketplaces = {'olx'};
 
   bool _saving = false;
   String? _errorMessage;
+  // Evita sobrescrever cidade/estado/palavras-bloqueadas assim que o usuário
+  // já os editou — o provider pode reemitir (ex.: refresh) depois do preenchimento inicial.
+  bool _defaultsApplied = false;
+
+  void _applyDefaults(ScanSettings settings) {
+    if (_defaultsApplied) return;
+    _defaultsApplied = true;
+    _cityController.text = settings.defaultCity;
+    _stateController.text = settings.defaultState;
+    setState(() {
+      _blockedWords.addAll(settings.defaultBlockedWords);
+    });
+  }
 
   @override
   void dispose() {
@@ -71,9 +96,11 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
 
   Future<void> _save() async {
     final name = _nameController.text.trim();
-    final targetPrice = double.tryParse(_targetPriceController.text.replaceAll(',', '.'));
+    final targetPrice = double.tryParse(
+      _targetPriceController.text.replaceAll(',', '.'),
+    );
 
-    if (name.isEmpty || targetPrice == null) {
+    if (name.isEmpty || targetPrice == null || _selectedMarketplaces.isEmpty) {
       setState(() {
         _errorMessage = AppLocalizations.of(context)!.newWatchValidationError;
       });
@@ -99,7 +126,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
       active: true,
       keywords: _keywords,
       blockedWords: _blockedWords,
-      marketplaces: const [_onlyAvailableMarketplace],
+      marketplaces: _selectedMarketplaces.toList(),
       // Vazio = usa o padrão global (ver ScanSettingsHandler/OLXFetcher).
       city: city.isEmpty ? null : city,
       state: state.isEmpty ? null : state,
@@ -116,8 +143,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
       context.go('/watches');
     } on DioException catch (e) {
       setState(() {
-        _errorMessage = AppLocalizations.of(context)!
-            .newWatchSaveError('${e.response?.data ?? e.message}');
+        _errorMessage = AppLocalizations.of(
+          context,
+        )!.newWatchSaveError('${e.response?.data ?? e.message}');
       });
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -128,6 +156,17 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+
+    ref.listen(scanSettingsProvider, (previous, next) {
+      final settings = next.valueOrNull;
+      if (settings != null) _applyDefaults(settings);
+    });
+    final initialSettings = ref.watch(scanSettingsProvider).valueOrNull;
+    if (initialSettings != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _applyDefaults(initialSettings),
+      );
+    }
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -152,7 +191,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: _nameController,
-                        decoration: InputDecoration(labelText: l10n.newWatchNameLabel),
+                        decoration: InputDecoration(
+                          labelText: l10n.newWatchNameLabel,
+                        ),
                       ),
                     ],
                   ),
@@ -165,7 +206,46 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(l10n.newWatchRegionTitle, style: Theme.of(context).textTheme.labelLarge),
+                      Text(
+                        l10n.newWatchActiveMarketplaces,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          for (final slug in _availableMarketplaces)
+                            FilterChip(
+                              label: Text(_marketplaceLabel(l10n, slug)),
+                              selected: _selectedMarketplaces.contains(slug),
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedMarketplaces.add(slug);
+                                  } else {
+                                    _selectedMarketplaces.remove(slug);
+                                  }
+                                });
+                              },
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        l10n.newWatchRegionTitle,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -173,7 +253,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                             flex: 2,
                             child: TextField(
                               controller: _cityController,
-                              decoration: InputDecoration(labelText: l10n.newWatchCityLabel),
+                              decoration: InputDecoration(
+                                labelText: l10n.newWatchCityLabel,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -190,20 +272,6 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Consumer(
-                        builder: (context, ref, _) {
-                          final settings = ref.watch(scanSettingsProvider);
-                          return settings.when(
-                            data: (s) => Text(
-                              l10n.newWatchRegionHint(s.defaultCity, s.defaultState),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            loading: () => const SizedBox.shrink(),
-                            error: (_, _) => const SizedBox.shrink(),
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ),
@@ -219,7 +287,8 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                       inputController: _keywordInputController,
                       words: _keywords,
                       onAdd: _addKeyword,
-                      onRemove: (word) => setState(() => _keywords.remove(word)),
+                      onRemove: (word) =>
+                          setState(() => _keywords.remove(word)),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -230,7 +299,8 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                       inputController: _blockedInputController,
                       words: _blockedWords,
                       onAdd: _addBlockedWord,
-                      onRemove: (word) => setState(() => _blockedWords.remove(word)),
+                      onRemove: (word) =>
+                          setState(() => _blockedWords.remove(word)),
                       isError: true,
                     ),
                   ),
@@ -243,15 +313,23 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(l10n.newWatchFinanceAndLimits, style: Theme.of(context).textTheme.labelLarge),
+                      Text(
+                        l10n.newWatchFinanceAndLimits,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
                       const SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(
                             child: TextField(
                               controller: _targetPriceController,
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              decoration: InputDecoration(labelText: l10n.newWatchTargetPriceLabel),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              decoration: InputDecoration(
+                                labelText: l10n.newWatchTargetPriceLabel,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -259,7 +337,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                             child: TextField(
                               controller: _toleranceController,
                               keyboardType: TextInputType.number,
-                              decoration: InputDecoration(labelText: l10n.newWatchToleranceLabel),
+                              decoration: InputDecoration(
+                                labelText: l10n.newWatchToleranceLabel,
+                              ),
                             ),
                           ),
                         ],
@@ -281,7 +361,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                             child: TextField(
                               controller: _maxOffersController,
                               keyboardType: TextInputType.number,
-                              decoration: InputDecoration(labelText: l10n.newWatchMaxOffersLabel),
+                              decoration: InputDecoration(
+                                labelText: l10n.newWatchMaxOffersLabel,
+                              ),
                             ),
                           ),
                         ],
@@ -347,7 +429,9 @@ class _WordListCard extends StatelessWidget {
           children: [
             Text(
               label,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: accent),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: accent),
             ),
             const SizedBox(height: 12),
             Wrap(
@@ -355,10 +439,7 @@ class _WordListCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 for (final word in words)
-                  InputChip(
-                    label: Text(word),
-                    onDeleted: () => onRemove(word),
-                  ),
+                  InputChip(label: Text(word), onDeleted: () => onRemove(word)),
               ],
             ),
             const SizedBox(height: 12),

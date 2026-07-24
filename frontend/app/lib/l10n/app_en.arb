@@ -51,10 +51,9 @@
   "newWatchRegionTitle": "Search Region",
   "newWatchCityLabel": "City",
   "newWatchStateLabel": "State",
-  "newWatchRegionHint": "Optional — leave blank to use the default: {city}/{state}",
-  "@newWatchRegionHint": {
-    "placeholders": { "city": { "type": "String" }, "state": { "type": "String" } }
-  },
+  "newWatchActiveMarketplaces": "Marketplaces",
+  "marketplaceOlx": "OLX",
+  "marketplaceFacebook": "Facebook Marketplace",
   "newWatchKeywords": "Keywords",
   "newWatchBlockedWords": "Blocked Words",
   "newWatchAddWordHint": "Add...",

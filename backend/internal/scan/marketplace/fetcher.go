@@ -26,9 +26,10 @@ type Query struct {
 
 // Fetcher busca anúncios em um Marketplace específico. Cada implementação
 // vive em seu próprio arquivo neste pacote e encapsula sua própria
-// estratégia de coleta (scraping, sessão autenticada, etc. — ver ADR 0003;
-// Mercado Livre e Facebook Marketplace foram removidos do sistema por não
-// terem um Fetcher viável, ver ADR 0002, superseded por ADR 0003).
+// estratégia de coleta (scraping, sessão autenticada, chamada a um serviço
+// de terceiro, etc. — ver ADR 0002/0003; Mercado Livre continua sem um
+// Fetcher viável, Facebook Marketplace foi reintroduzido via Apify, ver ADR
+// 0006).
 type Fetcher interface {
 	// Slug é o identificador do Marketplace, igual ao valor persistido em
 	// watch_marketplaces.marketplace_slug (ex: "olx").

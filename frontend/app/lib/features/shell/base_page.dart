@@ -136,7 +136,8 @@ class _SideNav extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
-    final isAdmin = ref.watch(currentUserProfileProvider).valueOrNull?.role == 'admin';
+    final userProfile = ref.watch(currentUserProfileProvider).valueOrNull;
+    final isAdmin = userProfile?.role == 'admin';
     // Ordem visual do menu — independente da ordem de branches no router.
     // Itens de admin só aparecem depois que o perfil confirma role=admin —
     // enquanto carrega ou para User comum, a sidebar mostra só os 3 itens
@@ -183,11 +184,11 @@ class _SideNav extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
             child: Row(
               children: [
                 Image.asset('assets/images/logo.png', width: 88, height: 88),
-                const SizedBox(width: 10),
+                const SizedBox(width: 5),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,8 +200,9 @@ class _SideNav extends ConsumerWidget {
                             ),
                       ),
                       Text(
-                        l10n.navUserDashboard,
+                        userProfile?.name ?? l10n.navUserDashboard,
                         style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),

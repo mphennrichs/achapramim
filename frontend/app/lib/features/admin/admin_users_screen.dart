@@ -90,7 +90,14 @@ class _UserCard extends ConsumerWidget {
                         label: Text(user.role == 'admin' ? l10n.adminUsersRoleAdmin : l10n.adminUsersRoleUser),
                       ),
                       Chip(
-                        label: Text(user.active ? l10n.adminUsersActive : l10n.adminUsersInactive),
+                        label: Text(
+                          user.active ? l10n.adminUsersActive : l10n.adminUsersInactive,
+                          style: TextStyle(
+                            color: user.active
+                                ? scheme.onPrimaryContainer
+                                : scheme.onErrorContainer,
+                          ),
+                        ),
                         backgroundColor: user.active
                             ? scheme.primaryContainer
                             : scheme.errorContainer,

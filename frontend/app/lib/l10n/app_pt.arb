@@ -51,10 +51,9 @@
   "newWatchRegionTitle": "Região da Busca",
   "newWatchCityLabel": "Cidade",
   "newWatchStateLabel": "Estado (UF)",
-  "newWatchRegionHint": "Opcional — deixe em branco para usar o padrão: {city}/{state}",
-  "@newWatchRegionHint": {
-    "placeholders": { "city": { "type": "String" }, "state": { "type": "String" } }
-  },
+  "newWatchActiveMarketplaces": "Marketplaces",
+  "marketplaceOlx": "OLX",
+  "marketplaceFacebook": "Facebook Marketplace",
   "newWatchKeywords": "Palavras-Chave",
   "newWatchBlockedWords": "Palavras Bloqueadas",
   "newWatchAddWordHint": "Adicionar...",
