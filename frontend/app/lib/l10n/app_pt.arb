@@ -212,5 +212,16 @@
   "adminSettingsValidationError": "Verifique o intervalo (máximo ≥ mínimo) e preencha cidade e estado padrão.",
   "adminSettingsSaveError": "Falha ao salvar configurações. Tente novamente.",
   "adminSettingsSaveSuccess": "Configurações salvas com sucesso.",
-  "adminSettingsSave": "Salvar"
+  "adminSettingsSave": "Salvar",
+  "adminSettingsApifyUsageTitle": "Custo do Facebook Marketplace (Apify)",
+  "adminSettingsApifyUsageDescription": "Últimas execuções e custo acumulado no ciclo atual, consultado ao vivo na conta Apify usada pelo scraper do Facebook Marketplace.",
+  "adminSettingsApifyUsageTotal": "Total no período: US$ {total}",
+  "@adminSettingsApifyUsageTotal": {
+    "placeholders": { "total": { "type": "String" } }
+  },
+  "adminSettingsApifyUsageEmpty": "Nenhuma execução registrada ainda.",
+  "adminSettingsApifyUsageError": "Falha ao carregar custo do Apify: {error}",
+  "@adminSettingsApifyUsageError": {
+    "placeholders": { "error": { "type": "String" } }
+  }
 }

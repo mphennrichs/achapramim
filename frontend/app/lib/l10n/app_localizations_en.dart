@@ -488,4 +488,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminSettingsSave => 'Save';
+
+  @override
+  String get adminSettingsApifyUsageTitle =>
+      'Facebook Marketplace Cost (Apify)';
+
+  @override
+  String get adminSettingsApifyUsageDescription =>
+      'Recent runs and accumulated cost for the current cycle, fetched live from the Apify account used by the Facebook Marketplace scraper.';
+
+  @override
+  String adminSettingsApifyUsageTotal(String total) {
+    return 'Total this period: US\$ $total';
+  }
+
+  @override
+  String get adminSettingsApifyUsageEmpty => 'No runs recorded yet.';
+
+  @override
+  String adminSettingsApifyUsageError(String error) {
+    return 'Failed to load Apify usage: $error';
+  }
 }

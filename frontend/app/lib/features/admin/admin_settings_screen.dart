@@ -17,7 +17,8 @@ class AdminSettingsScreen extends ConsumerWidget {
     return Scaffold(
       body: settingsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(l10n.adminSettingsLoadError(error.toString()))),
+        error: (error, _) =>
+            Center(child: Text(l10n.adminSettingsLoadError(error.toString()))),
         data: (settings) => _SettingsBody(settings: settings),
       ),
     );
@@ -34,14 +35,22 @@ class _SettingsBody extends ConsumerStatefulWidget {
 }
 
 class _SettingsBodyState extends ConsumerState<_SettingsBody> {
-  late final _minController =
-      TextEditingController(text: widget.settings.minIntervalMinutes.toString());
-  late final _maxController =
-      TextEditingController(text: widget.settings.maxIntervalMinutes.toString());
-  late final _cityController = TextEditingController(text: widget.settings.defaultCity);
-  late final _stateController = TextEditingController(text: widget.settings.defaultState);
+  late final _minController = TextEditingController(
+    text: widget.settings.minIntervalMinutes.toString(),
+  );
+  late final _maxController = TextEditingController(
+    text: widget.settings.maxIntervalMinutes.toString(),
+  );
+  late final _cityController = TextEditingController(
+    text: widget.settings.defaultCity,
+  );
+  late final _stateController = TextEditingController(
+    text: widget.settings.defaultState,
+  );
   late final _blockedWordInputController = TextEditingController();
-  late final List<String> _blockedWords = List.of(widget.settings.defaultBlockedWords);
+  late final List<String> _blockedWords = List.of(
+    widget.settings.defaultBlockedWords,
+  );
 
   bool _saving = false;
   String? _errorMessage;
@@ -75,7 +84,11 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
     final city = _cityController.text.trim();
     final state = _stateController.text.trim();
 
-    if (min == null || max == null || max < min || city.isEmpty || state.isEmpty) {
+    if (min == null ||
+        max == null ||
+        max < min ||
+        city.isEmpty ||
+        state.isEmpty) {
       setState(() {
         _errorMessage = l10n.adminSettingsValidationError;
         _successMessage = null;
@@ -90,7 +103,9 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
     });
 
     try {
-      await ref.read(adminServiceProvider).updateScanSettings(
+      await ref
+          .read(adminServiceProvider)
+          .updateScanSettings(
             minIntervalMinutes: min,
             maxIntervalMinutes: max,
             defaultCity: city,
@@ -100,7 +115,9 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
       // A tela de Novo Alerta também lê scanSettingsProvider (hint de
       // região) — invalida para refletir a mudança sem precisar recarregar.
       ref.invalidate(scanSettingsProvider);
-      if (mounted) setState(() => _successMessage = l10n.adminSettingsSaveSuccess);
+      if (mounted) {
+        setState(() => _successMessage = l10n.adminSettingsSaveSuccess);
+      }
     } on DioException {
       if (mounted) setState(() => _errorMessage = l10n.adminSettingsSaveError);
     } finally {
@@ -126,11 +143,17 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(l10n.adminSettingsScanTitle, style: Theme.of(context).textTheme.labelLarge),
+                    Text(
+                      l10n.adminSettingsScanTitle,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       l10n.adminSettingsScanDescription,
-                      style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
+                      style: TextStyle(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Row(
@@ -139,8 +162,9 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                           child: TextField(
                             controller: _minController,
                             keyboardType: TextInputType.number,
-                            decoration:
-                                InputDecoration(labelText: l10n.adminSettingsMinIntervalLabel),
+                            decoration: InputDecoration(
+                              labelText: l10n.adminSettingsMinIntervalLabel,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -148,8 +172,9 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                           child: TextField(
                             controller: _maxController,
                             keyboardType: TextInputType.number,
-                            decoration:
-                                InputDecoration(labelText: l10n.adminSettingsMaxIntervalLabel),
+                            decoration: InputDecoration(
+                              labelText: l10n.adminSettingsMaxIntervalLabel,
+                            ),
                           ),
                         ),
                       ],
@@ -165,11 +190,17 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(l10n.adminSettingsRegionTitle, style: Theme.of(context).textTheme.labelLarge),
+                    Text(
+                      l10n.adminSettingsRegionTitle,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       l10n.adminSettingsRegionDescription,
-                      style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
+                      style: TextStyle(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Row(
@@ -178,7 +209,9 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                           flex: 2,
                           child: TextField(
                             controller: _cityController,
-                            decoration: InputDecoration(labelText: l10n.adminSettingsDefaultCityLabel),
+                            decoration: InputDecoration(
+                              labelText: l10n.adminSettingsDefaultCityLabel,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -208,12 +241,17 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                   children: [
                     Text(
                       l10n.adminSettingsBlockedWordsTitle,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: scheme.error),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.labelLarge?.copyWith(color: scheme.error),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       l10n.adminSettingsBlockedWordsDescription,
-                      style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
+                      style: TextStyle(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Wrap(
@@ -223,7 +261,8 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                         for (final word in _blockedWords)
                           InputChip(
                             label: Text(word),
-                            onDeleted: () => setState(() => _blockedWords.remove(word)),
+                            onDeleted: () =>
+                                setState(() => _blockedWords.remove(word)),
                           ),
                       ],
                     ),
@@ -233,17 +272,24 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                         Expanded(
                           child: TextField(
                             controller: _blockedWordInputController,
-                            decoration: InputDecoration(hintText: l10n.newWatchAddWordHint),
+                            decoration: InputDecoration(
+                              hintText: l10n.newWatchAddWordHint,
+                            ),
                             onSubmitted: (_) => _addBlockedWord(),
                           ),
                         ),
-                        IconButton(onPressed: _addBlockedWord, icon: const Icon(Icons.add)),
+                        IconButton(
+                          onPressed: _addBlockedWord,
+                          icon: const Icon(Icons.add),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            const _ApifyUsageCard(),
             if (_errorMessage != null) ...[
               const SizedBox(height: 16),
               Text(_errorMessage!, style: TextStyle(color: scheme.error)),
@@ -262,6 +308,113 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Text(l10n.adminSettingsSave),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Histórico de custo da conta Apify usada pelo Facebook Marketplace (ver
+/// ADR 0006) — só leitura, consulta a API do Apify ao vivo via backend, sem
+/// nenhum estado/edição própria.
+class _ApifyUsageCard extends ConsumerWidget {
+  const _ApifyUsageCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final usageAsync = ref.watch(apifyUsageProvider);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.adminSettingsApifyUsageTitle,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.adminSettingsApifyUsageDescription,
+              style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            usageAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Text(
+                l10n.adminSettingsApifyUsageError(error.toString()),
+                style: TextStyle(color: scheme.error),
+              ),
+              data: (usage) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.adminSettingsApifyUsageTotal(
+                      usage.totalUsd.toStringAsFixed(4),
+                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  if (usage.runs.isEmpty)
+                    Text(
+                      l10n.adminSettingsApifyUsageEmpty,
+                      style: TextStyle(color: scheme.onSurfaceVariant),
+                    )
+                  else
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 320),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: usage.runs.length,
+                        separatorBuilder: (_, _) =>
+                            Divider(color: scheme.outlineVariant),
+                        itemBuilder: (context, index) {
+                          final run = usage.runs[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${run.startedAt.toLocal()}'
+                                            .split('.')
+                                            .first,
+                                      ),
+                                      Text(
+                                        run.status,
+                                        style: TextStyle(
+                                          color: scheme.onSurfaceVariant,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  '\$${run.usageUsd.toStringAsFixed(4)}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
             ),
           ],
         ),

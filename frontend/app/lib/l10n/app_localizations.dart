@@ -943,6 +943,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Salvar'**
   String get adminSettingsSave;
+
+  /// No description provided for @adminSettingsApifyUsageTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Custo do Facebook Marketplace (Apify)'**
+  String get adminSettingsApifyUsageTitle;
+
+  /// No description provided for @adminSettingsApifyUsageDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimas execuções e custo acumulado no ciclo atual, consultado ao vivo na conta Apify usada pelo scraper do Facebook Marketplace.'**
+  String get adminSettingsApifyUsageDescription;
+
+  /// No description provided for @adminSettingsApifyUsageTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total no período: US\$ {total}'**
+  String adminSettingsApifyUsageTotal(String total);
+
+  /// No description provided for @adminSettingsApifyUsageEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma execução registrada ainda.'**
+  String get adminSettingsApifyUsageEmpty;
+
+  /// No description provided for @adminSettingsApifyUsageError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao carregar custo do Apify: {error}'**
+  String adminSettingsApifyUsageError(String error);
 }
 
 class _AppLocalizationsDelegate

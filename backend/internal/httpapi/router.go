@@ -21,6 +21,7 @@ type Deps struct {
 	Issuer          *auth.TokenIssuer
 	RefreshTokenTTL time.Duration
 	Proposer        *linkpreview.Proposer
+	ApifyAPIToken   string
 }
 
 func NewRouter(deps Deps) http.Handler {
@@ -78,6 +79,9 @@ func NewRouter(deps Deps) http.Handler {
 			r.Patch("/api/users/{id}/username", userHandler.SetUsername)
 
 			r.Put("/api/scan-settings", scanSettingsHandler.Update)
+
+			apifyUsageHandler := NewApifyUsageHandler(deps.ApifyAPIToken)
+			r.Get("/api/admin/apify-usage", apifyUsageHandler.List)
 		})
 	})
 

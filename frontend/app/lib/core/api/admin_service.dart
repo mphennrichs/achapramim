@@ -1,3 +1,4 @@
+import '../models/apify_usage.dart';
 import '../models/scan_settings.dart';
 import '../models/user_profile.dart';
 import 'api_client.dart';
@@ -94,5 +95,10 @@ class AdminService {
       },
     );
     return ScanSettings.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<ApifyUsage> getApifyUsage() async {
+    final response = await _client.dio.get('/api/admin/apify-usage');
+    return ApifyUsage.fromJson(response.data as Map<String, dynamic>);
   }
 }

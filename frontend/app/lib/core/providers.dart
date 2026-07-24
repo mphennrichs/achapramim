@@ -65,3 +65,11 @@ final currentUserProfileProvider = FutureProvider<UserProfile>((ref) {
 final scanSettingsProvider = FutureProvider.autoDispose<ScanSettings>((ref) {
   return ref.watch(adminServiceProvider).getScanSettings();
 });
+
+/// Histórico de custo da conta Apify (usada pelo FacebookMarketplaceFetcher,
+/// ver ADR 0006) — consulta a API do Apify ao vivo via backend, sem
+/// persistência própria; autoDispose porque só a tela de Configurações
+/// Globais usa.
+final apifyUsageProvider = FutureProvider.autoDispose((ref) {
+  return ref.watch(adminServiceProvider).getApifyUsage();
+});
