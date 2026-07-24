@@ -79,26 +79,45 @@ func (f *OLXFetcher) Fetch(ctx context.Context, query Query) ([]Listing, error) 
 	return listings, nil
 }
 
-// buildOLXSearchURL monta a URL de busca do OLX escopada por estado quando
-// State está presente (path "/brasil/estado-<uf>?q=..."), com fallback para
-// busca nacional ("/brasil?q=...") se a região não for informada.
+// olxCityRegionSlugs mapeia "cidade|UF" (chave normalizada, ver
+// olxCityRegionKey) para o slug de região usado no path do OLX (ex.
+// "Belo Horizonte"+"MG" -> "belo-horizonte-e-regiao") — não é derivável do
+// nome da cidade por uma regra geral (cada região tem seu próprio nome no
+// OLX, ex. "regiao-de-juiz-de-fora", "grande-salvador"), por isso é mantido
+// como tabela manual, crescida conforme novas cidades entram em uso. Uma
+// cidade sem entrada aqui cai para escopo por estado (mais amplo, mas ainda
+// filtra corretamente — ver buildOLXSearchURL).
+var olxCityRegionSlugs = map[string]string{
+	"belo horizonte|mg": "belo-horizonte-e-regiao",
+}
+
+func olxCityRegionKey(city, state string) string {
+	return strings.ToLower(strings.TrimSpace(city)) + "|" + strings.ToLower(strings.TrimSpace(state))
+}
+
+// buildOLXSearchURL monta a URL de busca do OLX escopada por região: por
+// cidade quando há um slug mapeado (path "/estado-<uf>/<slug-da-regiao>",
+// ex. "/estado-mg/belo-horizonte-e-regiao"), com fallback para escopo por
+// estado (path "/brasil/estado-<uf>") quando só o estado está disponível, e
+// busca nacional ("/brasil") quando nenhuma região é informada.
 //
 // O formato antigo usado aqui ("/<nome-do-estado>/<cidade>?q=...", ex.
 // "/minas-gerais/belo-horizonte") nunca resolve para uma página de busca —
 // cai na home genérica do OLX, silenciosamente retornando zero listings
 // (sem erro, já que olx_search.py trata ausência de resultados como busca
-// vazia, não falha). Confirmado testando manualmente contra produção: o OLX
-// hoje só reconhece escopo regional via "/brasil/estado-<uf>" (ex.
-// "estado-mg"); escopo por cidade existe mas usa um slug de "região" que
-// não é derivável do nome da cidade (ex. Belo Horizonte é
-// "belo-horizonte-e-regiao", não "belo-horizonte") — por isso o escopo por
-// cidade foi abandonado em favor de só estado, que já filtra bem e não
-// depende de um mapa cidade→slug frágil.
+// vazia, não falha). Confirmado testando manualmente contra produção com os
+// dois formatos atuais: "/brasil/estado-<uf>?q=..." e
+// "/estado-<uf>/<slug-de-regiao>?q=...".
 func buildOLXSearchURL(query Query) string {
 	q := strings.Join(query.Keywords, " ")
 	regionPath := "brasil"
 	if query.State != "" {
-		regionPath = "brasil/estado-" + strings.ToLower(query.State)
+		stateSlug := strings.ToLower(query.State)
+		if regionSlug, ok := olxCityRegionSlugs[olxCityRegionKey(query.City, query.State)]; ok {
+			regionPath = "estado-" + stateSlug + "/" + regionSlug
+		} else {
+			regionPath = "brasil/estado-" + stateSlug
+		}
 	}
 	return "https://www.olx.com.br/" + regionPath + "?" + url.Values{"q": {q}}.Encode()
 }

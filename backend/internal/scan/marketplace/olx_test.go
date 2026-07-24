@@ -9,9 +9,19 @@ func TestBuildOLXSearchURL(t *testing.T) {
 		want  string
 	}{
 		{
-			name:  "state present scopes search to that state",
+			name:  "city with mapped region slug scopes to that region",
 			query: Query{Keywords: []string{"frigobar"}, City: "Belo Horizonte", State: "MG"},
-			want:  "https://www.olx.com.br/brasil/estado-mg?q=frigobar",
+			want:  "https://www.olx.com.br/estado-mg/belo-horizonte-e-regiao?q=frigobar",
+		},
+		{
+			name:  "city mapping is case-insensitive",
+			query: Query{Keywords: []string{"frigobar"}, City: "belo horizonte", State: "mg"},
+			want:  "https://www.olx.com.br/estado-mg/belo-horizonte-e-regiao?q=frigobar",
+		},
+		{
+			name:  "unmapped city falls back to state-only scope",
+			query: Query{Keywords: []string{"frigobar"}, City: "Curitiba", State: "PR"},
+			want:  "https://www.olx.com.br/brasil/estado-pr?q=frigobar",
 		},
 		{
 			name:  "state present without city still scopes to state",
