@@ -17,6 +17,11 @@ RUN CGO_ENABLED=0 go build -o /out/api ./cmd/api
 FROM python:3.13-slim-bookworm
 WORKDIR /app
 
+# wget: usado pelo healthcheck do stack (compose.yml) para checar
+# /api/health — a imagem base não traz nenhum client HTTP por padrão.
+RUN apt-get update && apt-get install -y --no-install-recommends wget \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY sidecar/requirements.txt ./sidecar/requirements.txt
 RUN pip install --no-cache-dir -r sidecar/requirements.txt \
     && playwright install --with-deps chromium
