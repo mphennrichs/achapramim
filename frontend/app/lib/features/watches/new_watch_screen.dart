@@ -10,36 +10,102 @@ import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
 import 'watch_list_screen.dart';
 
+final _editWatchProvider = FutureProvider.autoDispose.family<Watch, String>((
+  ref,
+  watchId,
+) {
+  return ref.watch(watchServiceProvider).get(watchId);
+});
+
+/// Carrega o Watch antes de montar o formulário de edição (NewWatchScreen
+/// com initialWatch) — a tela em si é síncrona/stateful sobre os valores
+/// iniciais, então precisa deles resolvidos antes de montar.
+class EditWatchScreen extends ConsumerWidget {
+  final String watchId;
+
+  const EditWatchScreen({super.key, required this.watchId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final watchAsync = ref.watch(_editWatchProvider(watchId));
+    final l10n = AppLocalizations.of(context)!;
+
+    return watchAsync.when(
+      loading: () => Scaffold(
+        appBar: AppBar(title: Text(l10n.editWatchTitle)),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        appBar: AppBar(title: Text(l10n.editWatchTitle)),
+        body: Center(child: Text(l10n.watchDetailLoadError(error.toString()))),
+      ),
+      data: (watch) => NewWatchScreen(initialWatch: watch),
+    );
+  }
+}
+
 class NewWatchScreen extends ConsumerStatefulWidget {
-  const NewWatchScreen({super.key});
+  // Presente = modo edição de um Alerta existente (todos os campos
+  // pré-preenchidos com os valores atuais, sem aplicar defaults globais, e
+  // salvar chama update em vez de create). Ausente = criação, comportamento
+  // original.
+  final Watch? initialWatch;
+
+  const NewWatchScreen({super.key, this.initialWatch});
 
   @override
   ConsumerState<NewWatchScreen> createState() => _NewWatchScreenState();
 }
 
 class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
-  final _nameController = TextEditingController();
-  final _targetPriceController = TextEditingController();
-  final _toleranceController = TextEditingController(text: '5');
-  final _thresholdController = TextEditingController(text: '10');
-  final _maxOffersController = TextEditingController(text: '50');
+  bool get _isEditing => widget.initialWatch != null;
+
+  late final _nameController = TextEditingController(
+    text: widget.initialWatch?.name ?? '',
+  );
+  late final _targetPriceController = TextEditingController(
+    text: widget.initialWatch != null
+        ? (widget.initialWatch!.targetPriceCents / 100).toStringAsFixed(2)
+        : '',
+  );
+  late final _toleranceController = TextEditingController(
+    text: widget.initialWatch?.tolerancePercent ?? '5',
+  );
+  late final _thresholdController = TextEditingController(
+    text: widget.initialWatch?.priceDropThresholdPercent ?? '10',
+  );
+  late final _maxOffersController = TextEditingController(
+    text: (widget.initialWatch?.maxOffers ?? 50).toString(),
+  );
   final _keywordInputController = TextEditingController();
   final _blockedInputController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _stateController = TextEditingController();
+  late final _cityController = TextEditingController(
+    text: widget.initialWatch?.city ?? '',
+  );
+  late final _stateController = TextEditingController(
+    text: widget.initialWatch?.state ?? '',
+  );
 
-  final List<String> _keywords = [];
-  final List<String> _blockedWords = [];
-  final Set<String> _selectedMarketplaces = {'olx'};
+  late final List<String> _keywords = List.of(
+    widget.initialWatch?.keywords ?? [],
+  );
+  late final List<String> _blockedWords = List.of(
+    widget.initialWatch?.blockedWords ?? [],
+  );
+  late final Set<String> _selectedMarketplaces = Set.of(
+    widget.initialWatch?.marketplaces ?? {'olx'},
+  );
 
   bool _saving = false;
   String? _errorMessage;
   // Evita sobrescrever cidade/estado/palavras-bloqueadas assim que o usuário
-  // já os editou — o provider pode reemitir (ex.: refresh) depois do preenchimento inicial.
+  // já os editou — o provider pode reemitir (ex.: refresh) depois do
+  // preenchimento inicial. Sempre true em modo edição: os campos já vêm dos
+  // valores reais do Alerta, não devem levar o seed/default global.
   bool _defaultsApplied = false;
 
   void _applyDefaults(ScanSettings settings) {
-    if (_defaultsApplied) return;
+    if (_isEditing || _defaultsApplied) return;
     _defaultsApplied = true;
     _cityController.text = settings.defaultCity;
     _stateController.text = settings.defaultState;
@@ -102,14 +168,14 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
     final state = _stateController.text.trim();
 
     final watch = Watch(
-      id: '',
-      userId: '',
+      id: widget.initialWatch?.id ?? '',
+      userId: widget.initialWatch?.userId ?? '',
       name: name,
       targetPriceCents: (targetPrice * 100).round(),
       tolerancePercent: _toleranceController.text.trim(),
       maxOffers: int.tryParse(_maxOffersController.text.trim()) ?? 50,
       priceDropThresholdPercent: _thresholdController.text.trim(),
-      active: true,
+      active: widget.initialWatch?.active ?? true,
       keywords: _keywords,
       blockedWords: _blockedWords,
       marketplaces: _selectedMarketplaces.toList(),
@@ -119,14 +185,22 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
     );
 
     try {
-      await ref.read(watchServiceProvider).create(watch);
+      if (_isEditing) {
+        await ref.read(watchServiceProvider).update(watch.id, watch);
+      } else {
+        await ref.read(watchServiceProvider).create(watch);
+      }
       if (!mounted) return;
       // Invalida a lista antes de trocar de branch: o IndexedStack do shell
       // mantém WatchListScreen viva entre navegações (não recria como o
       // Navigator.push antigo fazia), então sem isso ela continuaria
-      // mostrando o resultado já resolvido antes da criação.
+      // mostrando o resultado já resolvido antes da criação/edição.
       ref.invalidate(watchListProvider);
-      context.go('/watches');
+      if (_isEditing) {
+        context.pop();
+      } else {
+        context.go('/watches');
+      }
     } on DioException catch (e) {
       setState(() {
         _errorMessage = AppLocalizations.of(
@@ -155,6 +229,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
     }
 
     return Scaffold(
+      appBar: _isEditing ? AppBar(title: Text(l10n.editWatchTitle)) : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: ConstrainedBox(
@@ -372,7 +447,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.save),
-                label: Text(l10n.newWatchSubmit),
+                label: Text(
+                  _isEditing ? l10n.editWatchSubmit : l10n.newWatchSubmit,
+                ),
               ),
               const SizedBox(height: 32),
             ],

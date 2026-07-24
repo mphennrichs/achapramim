@@ -106,6 +106,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                       return WatchDetailScreen(watchId: watchId);
                     },
                   ),
+                  GoRoute(
+                    path: ':watchId/edit',
+                    builder: (context, state) {
+                      final watchId = state.pathParameters['watchId']!;
+                      return EditWatchScreen(watchId: watchId);
+                    },
+                  ),
                 ],
               ),
             ],

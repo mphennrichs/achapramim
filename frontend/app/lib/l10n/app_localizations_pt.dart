@@ -95,6 +95,9 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get watchEditTooltip => 'Editar Alerta';
+
+  @override
   String get watchDeleteTooltip => 'Excluir Alerta';
 
   @override
@@ -203,6 +206,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newWatchSubmit => 'Ativar Monitoramento';
 
   @override
+  String get editWatchTitle => 'Editar Alerta';
+
+  @override
+  String get editWatchSubmit => 'Salvar Alterações';
+
+  @override
   String get watchDetailFallbackTitle => 'Alerta';
 
   @override
@@ -255,6 +264,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get watchDetailOpenListing => 'Abrir anúncio';
+
+  @override
+  String get watchDetailOpenListingError =>
+      'Não foi possível abrir o anúncio. O link pode estar inválido.';
 
   @override
   String watchDetailScansLoadError(String error) {

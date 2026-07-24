@@ -37,6 +37,7 @@
   "@watchTolerance": {
     "placeholders": { "percent": { "type": "String" } }
   },
+  "watchEditTooltip": "Editar Alerta",
   "watchDeleteTooltip": "Excluir Alerta",
   "watchDeleteConfirmTitle": "Excluir Alerta?",
   "watchDeleteConfirmMessage": "Esta ação não pode ser desfeita. Todas as Offers e o histórico de Scans deste Alerta serão perdidos.",
@@ -77,6 +78,8 @@
     "placeholders": { "details": { "type": "String" } }
   },
   "newWatchSubmit": "Ativar Monitoramento",
+  "editWatchTitle": "Editar Alerta",
+  "editWatchSubmit": "Salvar Alterações",
 
   "watchDetailFallbackTitle": "Alerta",
   "watchDetailLoadError": "Falha ao carregar Alerta: {error}",
@@ -110,6 +113,7 @@
   "watchDetailNoOffers": "Nenhuma Offer encontrada ainda.",
   "watchDetailOfferUnavailable": "Indisponível",
   "watchDetailOpenListing": "Abrir anúncio",
+  "watchDetailOpenListingError": "Não foi possível abrir o anúncio. O link pode estar inválido.",
   "watchDetailScansLoadError": "Falha ao carregar Scans: {error}",
   "@watchDetailScansLoadError": {
     "placeholders": { "error": { "type": "String" } }

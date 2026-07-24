@@ -79,32 +79,28 @@ func (f *OLXFetcher) Fetch(ctx context.Context, query Query) ([]Listing, error) 
 	return listings, nil
 }
 
-// olxStateSlugs mapeia UF para o slug de estado usado no path do OLX
-// (ex: "MG" -> "minas-gerais"). Apenas os estados necessários hoje; um
-// estado sem slug conhecido cai para busca nacional (path "brasil").
-var olxStateSlugs = map[string]string{
-	"MG": "minas-gerais",
-}
-
-// buildOLXSearchURL monta a URL de busca do OLX escopada por região quando
-// City/State estão presentes (path "/<estado>/<cidade>?q=..."), com
-// fallback para busca nacional ("/brasil?q=...") se a UF não tiver slug
-// mapeado ou a região não for informada.
+// buildOLXSearchURL monta a URL de busca do OLX escopada por estado quando
+// State está presente (path "/brasil/estado-<uf>?q=..."), com fallback para
+// busca nacional ("/brasil?q=...") se a região não for informada.
+//
+// O formato antigo usado aqui ("/<nome-do-estado>/<cidade>?q=...", ex.
+// "/minas-gerais/belo-horizonte") nunca resolve para uma página de busca —
+// cai na home genérica do OLX, silenciosamente retornando zero listings
+// (sem erro, já que olx_search.py trata ausência de resultados como busca
+// vazia, não falha). Confirmado testando manualmente contra produção: o OLX
+// hoje só reconhece escopo regional via "/brasil/estado-<uf>" (ex.
+// "estado-mg"); escopo por cidade existe mas usa um slug de "região" que
+// não é derivável do nome da cidade (ex. Belo Horizonte é
+// "belo-horizonte-e-regiao", não "belo-horizonte") — por isso o escopo por
+// cidade foi abandonado em favor de só estado, que já filtra bem e não
+// depende de um mapa cidade→slug frágil.
 func buildOLXSearchURL(query Query) string {
 	q := strings.Join(query.Keywords, " ")
 	regionPath := "brasil"
-	if stateSlug, ok := olxStateSlugs[strings.ToUpper(query.State)]; ok && query.City != "" {
-		regionPath = stateSlug + "/" + slugify(query.City)
+	if query.State != "" {
+		regionPath = "brasil/estado-" + strings.ToLower(query.State)
 	}
 	return "https://www.olx.com.br/" + regionPath + "?" + url.Values{"q": {q}}.Encode()
-}
-
-// slugify normaliza um nome de cidade para o formato de path do OLX
-// (minúsculas, espaços viram hífen). Não remove acentos — cidades com
-// acento no nome (ex: "Belo Horizonte" não tem, mas outras têm) exigiriam
-// uma tabela de transliteração; fora do escopo enquanto só MG/BH é usado.
-func slugify(name string) string {
-	return strings.ToLower(strings.ReplaceAll(strings.TrimSpace(name), " ", "-"))
 }
 
 // parseBRLToCents converte "R$ 1.234,56" em 123456. Retorna ok=false para

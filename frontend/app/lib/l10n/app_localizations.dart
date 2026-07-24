@@ -254,6 +254,12 @@ abstract class AppLocalizations {
   /// **'Tolerância {percent}%'**
   String watchTolerance(String percent);
 
+  /// No description provided for @watchEditTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar Alerta'**
+  String get watchEditTooltip;
+
   /// No description provided for @watchDeleteTooltip.
   ///
   /// In pt, this message translates to:
@@ -452,6 +458,18 @@ abstract class AppLocalizations {
   /// **'Ativar Monitoramento'**
   String get newWatchSubmit;
 
+  /// No description provided for @editWatchTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar Alerta'**
+  String get editWatchTitle;
+
+  /// No description provided for @editWatchSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar Alterações'**
+  String get editWatchSubmit;
+
   /// No description provided for @watchDetailFallbackTitle.
   ///
   /// In pt, this message translates to:
@@ -535,6 +553,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Abrir anúncio'**
   String get watchDetailOpenListing;
+
+  /// No description provided for @watchDetailOpenListingError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível abrir o anúncio. O link pode estar inválido.'**
+  String get watchDetailOpenListingError;
 
   /// No description provided for @watchDetailScansLoadError.
   ///

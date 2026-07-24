@@ -9,14 +9,14 @@ func TestBuildOLXSearchURL(t *testing.T) {
 		want  string
 	}{
 		{
-			name:  "region known falls back to city/state path",
+			name:  "state present scopes search to that state",
 			query: Query{Keywords: []string{"frigobar"}, City: "Belo Horizonte", State: "MG"},
-			want:  "https://www.olx.com.br/minas-gerais/belo-horizonte?q=frigobar",
+			want:  "https://www.olx.com.br/brasil/estado-mg?q=frigobar",
 		},
 		{
-			name:  "unknown state falls back to national search",
-			query: Query{Keywords: []string{"frigobar"}, City: "Curitiba", State: "PR"},
-			want:  "https://www.olx.com.br/brasil?q=frigobar",
+			name:  "state present without city still scopes to state",
+			query: Query{Keywords: []string{"frigobar"}, State: "PR"},
+			want:  "https://www.olx.com.br/brasil/estado-pr?q=frigobar",
 		},
 		{
 			name:  "no region set falls back to national search",

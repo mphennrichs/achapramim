@@ -95,6 +95,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get watchEditTooltip => 'Edit Watch';
+
+  @override
   String get watchDeleteTooltip => 'Delete Watch';
 
   @override
@@ -203,6 +206,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newWatchSubmit => 'Activate Monitoring';
 
   @override
+  String get editWatchTitle => 'Edit Watch';
+
+  @override
+  String get editWatchSubmit => 'Save Changes';
+
+  @override
   String get watchDetailFallbackTitle => 'Watch';
 
   @override
@@ -255,6 +264,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get watchDetailOpenListing => 'Open listing';
+
+  @override
+  String get watchDetailOpenListingError =>
+      'Could not open the listing. The link may be invalid.';
 
   @override
   String watchDetailScansLoadError(String error) {

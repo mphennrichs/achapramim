@@ -152,6 +152,14 @@ class _WatchCard extends ConsumerWidget {
                     },
                   ),
                   IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    tooltip: l10n.watchEditTooltip,
+                    onPressed: () async {
+                      await context.push('/watches/${watch.id}/edit');
+                      ref.invalidate(watchListProvider);
+                    },
+                  ),
+                  IconButton(
                     icon: const Icon(Icons.delete_outline),
                     tooltip: l10n.watchDeleteTooltip,
                     onPressed: () => _confirmDelete(context, ref),

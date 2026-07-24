@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/marketplace_labels.dart';
 import '../../core/models/offer.dart';
@@ -93,6 +94,14 @@ class _WatchDetailScreenState extends ConsumerState<WatchDetailScreen> {
           watchAsync.valueOrNull?.name ?? l10n.watchDetailFallbackTitle,
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: l10n.watchEditTooltip,
+            onPressed: () async {
+              await context.push('/watches/${widget.watchId}/edit');
+              ref.invalidate(_watchProvider(widget.watchId));
+            },
+          ),
           IconButton(
             icon: _deleting
                 ? const SizedBox(
@@ -230,6 +239,18 @@ class _OfferCard extends StatelessWidget {
 
   const _OfferCard({required this.offer});
 
+  Future<void> _openListing(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final uri = Uri.tryParse(offer.url);
+    final launched =
+        uri != null && await launchUrl(uri, webOnlyWindowName: '_blank');
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.watchDetailOpenListingError)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -307,7 +328,7 @@ class _OfferCard extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.open_in_new),
-              onPressed: () {},
+              onPressed: () => _openListing(context),
               tooltip: l10n.watchDetailOpenListing,
             ),
           ],
