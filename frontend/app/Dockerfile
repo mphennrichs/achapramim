@@ -29,11 +29,19 @@ FROM nginx:stable-alpine
 
 RUN apk add --no-cache curl
 
+# index.html, o service worker e main.dart.js não têm hash no nome do
+# arquivo (diferente do conteúdo de /assets/) — sem no-cache aqui, o
+# navegador pode nunca buscar um build novo após o deploy, mesmo com
+# reload manual (o Service Worker do Flutter intercepta antes do HTTP).
 RUN echo 'server { \
     listen 80; \
     location / { \
         root /usr/share/nginx/html; \
         try_files $uri $uri/ /index.html; \
+    } \
+    location ~* ^/(index\.html|flutter_bootstrap\.js|flutter_service_worker\.js|version\.json|main\.dart\.js)$ { \
+        root /usr/share/nginx/html; \
+        add_header Cache-Control "no-cache, no-store, must-revalidate"; \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
