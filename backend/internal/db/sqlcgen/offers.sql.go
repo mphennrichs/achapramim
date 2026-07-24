@@ -12,7 +12,7 @@ import (
 )
 
 const getOfferByID = `-- name: GetOfferByID :one
-SELECT id, watch_id, marketplace_slug, external_id, url, title, image_url, price_cents, classification, available, first_seen_scan_id, last_checked_scan_id, created_at, updated_at FROM offers WHERE id = $1
+SELECT id, watch_id, marketplace_slug, external_id, url, title, image_url, price_cents, classification, available, first_seen_scan_id, last_checked_scan_id, created_at, updated_at, monitored FROM offers WHERE id = $1
 `
 
 func (q *Queries) GetOfferByID(ctx context.Context, id pgtype.UUID) (Offer, error) {
@@ -33,6 +33,7 @@ func (q *Queries) GetOfferByID(ctx context.Context, id pgtype.UUID) (Offer, erro
 		&i.LastCheckedScanID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Monitored,
 	)
 	return i, err
 }
@@ -115,11 +116,48 @@ func (q *Queries) MarkOffersUnavailableNotIn(ctx context.Context, arg MarkOffers
 	return err
 }
 
+const setOfferMonitored = `-- name: SetOfferMonitored :one
+UPDATE offers SET monitored = $2, updated_at = now() WHERE id = $1 RETURNING id, watch_id, marketplace_slug, external_id, url, title, image_url, price_cents, classification, available, first_seen_scan_id, last_checked_scan_id, created_at, updated_at, monitored
+`
+
+type SetOfferMonitoredParams struct {
+	ID        pgtype.UUID `json:"id"`
+	Monitored bool        `json:"monitored"`
+}
+
+func (q *Queries) SetOfferMonitored(ctx context.Context, arg SetOfferMonitoredParams) (Offer, error) {
+	row := q.db.QueryRow(ctx, setOfferMonitored, arg.ID, arg.Monitored)
+	var i Offer
+	err := row.Scan(
+		&i.ID,
+		&i.WatchID,
+		&i.MarketplaceSlug,
+		&i.ExternalID,
+		&i.Url,
+		&i.Title,
+		&i.ImageUrl,
+		&i.PriceCents,
+		&i.Classification,
+		&i.Available,
+		&i.FirstSeenScanID,
+		&i.LastCheckedScanID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Monitored,
+	)
+	return i, err
+}
+
 const topOffersByWatch = `-- name: TopOffersByWatch :many
-SELECT id, watch_id, marketplace_slug, external_id, url, title, image_url, price_cents, classification, available, first_seen_scan_id, last_checked_scan_id, created_at, updated_at FROM offers
-WHERE watch_id = $1 AND available
-ORDER BY classification DESC
-LIMIT $2
+SELECT o.id, o.watch_id, o.marketplace_slug, o.external_id, o.url, o.title, o.image_url, o.price_cents, o.classification, o.available, o.first_seen_scan_id, o.last_checked_scan_id, o.created_at, o.updated_at, o.monitored FROM offers o
+WHERE o.watch_id = $1 AND o.available
+  AND (o.monitored OR o.id IN (
+    SELECT o2.id FROM offers o2
+    WHERE o2.watch_id = $1 AND o2.available
+    ORDER BY o2.classification DESC
+    LIMIT $2
+  ))
+ORDER BY o.monitored DESC, o.classification DESC
 `
 
 type TopOffersByWatchParams struct {
@@ -127,8 +165,9 @@ type TopOffersByWatchParams struct {
 	Limit   int32       `json:"limit"`
 }
 
-// Offers atualmente exibidas (top-N pelo limite do Watch): são as únicas
-// reverificadas a cada Scan, conforme o domínio.
+// Offers atualmente exibidas: as top-N por Classificação (as únicas
+// reverificadas a cada Scan, conforme o domínio) mais as marcadas como
+// monitored, que sempre aparecem independente do corte do limite.
 func (q *Queries) TopOffersByWatch(ctx context.Context, arg TopOffersByWatchParams) ([]Offer, error) {
 	rows, err := q.db.Query(ctx, topOffersByWatch, arg.WatchID, arg.Limit)
 	if err != nil {
@@ -153,6 +192,7 @@ func (q *Queries) TopOffersByWatch(ctx context.Context, arg TopOffersByWatchPara
 			&i.LastCheckedScanID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Monitored,
 		); err != nil {
 			return nil, err
 		}
@@ -179,7 +219,7 @@ ON CONFLICT (watch_id, marketplace_slug, external_id) DO UPDATE SET
     available = TRUE,
     last_checked_scan_id = EXCLUDED.last_checked_scan_id,
     updated_at = now()
-RETURNING id, watch_id, marketplace_slug, external_id, url, title, image_url, price_cents, classification, available, first_seen_scan_id, last_checked_scan_id, created_at, updated_at, (xmax = 0) AS is_new
+RETURNING id, watch_id, marketplace_slug, external_id, url, title, image_url, price_cents, classification, available, first_seen_scan_id, last_checked_scan_id, created_at, updated_at, monitored, (xmax = 0) AS is_new
 `
 
 type UpsertOfferParams struct {
@@ -209,6 +249,7 @@ type UpsertOfferRow struct {
 	LastCheckedScanID pgtype.UUID        `json:"last_checked_scan_id"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	Monitored         bool               `json:"monitored"`
 	IsNew             bool               `json:"is_new"`
 }
 
@@ -243,6 +284,7 @@ func (q *Queries) UpsertOffer(ctx context.Context, arg UpsertOfferParams) (Upser
 		&i.LastCheckedScanID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Monitored,
 		&i.IsNew,
 	)
 	return i, err

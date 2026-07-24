@@ -207,6 +207,34 @@ func TestWatchHandler_SetActiveAndDelete(t *testing.T) {
 	require.Equal(t, http.StatusNotFound, getRec.Code)
 }
 
+// TestWatchHandler_DeleteWithOffersAndPriceHistory reproduz o bug em que
+// excluir um Watch com Offers/Histórico de Preço retornava 500: as FKs
+// offers.first_seen_scan_id/last_checked_scan_id e
+// offer_price_points.scan_id -> scans não tinham ON DELETE CASCADE, então
+// apagar os Scans (cascata de watches -> scans) violava essas constraints.
+func TestWatchHandler_DeleteWithOffersAndPriceHistory(t *testing.T) {
+	pool := newTestPool(t)
+	user := createTestUser(t, pool, "user")
+	claims := claimsFor(user)
+	h := NewWatchHandler(pool, scan.NewRunner(pool, nil))
+
+	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
+	createRec := httptest.NewRecorder()
+	h.Create(createRec, createReq)
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(createRec.Body.Bytes(), &created))
+
+	q := sqlcgen.New(pool)
+	watch, err := q.GetWatchByID(context.Background(), parseUUID(created.ID))
+	require.NoError(t, err)
+	seedOfferAndScan(t, q, watch)
+
+	deleteReq := withChiParam(newWatchRequest(t, http.MethodDelete, "/api/watches/"+created.ID, claims, nil), "id", created.ID)
+	deleteRec := httptest.NewRecorder()
+	h.Delete(deleteRec, deleteReq)
+	require.Equal(t, http.StatusNoContent, deleteRec.Code, deleteRec.Body.String())
+}
+
 func TestWatchHandler_List(t *testing.T) {
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")

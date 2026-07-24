@@ -64,6 +64,18 @@ class WatchService {
         .toList();
   }
 
+  Future<Offer> setOfferMonitored(
+    String watchId,
+    String offerId,
+    bool monitored,
+  ) async {
+    final response = await _client.dio.patch(
+      '/api/watches/$watchId/offers/$offerId/monitored',
+      data: {'monitored': monitored},
+    );
+    return Offer.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<List<PricePoint>> priceHistory(String watchId, String offerId) async {
     final response = await _client.dio.get(
       '/api/watches/$watchId/offers/$offerId/price-history',

@@ -19,12 +19,21 @@ ON CONFLICT (watch_id, marketplace_slug, external_id) DO UPDATE SET
 RETURNING *, (xmax = 0) AS is_new;
 
 -- name: TopOffersByWatch :many
--- Offers atualmente exibidas (top-N pelo limite do Watch): são as únicas
--- reverificadas a cada Scan, conforme o domínio.
-SELECT * FROM offers
-WHERE watch_id = $1 AND available
-ORDER BY classification DESC
-LIMIT $2;
+-- Offers atualmente exibidas: as top-N por Classificação (as únicas
+-- reverificadas a cada Scan, conforme o domínio) mais as marcadas como
+-- monitored, que sempre aparecem independente do corte do limite.
+SELECT o.* FROM offers o
+WHERE o.watch_id = $1 AND o.available
+  AND (o.monitored OR o.id IN (
+    SELECT o2.id FROM offers o2
+    WHERE o2.watch_id = $1 AND o2.available
+    ORDER BY o2.classification DESC
+    LIMIT $2
+  ))
+ORDER BY o.monitored DESC, o.classification DESC;
+
+-- name: SetOfferMonitored :one
+UPDATE offers SET monitored = $2, updated_at = now() WHERE id = $1 RETURNING *;
 
 -- name: MarkOffersUnavailableNotIn :exec
 -- Marca como indisponíveis as Offers que estavam no top-N e não vieram mais

@@ -132,6 +132,74 @@ func TestOfferHandler_PriceHistory(t *testing.T) {
 	require.Equal(t, int64(250000), points[0].PriceCents)
 }
 
+func TestOfferHandler_SetMonitored(t *testing.T) {
+	pool := newTestPool(t)
+	user := createTestUser(t, pool, "user")
+	claims := claimsFor(user)
+
+	watchHandler := NewWatchHandler(pool, scan.NewRunner(pool, nil))
+	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
+	createRec := httptest.NewRecorder()
+	watchHandler.Create(createRec, createReq)
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(createRec.Body.Bytes(), &created))
+
+	q := sqlcgen.New(pool)
+	watch, err := q.GetWatchByID(context.Background(), parseUUID(created.ID))
+	require.NoError(t, err)
+	_, offer := seedOfferAndScan(t, q, watch)
+
+	offerHandler := NewOfferHandler(pool)
+	body := map[string]bool{"monitored": true}
+	req := withChiParams(newWatchRequest(t, http.MethodPatch, "/api/watches/"+created.ID+"/offers/"+uuidString(offer.ID)+"/monitored", claims, body), map[string]string{
+		"id":      created.ID,
+		"offerId": uuidString(offer.ID),
+	})
+	rec := httptest.NewRecorder()
+	offerHandler.SetMonitored(rec, req)
+	require.Equal(t, http.StatusOK, rec.Code, rec.Body.String())
+
+	var resp offerResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.True(t, resp.Monitored)
+
+	listReq := withChiParam(newWatchRequest(t, http.MethodGet, "/api/watches/"+created.ID+"/offers", claims, nil), "id", created.ID)
+	listRec := httptest.NewRecorder()
+	offerHandler.List(listRec, listReq)
+	var offers []offerResponse
+	require.NoError(t, json.Unmarshal(listRec.Body.Bytes(), &offers))
+	require.Len(t, offers, 1)
+	require.True(t, offers[0].Monitored)
+}
+
+func TestOfferHandler_SetMonitoredDeniedForOtherUser(t *testing.T) {
+	pool := newTestPool(t)
+	owner := createTestUser(t, pool, "user")
+	other := createTestUser(t, pool, "user")
+
+	watchHandler := NewWatchHandler(pool, scan.NewRunner(pool, nil))
+	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
+	createRec := httptest.NewRecorder()
+	watchHandler.Create(createRec, createReq)
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(createRec.Body.Bytes(), &created))
+
+	q := sqlcgen.New(pool)
+	watch, err := q.GetWatchByID(context.Background(), parseUUID(created.ID))
+	require.NoError(t, err)
+	_, offer := seedOfferAndScan(t, q, watch)
+
+	offerHandler := NewOfferHandler(pool)
+	body := map[string]bool{"monitored": true}
+	req := withChiParams(newWatchRequest(t, http.MethodPatch, "/api/watches/"+created.ID+"/offers/"+uuidString(offer.ID)+"/monitored", claimsFor(other), body), map[string]string{
+		"id":      created.ID,
+		"offerId": uuidString(offer.ID),
+	})
+	rec := httptest.NewRecorder()
+	offerHandler.SetMonitored(rec, req)
+	require.Equal(t, http.StatusNotFound, rec.Code)
+}
+
 func TestOfferHandler_ListScans(t *testing.T) {
 	pool := newTestPool(t)
 	user := createTestUser(t, pool, "user")

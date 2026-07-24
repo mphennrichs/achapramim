@@ -590,6 +590,54 @@ abstract class AppLocalizations {
   /// **'Não foi possível abrir o anúncio. O link pode estar inválido.'**
   String get watchDetailOpenListingError;
 
+  /// No description provided for @watchDetailMonitorOffer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Monitorar esta oferta'**
+  String get watchDetailMonitorOffer;
+
+  /// No description provided for @watchDetailUnmonitorOffer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parar de monitorar esta oferta'**
+  String get watchDetailUnmonitorOffer;
+
+  /// No description provided for @watchDetailMonitorError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível atualizar o monitoramento: {error}'**
+  String watchDetailMonitorError(String error);
+
+  /// No description provided for @watchDetailPriceHistoryTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico de preço'**
+  String get watchDetailPriceHistoryTooltip;
+
+  /// No description provided for @watchDetailPriceHistoryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico de preço'**
+  String get watchDetailPriceHistoryTitle;
+
+  /// No description provided for @watchDetailPriceHistoryLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao carregar histórico de preço: {error}'**
+  String watchDetailPriceHistoryLoadError(String error);
+
+  /// No description provided for @watchDetailPriceHistoryEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda não há histórico de preço para esta oferta.'**
+  String get watchDetailPriceHistoryEmpty;
+
+  /// No description provided for @watchDetailPriceHistoryClose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fechar'**
+  String get watchDetailPriceHistoryClose;
+
   /// No description provided for @watchDetailScansLoadError.
   ///
   /// In pt, this message translates to:

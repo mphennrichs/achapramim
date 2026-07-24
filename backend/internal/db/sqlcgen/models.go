@@ -219,6 +219,7 @@ type Offer struct {
 	LastCheckedScanID pgtype.UUID        `json:"last_checked_scan_id"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	Monitored         bool               `json:"monitored"`
 }
 
 type OfferPricePoint struct {

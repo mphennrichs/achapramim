@@ -285,6 +285,35 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível abrir o anúncio. O link pode estar inválido.';
 
   @override
+  String get watchDetailMonitorOffer => 'Monitorar esta oferta';
+
+  @override
+  String get watchDetailUnmonitorOffer => 'Parar de monitorar esta oferta';
+
+  @override
+  String watchDetailMonitorError(String error) {
+    return 'Não foi possível atualizar o monitoramento: $error';
+  }
+
+  @override
+  String get watchDetailPriceHistoryTooltip => 'Histórico de preço';
+
+  @override
+  String get watchDetailPriceHistoryTitle => 'Histórico de preço';
+
+  @override
+  String watchDetailPriceHistoryLoadError(String error) {
+    return 'Falha ao carregar histórico de preço: $error';
+  }
+
+  @override
+  String get watchDetailPriceHistoryEmpty =>
+      'Ainda não há histórico de preço para esta oferta.';
+
+  @override
+  String get watchDetailPriceHistoryClose => 'Fechar';
+
+  @override
   String watchDetailScansLoadError(String error) {
     return 'Falha ao carregar Scans: $error';
   }

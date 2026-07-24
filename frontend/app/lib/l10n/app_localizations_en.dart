@@ -285,6 +285,35 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not open the listing. The link may be invalid.';
 
   @override
+  String get watchDetailMonitorOffer => 'Monitor this offer';
+
+  @override
+  String get watchDetailUnmonitorOffer => 'Stop monitoring this offer';
+
+  @override
+  String watchDetailMonitorError(String error) {
+    return 'Could not update monitoring: $error';
+  }
+
+  @override
+  String get watchDetailPriceHistoryTooltip => 'Price history';
+
+  @override
+  String get watchDetailPriceHistoryTitle => 'Price history';
+
+  @override
+  String watchDetailPriceHistoryLoadError(String error) {
+    return 'Failed to load price history: $error';
+  }
+
+  @override
+  String get watchDetailPriceHistoryEmpty =>
+      'No price history yet for this offer.';
+
+  @override
+  String get watchDetailPriceHistoryClose => 'Close';
+
+  @override
   String watchDetailScansLoadError(String error) {
     return 'Failed to load Scans: $error';
   }

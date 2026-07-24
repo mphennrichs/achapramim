@@ -119,6 +119,20 @@
   "watchDetailOfferUnavailable": "Indisponível",
   "watchDetailOpenListing": "Abrir anúncio",
   "watchDetailOpenListingError": "Não foi possível abrir o anúncio. O link pode estar inválido.",
+  "watchDetailMonitorOffer": "Monitorar esta oferta",
+  "watchDetailUnmonitorOffer": "Parar de monitorar esta oferta",
+  "watchDetailMonitorError": "Não foi possível atualizar o monitoramento: {error}",
+  "@watchDetailMonitorError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "watchDetailPriceHistoryTooltip": "Histórico de preço",
+  "watchDetailPriceHistoryTitle": "Histórico de preço",
+  "watchDetailPriceHistoryLoadError": "Falha ao carregar histórico de preço: {error}",
+  "@watchDetailPriceHistoryLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "watchDetailPriceHistoryEmpty": "Ainda não há histórico de preço para esta oferta.",
+  "watchDetailPriceHistoryClose": "Fechar",
   "watchDetailScansLoadError": "Falha ao carregar Scans: {error}",
   "@watchDetailScansLoadError": {
     "placeholders": { "error": { "type": "String" } }

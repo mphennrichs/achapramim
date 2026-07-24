@@ -10,6 +10,7 @@ class Offer {
   // Quando a Offer foi vista pela primeira vez — usado para ordenar por
   // "mais recentes" na tela de detalhes do Alerta.
   final DateTime createdAt;
+  final bool monitored;
 
   Offer({
     required this.id,
@@ -21,6 +22,7 @@ class Offer {
     required this.classification,
     required this.available,
     required this.createdAt,
+    required this.monitored,
   });
 
   /// Classification vem do backend como string decimal (NUMERIC do
@@ -39,6 +41,7 @@ class Offer {
       classification: json['classification'] as String,
       available: json['available'] as bool,
       createdAt: DateTime.parse(json['created_at'] as String),
+      monitored: json['monitored'] as bool? ?? false,
     );
   }
 }

@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -31,6 +32,11 @@ type offerResponse struct {
 	// Quando a Offer foi vista pela primeira vez (ver offers.created_at) —
 	// usado pela UI para ordenar por "mais recentes".
 	CreatedAt string `json:"created_at"`
+	Monitored bool   `json:"monitored"`
+}
+
+type setOfferMonitoredRequest struct {
+	Monitored bool `json:"monitored"`
 }
 
 type pricePointResponse struct {
@@ -78,9 +84,67 @@ func (h *OfferHandler) List(w http.ResponseWriter, r *http.Request) {
 			Classification:  numericString(o.Classification),
 			Available:       o.Available,
 			CreatedAt:       o.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+			Monitored:       o.Monitored,
 		}
 	}
 	writeJSON(w, http.StatusOK, resp)
+}
+
+// SetMonitored marca/desmarca uma Offer para monitoramento manual do
+// usuário — base para o futuro drop trigger escolher o que observar, e dá
+// prioridade fixa na listagem (ver TopOffersByWatch). A Offer precisa
+// pertencer ao Watch informado na URL, mesma checagem de posse do
+// PriceHistory.
+func (h *OfferHandler) SetMonitored(w http.ResponseWriter, r *http.Request) {
+	claims, ok := auth.FromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing claims")
+		return
+	}
+
+	var req setOfferMonitoredRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	ctx := r.Context()
+	q := sqlcgen.New(h.pool)
+	watchID := parseUUID(chi.URLParam(r, "id"))
+
+	if _, ok := getOwnedWatch(ctx, w, q, watchID, claims); !ok {
+		return
+	}
+
+	offerID := parseUUID(chi.URLParam(r, "offerId"))
+	offer, err := q.GetOfferByID(ctx, offerID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "offer not found")
+		return
+	}
+	if uuidString(offer.WatchID) != chi.URLParam(r, "id") {
+		writeError(w, http.StatusNotFound, "offer not found")
+		return
+	}
+
+	updated, err := q.SetOfferMonitored(ctx, sqlcgen.SetOfferMonitoredParams{ID: offerID, Monitored: req.Monitored})
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, offerResponse{
+		ID:              uuidString(updated.ID),
+		MarketplaceSlug: updated.MarketplaceSlug,
+		URL:             updated.Url,
+		Title:           updated.Title,
+		ImageURL:        updated.ImageUrl,
+		PriceCents:      updated.PriceCents,
+		Classification:  numericString(updated.Classification),
+		Available:       updated.Available,
+		CreatedAt:       updated.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+		Monitored:       updated.Monitored,
+	})
 }
 
 // PriceHistory retorna o Histórico de Preço de uma Offer específica. A

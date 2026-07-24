@@ -60,6 +60,7 @@ func NewRouter(deps Deps) http.Handler {
 
 		offerHandler := NewOfferHandler(deps.Pool)
 		r.Get("/api/watches/{id}/offers", offerHandler.List)
+		r.Patch("/api/watches/{id}/offers/{offerId}/monitored", offerHandler.SetMonitored)
 		r.Get("/api/watches/{id}/offers/{offerId}/price-history", offerHandler.PriceHistory)
 		r.Get("/api/watches/{id}/scans", offerHandler.ListScans)
 

@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,13 @@ final _offersProvider = FutureProvider.autoDispose.family<List<Offer>, String>((
 final _scansProvider = FutureProvider.autoDispose
     .family<List<ScanSummary>, String>((ref, watchId) {
       return ref.watch(watchServiceProvider).scans(watchId);
+    });
+
+final _priceHistoryProvider = FutureProvider.autoDispose
+    .family<List<PricePoint>, ({String watchId, String offerId})>((ref, args) {
+      return ref
+          .watch(watchServiceProvider)
+          .priceHistory(args.watchId, args.offerId);
     });
 
 class WatchDetailScreen extends ConsumerStatefulWidget {
@@ -226,6 +234,13 @@ class _OffersTabState extends ConsumerState<_OffersTab> {
       case _OfferSortCriterion.newest:
         sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     }
+    // Offers monitoradas sempre no topo, independente do critério de
+    // ordenação escolhido — dentro do grupo (monitoradas / não monitoradas)
+    // a ordenação acima é preservada (sort estável).
+    sorted.sort((a, b) {
+      if (a.monitored == b.monitored) return 0;
+      return a.monitored ? -1 : 1;
+    });
     return sorted;
   }
 
@@ -292,8 +307,10 @@ class _OffersTabState extends ConsumerState<_OffersTab> {
                 padding: const EdgeInsets.all(16),
                 itemCount: sortedOffers.length,
                 separatorBuilder: (context, _) => const SizedBox(height: 12),
-                itemBuilder: (context, index) =>
-                    _OfferCard(offer: sortedOffers[index]),
+                itemBuilder: (context, index) => _OfferCard(
+                  watchId: widget.watchId,
+                  offer: sortedOffers[index],
+                ),
               ),
             ),
           ],
@@ -303,14 +320,22 @@ class _OffersTabState extends ConsumerState<_OffersTab> {
   }
 }
 
-class _OfferCard extends StatelessWidget {
+class _OfferCard extends ConsumerStatefulWidget {
+  final String watchId;
   final Offer offer;
 
-  const _OfferCard({required this.offer});
+  const _OfferCard({required this.watchId, required this.offer});
+
+  @override
+  ConsumerState<_OfferCard> createState() => _OfferCardState();
+}
+
+class _OfferCardState extends ConsumerState<_OfferCard> {
+  bool _togglingMonitor = false;
 
   Future<void> _openListing(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final uri = Uri.tryParse(offer.url);
+    final uri = Uri.tryParse(widget.offer.url);
     final launched =
         uri != null && await launchUrl(uri, webOnlyWindowName: '_blank');
     if (!launched && context.mounted) {
@@ -320,8 +345,40 @@ class _OfferCard extends StatelessWidget {
     }
   }
 
+  Future<void> _toggleMonitored() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _togglingMonitor = true);
+    try {
+      await ref
+          .read(watchServiceProvider)
+          .setOfferMonitored(
+            widget.watchId,
+            widget.offer.id,
+            !widget.offer.monitored,
+          );
+      ref.invalidate(_offersProvider(widget.watchId));
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.watchDetailMonitorError(error.toString()))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _togglingMonitor = false);
+    }
+  }
+
+  void _openPriceHistory() {
+    showDialog<void>(
+      context: context,
+      builder: (context) =>
+          _PriceHistoryDialog(watchId: widget.watchId, offer: widget.offer),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final offer = widget.offer;
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final priceLabel =
@@ -396,12 +453,178 @@ class _OfferCard extends StatelessWidget {
               ),
             ),
             IconButton(
+              icon: _togglingMonitor
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(
+                      offer.monitored ? Icons.star : Icons.star_border,
+                      color: offer.monitored ? warningColor : null,
+                    ),
+              onPressed: _togglingMonitor ? null : _toggleMonitored,
+              tooltip: offer.monitored
+                  ? l10n.watchDetailUnmonitorOffer
+                  : l10n.watchDetailMonitorOffer,
+            ),
+            IconButton(
+              icon: const Icon(Icons.show_chart),
+              onPressed: _openPriceHistory,
+              tooltip: l10n.watchDetailPriceHistoryTooltip,
+            ),
+            IconButton(
               icon: const Icon(Icons.open_in_new),
               onPressed: () => _openListing(context),
               tooltip: l10n.watchDetailOpenListing,
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PriceHistoryDialog extends ConsumerWidget {
+  final String watchId;
+  final Offer offer;
+
+  const _PriceHistoryDialog({required this.watchId, required this.offer});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final historyAsync = ref.watch(
+      _priceHistoryProvider((watchId: watchId, offerId: offer.id)),
+    );
+
+    return AlertDialog(
+      title: Text(l10n.watchDetailPriceHistoryTitle),
+      content: SizedBox(
+        width: 400,
+        height: 260,
+        child: historyAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(
+            child: Text(
+              l10n.watchDetailPriceHistoryLoadError(error.toString()),
+            ),
+          ),
+          data: (points) {
+            if (points.isEmpty) {
+              return Center(
+                child: Text(
+                  l10n.watchDetailPriceHistoryEmpty,
+                  style: TextStyle(color: scheme.onSurfaceVariant),
+                ),
+              );
+            }
+            return _PriceHistoryChart(points: points);
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.watchDetailPriceHistoryClose),
+        ),
+      ],
+    );
+  }
+}
+
+class _PriceHistoryChart extends StatelessWidget {
+  final List<PricePoint> points;
+
+  const _PriceHistoryChart({required this.points});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dateFormat = DateFormat('dd/MM');
+    final spots = [
+      for (var i = 0; i < points.length; i++)
+        FlSpot(i.toDouble(), points[i].priceCents / 100),
+    ];
+    final minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
+    final maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
+    final padding = (maxY - minY) * 0.1 + 1;
+
+    return LineChart(
+      LineChartData(
+        minY: minY - padding,
+        maxY: maxY + padding,
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipItems: (touchedSpots) {
+              return [
+                for (final spot in touchedSpots)
+                  LineTooltipItem(
+                    'R\$ ${spot.y.toStringAsFixed(2).replaceAll('.', ',')}\n'
+                    '${dateFormat.format(points[spot.x.toInt()].observedAt.toLocal())}',
+                    TextStyle(color: scheme.onInverseSurface),
+                  ),
+              ];
+            },
+          ),
+        ),
+        titlesData: FlTitlesData(
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 28,
+              interval: (points.length / 4).clamp(1, double.infinity),
+              getTitlesWidget: (value, meta) {
+                final index = value.toInt();
+                if (index < 0 || index >= points.length) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    dateFormat.format(points[index].observedAt.toLocal()),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 48,
+              getTitlesWidget: (value, meta) => Text(
+                value.toStringAsFixed(0),
+                style: TextStyle(fontSize: 10, color: scheme.onSurfaceVariant),
+              ),
+            ),
+          ),
+        ),
+        gridData: const FlGridData(show: true),
+        borderData: FlBorderData(show: true),
+        lineBarsData: [
+          LineChartBarData(
+            spots: spots,
+            isCurved: false,
+            color: scheme.primary,
+            barWidth: 2,
+            dotData: const FlDotData(show: true),
+            belowBarData: BarAreaData(
+              show: true,
+              color: scheme.primary.withValues(alpha: 0.15),
+            ),
+          ),
+        ],
       ),
     );
   }
