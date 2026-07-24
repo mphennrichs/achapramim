@@ -6,7 +6,6 @@ import '../../core/models/offer.dart';
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
-import 'app_shell.dart';
 
 final _watchProvider =
     FutureProvider.autoDispose.family<Watch, String>((ref, watchId) {
@@ -33,9 +32,10 @@ class WatchDetailScreen extends ConsumerWidget {
     final watchAsync = ref.watch(_watchProvider(watchId));
     final l10n = AppLocalizations.of(context)!;
 
-    return AppShell(
-      title: watchAsync.valueOrNull?.name ?? l10n.watchDetailFallbackTitle,
-      selectedIndex: 0,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(watchAsync.valueOrNull?.name ?? l10n.watchDetailFallbackTitle),
+      ),
       body: watchAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(l10n.watchDetailLoadError(error.toString()))),

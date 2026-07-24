@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/user_profile.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
-import '../watches/app_shell.dart';
 
 final _profileProvider = FutureProvider.autoDispose<UserProfile>((ref) {
   return ref.watch(meServiceProvider).get();
@@ -19,9 +18,7 @@ class ProfileScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final profileAsync = ref.watch(_profileProvider);
 
-    return AppShell(
-      title: l10n.profileTitle,
-      selectedIndex: 2,
+    return Scaffold(
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(l10n.profileLoadError(error.toString()))),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/auth_state.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -41,8 +42,11 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
     try {
       await ref.read(meServiceProvider).setUsername(_usernameController.text.trim());
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed('/watches');
+      ref.read(authStateProvider.notifier).completeUsernameSetup();
+      // Não navega aqui: o redirect do GoRouter reage à mudança de
+      // authStateProvider e leva para /watches sozinho.
     } on DioException catch (e) {
+      if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
       setState(() {
         _errorMessage = e.response?.statusCode == 409

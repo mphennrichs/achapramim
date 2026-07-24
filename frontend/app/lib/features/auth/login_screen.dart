@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/providers.dart';
+import '../../core/auth_state.dart';
 import '../../l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -35,15 +35,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      final usernamePending = await ref.read(authServiceProvider).login(
+      await ref.read(authStateProvider.notifier).login(
             emailOrUsername: _emailOrUsernameController.text.trim(),
             password: _passwordController.text,
           );
-      if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed(
-        usernamePending ? '/set-username' : '/watches',
-      );
+      // Não navega aqui: o redirect do GoRouter reage à mudança de
+      // authStateProvider e leva para /set-username ou /watches sozinho.
     } on DioException catch (e) {
+      if (!mounted) return;
       final status = e.response?.statusCode;
       final l10n = AppLocalizations.of(context)!;
       setState(() {

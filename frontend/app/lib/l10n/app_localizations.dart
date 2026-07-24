@@ -215,7 +215,7 @@ abstract class AppLocalizations {
   /// No description provided for @navLogout.
   ///
   /// In pt, this message translates to:
-  /// **'Logout'**
+  /// **'Sair'**
   String get navLogout;
 
   /// No description provided for @navUserDashboard.

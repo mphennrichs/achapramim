@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
-import 'app_shell.dart';
+import 'watch_list_screen.dart';
 
 const _availableMarketplaces = ['olx', 'mercado_livre', 'facebook_marketplace'];
 
@@ -35,7 +36,6 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
   final _toleranceController = TextEditingController(text: '5');
   final _thresholdController = TextEditingController(text: '10');
   final _maxOffersController = TextEditingController(text: '50');
-  final _linkController = TextEditingController();
   final _keywordInputController = TextEditingController();
   final _blockedInputController = TextEditingController();
 
@@ -43,10 +43,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
   final List<String> _blockedWords = [];
   final Set<String> _selectedMarketplaces = {'olx'};
 
-  bool _analyzingLink = false;
   bool _saving = false;
-  bool _aiFilled = false;
-  bool _partialFailure = false;
   String? _errorMessage;
 
   @override
@@ -56,46 +53,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
     _toleranceController.dispose();
     _thresholdController.dispose();
     _maxOffersController.dispose();
-    _linkController.dispose();
     _keywordInputController.dispose();
     _blockedInputController.dispose();
     super.dispose();
-  }
-
-  Future<void> _analyzeLink() async {
-    final url = _linkController.text.trim();
-    if (url.isEmpty) return;
-
-    setState(() {
-      _analyzingLink = true;
-      _errorMessage = null;
-      _partialFailure = false;
-    });
-
-    try {
-      final proposal = await ref.read(linkPreviewServiceProvider).preview(url);
-      setState(() {
-        if (proposal.name.isNotEmpty) _nameController.text = proposal.name;
-        if (proposal.targetPriceCents > 0) {
-          _targetPriceController.text =
-              (proposal.targetPriceCents / 100).toStringAsFixed(2);
-        }
-        for (final keyword in proposal.keywords) {
-          if (!_keywords.contains(keyword)) _keywords.add(keyword);
-        }
-        for (final blocked in proposal.blockedWords) {
-          if (!_blockedWords.contains(blocked)) _blockedWords.add(blocked);
-        }
-        _aiFilled = true;
-        _partialFailure = proposal.partialFailure;
-      });
-    } on DioException {
-      setState(() {
-        _errorMessage = AppLocalizations.of(context)!.newWatchLinkAnalysisError;
-      });
-    } finally {
-      if (mounted) setState(() => _analyzingLink = false);
-    }
   }
 
   void _addKeyword() {
@@ -149,7 +109,12 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
     try {
       await ref.read(watchServiceProvider).create(watch);
       if (!mounted) return;
-      Navigator.of(context).pop();
+      // Invalida a lista antes de trocar de branch: o IndexedStack do shell
+      // mantém WatchListScreen viva entre navegações (não recria como o
+      // Navigator.push antigo fazia), então sem isso ela continuaria
+      // mostrando o resultado já resolvido antes da criação.
+      ref.invalidate(watchListProvider);
+      context.go('/watches');
     } on DioException catch (e) {
       setState(() {
         _errorMessage = AppLocalizations.of(context)!
@@ -165,9 +130,7 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
 
-    return AppShell(
-      title: l10n.newWatchTitle,
-      selectedIndex: 1,
+    return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: ConstrainedBox(
@@ -175,86 +138,17 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Criação a partir de link (via LLM) fica oculta: não faz
+              // parte do MVP, que só cobre criação manual do Watch.
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.link, color: scheme.onSurfaceVariant),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              l10n.newWatchFromLinkTitle,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
                       Text(
-                        l10n.newWatchFromLinkDescription,
-                        style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _linkController,
-                              decoration: InputDecoration(
-                                hintText: l10n.newWatchLinkHint,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          FilledButton.icon(
-                            onPressed: _analyzingLink ? null : _analyzeLink,
-                            icon: _analyzingLink
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                : const Icon(Icons.auto_awesome),
-                            label: Text(l10n.newWatchAnalyze),
-                          ),
-                        ],
-                      ),
-                      if (_partialFailure) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.newWatchPartialFailure,
-                          style: TextStyle(color: scheme.error, fontSize: 12),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.newWatchIdentification,
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
-                          ),
-                          if (_aiFilled)
-                            Chip(
-                              avatar: const Icon(Icons.auto_awesome, size: 16),
-                              label: Text(l10n.newWatchAiSuggested),
-                            ),
-                        ],
+                        l10n.newWatchIdentification,
+                        style: Theme.of(context).textTheme.labelLarge,
                       ),
                       const SizedBox(height: 8),
                       TextField(

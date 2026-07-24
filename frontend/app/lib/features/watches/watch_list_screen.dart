@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
-import 'app_shell.dart';
 
 final watchListProvider = FutureProvider.autoDispose<List<Watch>>((ref) {
   return ref.watch(watchServiceProvider).list();
@@ -19,11 +19,9 @@ class WatchListScreen extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
 
-    return AppShell(
-      title: l10n.watchListTitle,
-      selectedIndex: 0,
+    return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).pushNamed('/watches/new'),
+        onPressed: () => context.go('/watches/new'),
         icon: const Icon(Icons.add),
         label: Text(l10n.navNewWatch),
       ),
@@ -46,7 +44,7 @@ class WatchListScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: () => Navigator.of(context).pushNamed('/watches/new'),
+                    onPressed: () => context.go('/watches/new'),
                     child: Text(l10n.watchListCreateFirst),
                   ),
                 ],
@@ -86,7 +84,7 @@ class _WatchCard extends ConsumerWidget {
 
     return Card(
       child: InkWell(
-        onTap: () => Navigator.of(context).pushNamed('/watches/${watch.id}'),
+        onTap: () => context.push('/watches/${watch.id}'),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),

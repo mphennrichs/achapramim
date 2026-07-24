@@ -70,7 +70,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navProfile => 'Perfil';
 
   @override
-  String get navLogout => 'Logout';
+  String get navLogout => 'Sair';
 
   @override
   String get navUserDashboard => 'Painel do Usuário';
