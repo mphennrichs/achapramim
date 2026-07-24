@@ -25,10 +25,11 @@ class AuthState {
 /// [authRouterRefreshProvider]) para decidir redirects, e login/logout/
 /// set-username atualizam este notifier em vez de navegar imperativamente.
 class AuthNotifier extends StateNotifier<AuthState> {
+  final Ref _ref;
   final AuthService _authService;
   final MeService _meService;
 
-  AuthNotifier(this._authService, this._meService) : super(AuthState.unknown) {
+  AuthNotifier(this._ref, this._authService, this._meService) : super(AuthState.unknown) {
     _checkSession();
   }
 
@@ -50,19 +51,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
       emailOrUsername: emailOrUsername,
       password: password,
     );
+    // currentUserProfileProvider é criado (e a chamada GET /api/me feita) na
+    // primeira leitura, que acontece antes do login (sidebar/router lendo o
+    // valor ainda vazio) — sem invalidar aqui, ele ficaria travado
+    // permanentemente no erro 401 daquela primeira tentativa sem sessão.
+    _ref.invalidate(currentUserProfileProvider);
     state = usernamePending ? AuthState.usernamePending : AuthState.authenticated;
   }
 
   void completeUsernameSetup() {
+    _ref.invalidate(currentUserProfileProvider);
     state = AuthState.authenticated;
   }
 
   Future<void> logout() async {
     await _authService.logout();
+    _ref.invalidate(currentUserProfileProvider);
     state = AuthState.unauthenticated;
   }
 }
 
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref.watch(authServiceProvider), ref.watch(meServiceProvider));
+  return AuthNotifier(ref, ref.watch(authServiceProvider), ref.watch(meServiceProvider));
 });

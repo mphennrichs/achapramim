@@ -131,5 +131,57 @@
   "profileCurrentPasswordWrong": "Current password is incorrect.",
   "profilePasswordChangeError": "Could not change password. Please try again.",
   "profilePasswordChangeSuccess": "Password changed successfully.",
-  "profileSaveChanges": "Save"
+  "profileSaveChanges": "Save",
+
+  "navAdminUsers": "Users",
+  "navAdminAllWatches": "All Watches",
+  "navAdminSettings": "Settings",
+
+  "adminUsersTitle": "Users",
+  "adminUsersLoadError": "Failed to load users: {error}",
+  "@adminUsersLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "adminUsersCreate": "New user",
+  "adminUsersNameLabel": "Name",
+  "adminUsersEmailLabel": "Email",
+  "adminUsersPasswordLabel": "Initial password",
+  "adminUsersRoleLabel": "Role",
+  "adminUsersRoleAdmin": "Admin",
+  "adminUsersRoleUser": "User",
+  "adminUsersCreateSubmit": "Create",
+  "adminUsersCreateError": "Failed to create user: {details}",
+  "@adminUsersCreateError": {
+    "placeholders": { "details": { "type": "String" } }
+  },
+  "adminUsersActive": "Active",
+  "adminUsersInactive": "Inactive",
+  "adminUsersUsernamePending": "Username pending",
+  "adminUsersUpdateError": "Failed to update user. Please try again.",
+  "adminUsersCancel": "Cancel",
+
+  "adminWatchesTitle": "All Watches",
+  "adminWatchesLoadError": "Failed to load Watches: {error}",
+  "@adminWatchesLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "adminWatchesEmpty": "No Watch created in the system yet.",
+  "adminWatchesOwnerLabel": "Owner: {name} ({email})",
+  "@adminWatchesOwnerLabel": {
+    "placeholders": { "name": { "type": "String" }, "email": { "type": "String" } }
+  },
+
+  "adminSettingsTitle": "Settings",
+  "adminSettingsLoadError": "Failed to load settings: {error}",
+  "@adminSettingsLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "adminSettingsScanTitle": "Scan Interval",
+  "adminSettingsScanDescription": "Minimum and maximum interval (in minutes) between Scan runs for each Watch. Each Watch's actual schedule is randomized within this range.",
+  "adminSettingsMinIntervalLabel": "Minimum interval (minutes)",
+  "adminSettingsMaxIntervalLabel": "Maximum interval (minutes)",
+  "adminSettingsValidationError": "The maximum interval must be greater than or equal to the minimum.",
+  "adminSettingsSaveError": "Failed to save settings. Please try again.",
+  "adminSettingsSaveSuccess": "Settings saved successfully.",
+  "adminSettingsSave": "Save"
 }

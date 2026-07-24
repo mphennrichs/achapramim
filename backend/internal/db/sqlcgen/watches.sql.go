@@ -131,19 +131,41 @@ func (q *Queries) GetWatchByID(ctx context.Context, id pgtype.UUID) (Watch, erro
 	return i, err
 }
 
-const listAllWatchesGroupedByUser = `-- name: ListAllWatchesGroupedByUser :many
-SELECT id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at FROM watches ORDER BY user_id, created_at DESC
+const listAllWatchesWithOwner = `-- name: ListAllWatchesWithOwner :many
+SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, u.name AS owner_name, u.email AS owner_email
+FROM watches w
+JOIN users u ON u.id = w.user_id
+ORDER BY w.user_id, w.created_at DESC
 `
 
-func (q *Queries) ListAllWatchesGroupedByUser(ctx context.Context) ([]Watch, error) {
-	rows, err := q.db.Query(ctx, listAllWatchesGroupedByUser)
+type ListAllWatchesWithOwnerRow struct {
+	ID                        pgtype.UUID        `json:"id"`
+	UserID                    pgtype.UUID        `json:"user_id"`
+	Name                      string             `json:"name"`
+	TargetPriceCents          int64              `json:"target_price_cents"`
+	TolerancePercent          pgtype.Numeric     `json:"tolerance_percent"`
+	MaxOffers                 int32              `json:"max_offers"`
+	PriceDropThresholdPercent pgtype.Numeric     `json:"price_drop_threshold_percent"`
+	Active                    bool               `json:"active"`
+	NextScanAt                pgtype.Timestamptz `json:"next_scan_at"`
+	CreatedAt                 pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                 pgtype.Timestamptz `json:"updated_at"`
+	OwnerName                 string             `json:"owner_name"`
+	OwnerEmail                string             `json:"owner_email"`
+}
+
+// Listagem cross-user (admin, ver ?all=true em WatchHandler.List) já com
+// nome/email do dono — usada pela tela admin "Todos os Alertas" para exibir
+// de quem é cada Alerta sem uma segunda chamada por User.
+func (q *Queries) ListAllWatchesWithOwner(ctx context.Context) ([]ListAllWatchesWithOwnerRow, error) {
+	rows, err := q.db.Query(ctx, listAllWatchesWithOwner)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Watch
+	var items []ListAllWatchesWithOwnerRow
 	for rows.Next() {
-		var i Watch
+		var i ListAllWatchesWithOwnerRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -156,6 +178,8 @@ func (q *Queries) ListAllWatchesGroupedByUser(ctx context.Context) ([]Watch, err
 			&i.NextScanAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.OwnerName,
+			&i.OwnerEmail,
 		); err != nil {
 			return nil, err
 		}

@@ -14,6 +14,15 @@ class WatchService {
         .toList();
   }
 
+  /// Alertas de todos os Users (admin) — só tem efeito para quem tem
+  /// role=admin; um User comum recebe apenas os próprios Alertas de volta.
+  Future<List<Watch>> listAll() async {
+    final response = await _client.dio.get('/api/watches', queryParameters: {'all': 'true'});
+    return (response.data as List<dynamic>)
+        .map((json) => Watch.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<Watch> get(String id) async {
     final response = await _client.dio.get('/api/watches/$id');
     return Watch.fromJson(response.data as Map<String, dynamic>);

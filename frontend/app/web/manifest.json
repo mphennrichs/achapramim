@@ -1,11 +1,11 @@
 {
-    "name": "app",
-    "short_name": "app",
+    "name": "Achapramim",
+    "short_name": "Achapramim",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F7F9FB",
+    "theme_color": "#785900",
+    "description": "Monitoramento de ofertas em marketplaces.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

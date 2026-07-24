@@ -10,6 +10,9 @@ class Watch {
   final List<String> keywords;
   final List<String> blockedWords;
   final List<String> marketplaces;
+  // Só preenchidos na listagem admin (GET /api/watches?all=true).
+  final String? ownerName;
+  final String? ownerEmail;
 
   Watch({
     required this.id,
@@ -23,6 +26,8 @@ class Watch {
     required this.keywords,
     required this.blockedWords,
     required this.marketplaces,
+    this.ownerName,
+    this.ownerEmail,
   });
 
   factory Watch.fromJson(Map<String, dynamic> json) {
@@ -38,6 +43,8 @@ class Watch {
       keywords: (json['keywords'] as List<dynamic>? ?? []).cast<String>(),
       blockedWords: (json['blocked_words'] as List<dynamic>? ?? []).cast<String>(),
       marketplaces: (json['marketplaces'] as List<dynamic>? ?? []).cast<String>(),
+      ownerName: json['owner_name'] as String?,
+      ownerEmail: json['owner_email'] as String?,
     );
   }
 

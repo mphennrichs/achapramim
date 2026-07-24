@@ -49,6 +49,11 @@ type watchResponse struct {
 	Keywords                  []string `json:"keywords"`
 	BlockedWords              []string `json:"blocked_words"`
 	Marketplaces              []string `json:"marketplaces"`
+	// Preenchidos só na listagem admin (GET /api/watches?all=true) — o dono
+	// de um Watch é irrelevante nas demais respostas (o próprio User já sabe
+	// quais Watches são seus).
+	OwnerName  *string `json:"owner_name,omitempty"`
+	OwnerEmail *string `json:"owner_email,omitempty"`
 }
 
 // Create cria um Watch para o User autenticado, junto de suas keywords,
@@ -280,13 +285,41 @@ func (h *WatchHandler) List(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	q := sqlcgen.New(h.pool)
 
-	var watches []sqlcgen.Watch
-	var err error
 	if r.URL.Query().Get("all") == "true" && auth.IsAdmin(claims) {
-		watches, err = q.ListAllWatchesGroupedByUser(ctx)
-	} else {
-		watches, err = q.ListWatchesByUser(ctx, parseUUID(claims.UserID))
+		rows, err := q.ListAllWatchesWithOwner(ctx)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "internal error")
+			return
+		}
+		resp := make([]watchResponse, 0, len(rows))
+		for _, row := range rows {
+			watch := sqlcgen.Watch{
+				ID:                        row.ID,
+				UserID:                    row.UserID,
+				Name:                      row.Name,
+				TargetPriceCents:          row.TargetPriceCents,
+				TolerancePercent:          row.TolerancePercent,
+				MaxOffers:                 row.MaxOffers,
+				PriceDropThresholdPercent: row.PriceDropThresholdPercent,
+				Active:                    row.Active,
+				NextScanAt:                row.NextScanAt,
+				CreatedAt:                 row.CreatedAt,
+				UpdatedAt:                 row.UpdatedAt,
+			}
+			wr, err := loadWatchResponse(ctx, q, watch)
+			if err != nil {
+				writeError(w, http.StatusInternalServerError, "internal error")
+				return
+			}
+			wr.OwnerName = &row.OwnerName
+			wr.OwnerEmail = &row.OwnerEmail
+			resp = append(resp, wr)
+		}
+		writeJSON(w, http.StatusOK, resp)
+		return
 	}
+
+	watches, err := q.ListWatchesByUser(ctx, parseUUID(claims.UserID))
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "internal error")
 		return

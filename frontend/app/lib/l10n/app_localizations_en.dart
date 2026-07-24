@@ -298,4 +298,117 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSaveChanges => 'Save';
+
+  @override
+  String get navAdminUsers => 'Users';
+
+  @override
+  String get navAdminAllWatches => 'All Watches';
+
+  @override
+  String get navAdminSettings => 'Settings';
+
+  @override
+  String get adminUsersTitle => 'Users';
+
+  @override
+  String adminUsersLoadError(String error) {
+    return 'Failed to load users: $error';
+  }
+
+  @override
+  String get adminUsersCreate => 'New user';
+
+  @override
+  String get adminUsersNameLabel => 'Name';
+
+  @override
+  String get adminUsersEmailLabel => 'Email';
+
+  @override
+  String get adminUsersPasswordLabel => 'Initial password';
+
+  @override
+  String get adminUsersRoleLabel => 'Role';
+
+  @override
+  String get adminUsersRoleAdmin => 'Admin';
+
+  @override
+  String get adminUsersRoleUser => 'User';
+
+  @override
+  String get adminUsersCreateSubmit => 'Create';
+
+  @override
+  String adminUsersCreateError(String details) {
+    return 'Failed to create user: $details';
+  }
+
+  @override
+  String get adminUsersActive => 'Active';
+
+  @override
+  String get adminUsersInactive => 'Inactive';
+
+  @override
+  String get adminUsersUsernamePending => 'Username pending';
+
+  @override
+  String get adminUsersUpdateError =>
+      'Failed to update user. Please try again.';
+
+  @override
+  String get adminUsersCancel => 'Cancel';
+
+  @override
+  String get adminWatchesTitle => 'All Watches';
+
+  @override
+  String adminWatchesLoadError(String error) {
+    return 'Failed to load Watches: $error';
+  }
+
+  @override
+  String get adminWatchesEmpty => 'No Watch created in the system yet.';
+
+  @override
+  String adminWatchesOwnerLabel(String name, String email) {
+    return 'Owner: $name ($email)';
+  }
+
+  @override
+  String get adminSettingsTitle => 'Settings';
+
+  @override
+  String adminSettingsLoadError(String error) {
+    return 'Failed to load settings: $error';
+  }
+
+  @override
+  String get adminSettingsScanTitle => 'Scan Interval';
+
+  @override
+  String get adminSettingsScanDescription =>
+      'Minimum and maximum interval (in minutes) between Scan runs for each Watch. Each Watch\'s actual schedule is randomized within this range.';
+
+  @override
+  String get adminSettingsMinIntervalLabel => 'Minimum interval (minutes)';
+
+  @override
+  String get adminSettingsMaxIntervalLabel => 'Maximum interval (minutes)';
+
+  @override
+  String get adminSettingsValidationError =>
+      'The maximum interval must be greater than or equal to the minimum.';
+
+  @override
+  String get adminSettingsSaveError =>
+      'Failed to save settings. Please try again.';
+
+  @override
+  String get adminSettingsSaveSuccess => 'Settings saved successfully.';
+
+  @override
+  String get adminSettingsSave => 'Save';
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth_state.dart';
 import '../../core/navigation_pages.dart';
+import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Casco persistente das telas autenticadas: sidebar fixa em telas largas
@@ -19,20 +20,26 @@ class BasePage extends ConsumerWidget {
   const BasePage({super.key, required this.navigationShell});
 
   /// Índice de branch (ordem física em router_provider.dart: newWatch=0,
-  /// watches=1, profile=2 — newWatch precisa vir primeiro ali para não
-  /// colidir com a sub-rota `:watchId` de watches) por página. A ordem
-  /// *visual* do menu (Meus Watches, Nova Consulta, Perfil) é definida em
-  /// `_SideNav.destinations` e é independente desta.
+  /// watches=1, profile=2, adminUsers=3, adminWatches=4, adminSettings=5 —
+  /// newWatch precisa vir antes de watches ali para não colidir com a
+  /// sub-rota `:watchId` de watches) por página. A ordem *visual* do menu é
+  /// definida em `_SideNav.destinations` e é independente desta.
   static const _branchIndexByPage = {
     NavigationPage.newWatch: 0,
     NavigationPage.watches: 1,
     NavigationPage.profile: 2,
+    NavigationPage.adminUsers: 3,
+    NavigationPage.adminWatches: 4,
+    NavigationPage.adminSettings: 5,
   };
 
   static const _pageByBranchIndex = {
     0: NavigationPage.newWatch,
     1: NavigationPage.watches,
     2: NavigationPage.profile,
+    3: NavigationPage.adminUsers,
+    4: NavigationPage.adminWatches,
+    5: NavigationPage.adminSettings,
   };
 
   @override
@@ -48,12 +55,21 @@ class BasePage extends ConsumerWidget {
     );
 
     final title = _titleFor(context, _pageByBranchIndex[navigationShell.currentIndex]!);
-    // Uma sub-rota do branch (ex.: watch detail em /watches/:watchId) traz
+    // Uma sub-rota do branch (hoje só watch detail, /watches/:watchId) traz
     // seu próprio Scaffold+AppBar — some com o cabeçalho fixo do Shell aqui
-    // pra não duplicar título/voltar. Detecta por profundidade de segmentos
-    // além do path base do branch (`/watches` = 1 segmento).
+    // pra não duplicar título/voltar. Compara contra os paths exatos dos
+    // branches em vez de contar segmentos: contar segmentos classificaria
+    // erroneamente /watches/new (branch newWatch, 2 segmentos) como sub-rota.
     final currentLocation = GoRouterState.of(context).uri.toString();
-    final isSubRoute = currentLocation.split('/').where((s) => s.isNotEmpty).length > 1;
+    const branchPaths = {
+      '/watches',
+      '/watches/new',
+      '/profile',
+      '/admin/users',
+      '/admin/watches',
+      '/admin/settings',
+    };
+    final isSubRoute = !branchPaths.contains(currentLocation);
 
     return Scaffold(
       appBar: (isWide || isSubRoute) ? null : AppBar(title: Text(title)),
@@ -97,12 +113,15 @@ class BasePage extends ConsumerWidget {
       NavigationPage.watches => l10n.watchListTitle,
       NavigationPage.newWatch => l10n.newWatchTitle,
       NavigationPage.profile => l10n.profileTitle,
+      NavigationPage.adminUsers => l10n.adminUsersTitle,
+      NavigationPage.adminWatches => l10n.adminWatchesTitle,
+      NavigationPage.adminSettings => l10n.adminSettingsTitle,
       _ => '',
     };
   }
 }
 
-class _SideNav extends StatelessWidget {
+class _SideNav extends ConsumerWidget {
   final NavigationPage currentPage;
   final ValueChanged<NavigationPage> onDestinationSelected;
   final VoidCallback onLogout;
@@ -114,10 +133,14 @@ class _SideNav extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final isAdmin = ref.watch(currentUserProfileProvider).valueOrNull?.role == 'admin';
     // Ordem visual do menu — independente da ordem de branches no router.
+    // Itens de admin só aparecem depois que o perfil confirma role=admin —
+    // enquanto carrega ou para User comum, a sidebar mostra só os 3 itens
+    // padrão (não pisca os itens de admin e depois some).
     final destinations = [
       _NavDestination(
         page: NavigationPage.watches,
@@ -134,6 +157,23 @@ class _SideNav extends StatelessWidget {
         icon: Icons.person,
         label: l10n.navProfile,
       ),
+      if (isAdmin) ...[
+        _NavDestination(
+          page: NavigationPage.adminUsers,
+          icon: Icons.people,
+          label: l10n.navAdminUsers,
+        ),
+        _NavDestination(
+          page: NavigationPage.adminWatches,
+          icon: Icons.admin_panel_settings,
+          label: l10n.navAdminAllWatches,
+        ),
+        _NavDestination(
+          page: NavigationPage.adminSettings,
+          icon: Icons.settings,
+          label: l10n.navAdminSettings,
+        ),
+      ],
     ];
 
     return Container(
@@ -146,7 +186,7 @@ class _SideNav extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
             child: Row(
               children: [
-                Image.asset('assets/images/logo.png', width: 44, height: 44),
+                Image.asset('assets/images/logo.png', width: 88, height: 88),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(

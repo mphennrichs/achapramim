@@ -197,13 +197,13 @@ abstract class AppLocalizations {
   /// No description provided for @navMyWatches.
   ///
   /// In pt, this message translates to:
-  /// **'Meus Watches'**
+  /// **'Meus Alertas'**
   String get navMyWatches;
 
   /// No description provided for @navNewWatch.
   ///
   /// In pt, this message translates to:
-  /// **'Nova Consulta'**
+  /// **'Novo Alerta'**
   String get navNewWatch;
 
   /// No description provided for @navProfile.
@@ -227,25 +227,25 @@ abstract class AppLocalizations {
   /// No description provided for @watchListTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Meus Watches'**
+  /// **'Meus Alertas'**
   String get watchListTitle;
 
   /// No description provided for @watchListEmpty.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhum Watch cadastrado ainda.'**
+  /// **'Nenhum Alerta cadastrado ainda.'**
   String get watchListEmpty;
 
   /// No description provided for @watchListCreateFirst.
   ///
   /// In pt, this message translates to:
-  /// **'Criar o primeiro Watch'**
+  /// **'Criar o primeiro Alerta'**
   String get watchListCreateFirst;
 
   /// No description provided for @watchListLoadError.
   ///
   /// In pt, this message translates to:
-  /// **'Falha ao carregar Watches: {error}'**
+  /// **'Falha ao carregar Alertas: {error}'**
   String watchListLoadError(String error);
 
   /// No description provided for @watchTolerance.
@@ -257,7 +257,7 @@ abstract class AppLocalizations {
   /// No description provided for @newWatchTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Nova Consulta'**
+  /// **'Novo Alerta'**
   String get newWatchTitle;
 
   /// No description provided for @newWatchFromLinkTitle.
@@ -269,7 +269,7 @@ abstract class AppLocalizations {
   /// No description provided for @newWatchFromLinkDescription.
   ///
   /// In pt, this message translates to:
-  /// **'Cole a URL de um anúncio para gerar uma Proposta de Preenchimento — sempre editável, nunca cria o Watch sozinha.'**
+  /// **'Cole a URL de um anúncio para gerar uma Proposta de Preenchimento — sempre editável, nunca cria o Alerta sozinha.'**
   String get newWatchFromLinkDescription;
 
   /// No description provided for @newWatchLinkHint.
@@ -299,7 +299,7 @@ abstract class AppLocalizations {
   /// No description provided for @newWatchIdentification.
   ///
   /// In pt, this message translates to:
-  /// **'Identificação do Watch'**
+  /// **'Identificação do Alerta'**
   String get newWatchIdentification;
 
   /// No description provided for @newWatchAiSuggested.
@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @newWatchNameLabel.
   ///
   /// In pt, this message translates to:
-  /// **'Nome do Watch'**
+  /// **'Nome do Alerta'**
   String get newWatchNameLabel;
 
   /// No description provided for @newWatchKeywords.
@@ -377,7 +377,7 @@ abstract class AppLocalizations {
   /// No description provided for @newWatchSaveError.
   ///
   /// In pt, this message translates to:
-  /// **'Falha ao salvar Watch: {details}'**
+  /// **'Falha ao salvar Alerta: {details}'**
   String newWatchSaveError(String details);
 
   /// No description provided for @newWatchSubmit.
@@ -407,13 +407,13 @@ abstract class AppLocalizations {
   /// No description provided for @watchDetailFallbackTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Watch'**
+  /// **'Alerta'**
   String get watchDetailFallbackTitle;
 
   /// No description provided for @watchDetailLoadError.
   ///
   /// In pt, this message translates to:
-  /// **'Falha ao carregar Watch: {error}'**
+  /// **'Falha ao carregar Alerta: {error}'**
   String watchDetailLoadError(String error);
 
   /// No description provided for @watchDetailTabOffers.
@@ -607,6 +607,204 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Salvar'**
   String get profileSaveChanges;
+
+  /// No description provided for @navAdminUsers.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usuários'**
+  String get navAdminUsers;
+
+  /// No description provided for @navAdminAllWatches.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os Alertas'**
+  String get navAdminAllWatches;
+
+  /// No description provided for @navAdminSettings.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações'**
+  String get navAdminSettings;
+
+  /// No description provided for @adminUsersTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usuários'**
+  String get adminUsersTitle;
+
+  /// No description provided for @adminUsersLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao carregar usuários: {error}'**
+  String adminUsersLoadError(String error);
+
+  /// No description provided for @adminUsersCreate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo usuário'**
+  String get adminUsersCreate;
+
+  /// No description provided for @adminUsersNameLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome'**
+  String get adminUsersNameLabel;
+
+  /// No description provided for @adminUsersEmailLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail'**
+  String get adminUsersEmailLabel;
+
+  /// No description provided for @adminUsersPasswordLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha inicial'**
+  String get adminUsersPasswordLabel;
+
+  /// No description provided for @adminUsersRoleLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Role'**
+  String get adminUsersRoleLabel;
+
+  /// No description provided for @adminUsersRoleAdmin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Admin'**
+  String get adminUsersRoleAdmin;
+
+  /// No description provided for @adminUsersRoleUser.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usuário'**
+  String get adminUsersRoleUser;
+
+  /// No description provided for @adminUsersCreateSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar'**
+  String get adminUsersCreateSubmit;
+
+  /// No description provided for @adminUsersCreateError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao cadastrar usuário: {details}'**
+  String adminUsersCreateError(String details);
+
+  /// No description provided for @adminUsersActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativo'**
+  String get adminUsersActive;
+
+  /// No description provided for @adminUsersInactive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inativo'**
+  String get adminUsersInactive;
+
+  /// No description provided for @adminUsersUsernamePending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Username pendente'**
+  String get adminUsersUsernamePending;
+
+  /// No description provided for @adminUsersUpdateError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao atualizar usuário. Tente novamente.'**
+  String get adminUsersUpdateError;
+
+  /// No description provided for @adminUsersCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get adminUsersCancel;
+
+  /// No description provided for @adminWatchesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os Alertas'**
+  String get adminWatchesTitle;
+
+  /// No description provided for @adminWatchesLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao carregar Alertas: {error}'**
+  String adminWatchesLoadError(String error);
+
+  /// No description provided for @adminWatchesEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum Alerta cadastrado no sistema ainda.'**
+  String get adminWatchesEmpty;
+
+  /// No description provided for @adminWatchesOwnerLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dono: {name} ({email})'**
+  String adminWatchesOwnerLabel(String name, String email);
+
+  /// No description provided for @adminSettingsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações'**
+  String get adminSettingsTitle;
+
+  /// No description provided for @adminSettingsLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao carregar configurações: {error}'**
+  String adminSettingsLoadError(String error);
+
+  /// No description provided for @adminSettingsScanTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intervalo de Scan'**
+  String get adminSettingsScanTitle;
+
+  /// No description provided for @adminSettingsScanDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada Alerta. O agendamento real de cada Alerta é sorteado dentro dessa faixa.'**
+  String get adminSettingsScanDescription;
+
+  /// No description provided for @adminSettingsMinIntervalLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intervalo mínimo (minutos)'**
+  String get adminSettingsMinIntervalLabel;
+
+  /// No description provided for @adminSettingsMaxIntervalLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intervalo máximo (minutos)'**
+  String get adminSettingsMaxIntervalLabel;
+
+  /// No description provided for @adminSettingsValidationError.
+  ///
+  /// In pt, this message translates to:
+  /// **'O intervalo máximo deve ser maior ou igual ao mínimo.'**
+  String get adminSettingsValidationError;
+
+  /// No description provided for @adminSettingsSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao salvar configurações. Tente novamente.'**
+  String get adminSettingsSaveError;
+
+  /// No description provided for @adminSettingsSaveSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações salvas com sucesso.'**
+  String get adminSettingsSaveSuccess;
+
+  /// No description provided for @adminSettingsSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar'**
+  String get adminSettingsSave;
 }
 
 class _AppLocalizationsDelegate

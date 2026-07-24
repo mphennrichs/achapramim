@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'api/admin_service.dart';
 import 'api/api_client.dart';
 import 'api/auth_service.dart';
 import 'api/link_preview_service.dart';
 import 'api/me_service.dart';
 import 'api/watch_service.dart';
+import 'models/user_profile.dart';
 
 /// URL base da API.
 ///
@@ -41,4 +43,16 @@ final linkPreviewServiceProvider = Provider<LinkPreviewService>((ref) {
 
 final meServiceProvider = Provider<MeService>((ref) {
   return MeService(ref.watch(apiClientProvider));
+});
+
+final adminServiceProvider = Provider<AdminService>((ref) {
+  return AdminService(ref.watch(apiClientProvider));
+});
+
+/// Perfil do User autenticado — usado pela sidebar para decidir se mostra os
+/// itens de admin (role) e pela tela de Perfil para exibir/editar os dados.
+/// Não é autoDispose: precisa persistir durante toda a sessão, não só
+/// enquanto uma tela específica está montada.
+final currentUserProfileProvider = FutureProvider<UserProfile>((ref) {
+  return ref.watch(meServiceProvider).get();
 });

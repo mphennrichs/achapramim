@@ -6,17 +6,13 @@ import '../../core/models/user_profile.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
 
-final _profileProvider = FutureProvider.autoDispose<UserProfile>((ref) {
-  return ref.watch(meServiceProvider).get();
-});
-
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final profileAsync = ref.watch(_profileProvider);
+    final profileAsync = ref.watch(currentUserProfileProvider);
 
     return Scaffold(
       body: profileAsync.when(
@@ -74,7 +70,7 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
 
     try {
       await ref.read(meServiceProvider).updateProfile(name: name, username: username);
-      ref.invalidate(_profileProvider);
+      ref.invalidate(currentUserProfileProvider);
     } on DioException catch (e) {
       setState(() {
         _profileError = e.response?.statusCode == 409

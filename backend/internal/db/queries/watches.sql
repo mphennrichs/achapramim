@@ -12,8 +12,14 @@ SELECT * FROM watches WHERE id = $1;
 -- name: ListWatchesByUser :many
 SELECT * FROM watches WHERE user_id = $1 ORDER BY created_at DESC;
 
--- name: ListAllWatchesGroupedByUser :many
-SELECT * FROM watches ORDER BY user_id, created_at DESC;
+-- name: ListAllWatchesWithOwner :many
+-- Listagem cross-user (admin, ver ?all=true em WatchHandler.List) já com
+-- nome/email do dono — usada pela tela admin "Todos os Alertas" para exibir
+-- de quem é cada Alerta sem uma segunda chamada por User.
+SELECT w.*, u.name AS owner_name, u.email AS owner_email
+FROM watches w
+JOIN users u ON u.id = w.user_id
+ORDER BY w.user_id, w.created_at DESC;
 
 -- name: UpdateWatch :one
 UPDATE watches SET

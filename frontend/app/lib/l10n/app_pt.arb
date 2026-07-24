@@ -20,16 +20,16 @@
   "setUsernameTaken": "Este username já está em uso. Escolha outro.",
   "setUsernameGenericError": "Não foi possível salvar. Tente novamente.",
 
-  "navMyWatches": "Meus Watches",
-  "navNewWatch": "Nova Consulta",
+  "navMyWatches": "Meus Alertas",
+  "navNewWatch": "Novo Alerta",
   "navProfile": "Perfil",
   "navLogout": "Sair",
   "navUserDashboard": "Painel do Usuário",
 
-  "watchListTitle": "Meus Watches",
-  "watchListEmpty": "Nenhum Watch cadastrado ainda.",
-  "watchListCreateFirst": "Criar o primeiro Watch",
-  "watchListLoadError": "Falha ao carregar Watches: {error}",
+  "watchListTitle": "Meus Alertas",
+  "watchListEmpty": "Nenhum Alerta cadastrado ainda.",
+  "watchListCreateFirst": "Criar o primeiro Alerta",
+  "watchListLoadError": "Falha ao carregar Alertas: {error}",
   "@watchListLoadError": {
     "placeholders": { "error": { "type": "String" } }
   },
@@ -38,16 +38,16 @@
     "placeholders": { "percent": { "type": "String" } }
   },
 
-  "newWatchTitle": "Nova Consulta",
+  "newWatchTitle": "Novo Alerta",
   "newWatchFromLinkTitle": "Criar a partir de Link",
-  "newWatchFromLinkDescription": "Cole a URL de um anúncio para gerar uma Proposta de Preenchimento — sempre editável, nunca cria o Watch sozinha.",
+  "newWatchFromLinkDescription": "Cole a URL de um anúncio para gerar uma Proposta de Preenchimento — sempre editável, nunca cria o Alerta sozinha.",
   "newWatchLinkHint": "https://www.olx.com.br/...",
   "newWatchAnalyze": "Analisar",
   "newWatchPartialFailure": "A análise foi parcial — revise os campos preenchidos e complete o restante manualmente.",
   "newWatchLinkAnalysisError": "Não foi possível analisar o link agora. Preencha manualmente.",
-  "newWatchIdentification": "Identificação do Watch",
+  "newWatchIdentification": "Identificação do Alerta",
   "newWatchAiSuggested": "Sugerido por IA",
-  "newWatchNameLabel": "Nome do Watch",
+  "newWatchNameLabel": "Nome do Alerta",
   "newWatchKeywords": "Palavras-Chave",
   "newWatchBlockedWords": "Palavras Bloqueadas",
   "newWatchAddWordHint": "Adicionar...",
@@ -58,7 +58,7 @@
   "newWatchDropThresholdLabel": "Gatilho de Queda (%)",
   "newWatchMaxOffersLabel": "Máximo de Ofertas",
   "newWatchValidationError": "Preencha nome, preço-alvo e ao menos um marketplace.",
-  "newWatchSaveError": "Falha ao salvar Watch: {details}",
+  "newWatchSaveError": "Falha ao salvar Alerta: {details}",
   "@newWatchSaveError": {
     "placeholders": { "details": { "type": "String" } }
   },
@@ -67,8 +67,8 @@
   "marketplaceMercadoLivre": "Mercado Livre",
   "marketplaceFacebook": "FB Marketplace",
 
-  "watchDetailFallbackTitle": "Watch",
-  "watchDetailLoadError": "Falha ao carregar Watch: {error}",
+  "watchDetailFallbackTitle": "Alerta",
+  "watchDetailLoadError": "Falha ao carregar Alerta: {error}",
   "@watchDetailLoadError": {
     "placeholders": { "error": { "type": "String" } }
   },
@@ -131,5 +131,57 @@
   "profileCurrentPasswordWrong": "Senha atual incorreta.",
   "profilePasswordChangeError": "Não foi possível trocar a senha. Tente novamente.",
   "profilePasswordChangeSuccess": "Senha alterada com sucesso.",
-  "profileSaveChanges": "Salvar"
+  "profileSaveChanges": "Salvar",
+
+  "navAdminUsers": "Usuários",
+  "navAdminAllWatches": "Todos os Alertas",
+  "navAdminSettings": "Configurações",
+
+  "adminUsersTitle": "Usuários",
+  "adminUsersLoadError": "Falha ao carregar usuários: {error}",
+  "@adminUsersLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "adminUsersCreate": "Novo usuário",
+  "adminUsersNameLabel": "Nome",
+  "adminUsersEmailLabel": "E-mail",
+  "adminUsersPasswordLabel": "Senha inicial",
+  "adminUsersRoleLabel": "Role",
+  "adminUsersRoleAdmin": "Admin",
+  "adminUsersRoleUser": "Usuário",
+  "adminUsersCreateSubmit": "Cadastrar",
+  "adminUsersCreateError": "Falha ao cadastrar usuário: {details}",
+  "@adminUsersCreateError": {
+    "placeholders": { "details": { "type": "String" } }
+  },
+  "adminUsersActive": "Ativo",
+  "adminUsersInactive": "Inativo",
+  "adminUsersUsernamePending": "Username pendente",
+  "adminUsersUpdateError": "Falha ao atualizar usuário. Tente novamente.",
+  "adminUsersCancel": "Cancelar",
+
+  "adminWatchesTitle": "Todos os Alertas",
+  "adminWatchesLoadError": "Falha ao carregar Alertas: {error}",
+  "@adminWatchesLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "adminWatchesEmpty": "Nenhum Alerta cadastrado no sistema ainda.",
+  "adminWatchesOwnerLabel": "Dono: {name} ({email})",
+  "@adminWatchesOwnerLabel": {
+    "placeholders": { "name": { "type": "String" }, "email": { "type": "String" } }
+  },
+
+  "adminSettingsTitle": "Configurações",
+  "adminSettingsLoadError": "Falha ao carregar configurações: {error}",
+  "@adminSettingsLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "adminSettingsScanTitle": "Intervalo de Scan",
+  "adminSettingsScanDescription": "Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada Alerta. O agendamento real de cada Alerta é sorteado dentro dessa faixa.",
+  "adminSettingsMinIntervalLabel": "Intervalo mínimo (minutos)",
+  "adminSettingsMaxIntervalLabel": "Intervalo máximo (minutos)",
+  "adminSettingsValidationError": "O intervalo máximo deve ser maior ou igual ao mínimo.",
+  "adminSettingsSaveError": "Falha ao salvar configurações. Tente novamente.",
+  "adminSettingsSaveSuccess": "Configurações salvas com sucesso.",
+  "adminSettingsSave": "Salvar"
 }

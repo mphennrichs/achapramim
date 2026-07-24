@@ -61,10 +61,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível salvar. Tente novamente.';
 
   @override
-  String get navMyWatches => 'Meus Watches';
+  String get navMyWatches => 'Meus Alertas';
 
   @override
-  String get navNewWatch => 'Nova Consulta';
+  String get navNewWatch => 'Novo Alerta';
 
   @override
   String get navProfile => 'Perfil';
@@ -76,17 +76,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navUserDashboard => 'Painel do Usuário';
 
   @override
-  String get watchListTitle => 'Meus Watches';
+  String get watchListTitle => 'Meus Alertas';
 
   @override
-  String get watchListEmpty => 'Nenhum Watch cadastrado ainda.';
+  String get watchListEmpty => 'Nenhum Alerta cadastrado ainda.';
 
   @override
-  String get watchListCreateFirst => 'Criar o primeiro Watch';
+  String get watchListCreateFirst => 'Criar o primeiro Alerta';
 
   @override
   String watchListLoadError(String error) {
-    return 'Falha ao carregar Watches: $error';
+    return 'Falha ao carregar Alertas: $error';
   }
 
   @override
@@ -95,14 +95,14 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get newWatchTitle => 'Nova Consulta';
+  String get newWatchTitle => 'Novo Alerta';
 
   @override
   String get newWatchFromLinkTitle => 'Criar a partir de Link';
 
   @override
   String get newWatchFromLinkDescription =>
-      'Cole a URL de um anúncio para gerar uma Proposta de Preenchimento — sempre editável, nunca cria o Watch sozinha.';
+      'Cole a URL de um anúncio para gerar uma Proposta de Preenchimento — sempre editável, nunca cria o Alerta sozinha.';
 
   @override
   String get newWatchLinkHint => 'https://www.olx.com.br/...';
@@ -119,13 +119,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível analisar o link agora. Preencha manualmente.';
 
   @override
-  String get newWatchIdentification => 'Identificação do Watch';
+  String get newWatchIdentification => 'Identificação do Alerta';
 
   @override
   String get newWatchAiSuggested => 'Sugerido por IA';
 
   @override
-  String get newWatchNameLabel => 'Nome do Watch';
+  String get newWatchNameLabel => 'Nome do Alerta';
 
   @override
   String get newWatchKeywords => 'Palavras-Chave';
@@ -160,7 +160,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String newWatchSaveError(String details) {
-    return 'Falha ao salvar Watch: $details';
+    return 'Falha ao salvar Alerta: $details';
   }
 
   @override
@@ -176,11 +176,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get marketplaceFacebook => 'FB Marketplace';
 
   @override
-  String get watchDetailFallbackTitle => 'Watch';
+  String get watchDetailFallbackTitle => 'Alerta';
 
   @override
   String watchDetailLoadError(String error) {
-    return 'Falha ao carregar Watch: $error';
+    return 'Falha ao carregar Alerta: $error';
   }
 
   @override
@@ -298,4 +298,117 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get profileSaveChanges => 'Salvar';
+
+  @override
+  String get navAdminUsers => 'Usuários';
+
+  @override
+  String get navAdminAllWatches => 'Todos os Alertas';
+
+  @override
+  String get navAdminSettings => 'Configurações';
+
+  @override
+  String get adminUsersTitle => 'Usuários';
+
+  @override
+  String adminUsersLoadError(String error) {
+    return 'Falha ao carregar usuários: $error';
+  }
+
+  @override
+  String get adminUsersCreate => 'Novo usuário';
+
+  @override
+  String get adminUsersNameLabel => 'Nome';
+
+  @override
+  String get adminUsersEmailLabel => 'E-mail';
+
+  @override
+  String get adminUsersPasswordLabel => 'Senha inicial';
+
+  @override
+  String get adminUsersRoleLabel => 'Role';
+
+  @override
+  String get adminUsersRoleAdmin => 'Admin';
+
+  @override
+  String get adminUsersRoleUser => 'Usuário';
+
+  @override
+  String get adminUsersCreateSubmit => 'Cadastrar';
+
+  @override
+  String adminUsersCreateError(String details) {
+    return 'Falha ao cadastrar usuário: $details';
+  }
+
+  @override
+  String get adminUsersActive => 'Ativo';
+
+  @override
+  String get adminUsersInactive => 'Inativo';
+
+  @override
+  String get adminUsersUsernamePending => 'Username pendente';
+
+  @override
+  String get adminUsersUpdateError =>
+      'Falha ao atualizar usuário. Tente novamente.';
+
+  @override
+  String get adminUsersCancel => 'Cancelar';
+
+  @override
+  String get adminWatchesTitle => 'Todos os Alertas';
+
+  @override
+  String adminWatchesLoadError(String error) {
+    return 'Falha ao carregar Alertas: $error';
+  }
+
+  @override
+  String get adminWatchesEmpty => 'Nenhum Alerta cadastrado no sistema ainda.';
+
+  @override
+  String adminWatchesOwnerLabel(String name, String email) {
+    return 'Dono: $name ($email)';
+  }
+
+  @override
+  String get adminSettingsTitle => 'Configurações';
+
+  @override
+  String adminSettingsLoadError(String error) {
+    return 'Falha ao carregar configurações: $error';
+  }
+
+  @override
+  String get adminSettingsScanTitle => 'Intervalo de Scan';
+
+  @override
+  String get adminSettingsScanDescription =>
+      'Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada Alerta. O agendamento real de cada Alerta é sorteado dentro dessa faixa.';
+
+  @override
+  String get adminSettingsMinIntervalLabel => 'Intervalo mínimo (minutos)';
+
+  @override
+  String get adminSettingsMaxIntervalLabel => 'Intervalo máximo (minutos)';
+
+  @override
+  String get adminSettingsValidationError =>
+      'O intervalo máximo deve ser maior ou igual ao mínimo.';
+
+  @override
+  String get adminSettingsSaveError =>
+      'Falha ao salvar configurações. Tente novamente.';
+
+  @override
+  String get adminSettingsSaveSuccess => 'Configurações salvas com sucesso.';
+
+  @override
+  String get adminSettingsSave => 'Salvar';
 }

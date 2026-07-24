@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/admin/admin_settings_screen.dart';
+import '../features/admin/admin_users_screen.dart';
+import '../features/admin/admin_watches_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/set_username_screen.dart';
 import '../features/profile/profile_screen.dart';
@@ -12,8 +15,10 @@ import '../features/watches/watch_list_screen.dart';
 import 'auth_router_refresh.dart';
 import 'auth_state.dart';
 import 'navigation_pages.dart';
+import 'providers.dart';
 
 const _splashPath = '/splash';
+const _adminPathPrefix = '/admin/';
 
 /// Router único do app. `ref.read`, não `watch`: o GoRouter deve ser criado
 /// uma vez e permanecer estável — `refreshListenable` (não uma dependência de
@@ -41,9 +46,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         case SessionStatus.usernamePending:
           return isSetUsernameRoute ? null : '/set-username';
         case SessionStatus.authenticated:
-          return (isSplashRoute || isAuthRoute || isSetUsernameRoute)
-              ? NavigationPage.watches.path
-              : null;
+          if (isSplashRoute || isAuthRoute || isSetUsernameRoute) {
+            return NavigationPage.watches.path;
+          }
+          // Bloqueia acesso direto por URL às rotas /admin/* para quem não é
+          // admin — a sidebar já esconde esses itens, mas alguém pode digitar
+          // a URL diretamente. Enquanto o perfil ainda carrega (valueOrNull
+          // null), deixa passar sem bloquear; AuthRouterRefresh reavalia este
+          // redirect assim que currentUserProfileProvider resolver a role real.
+          final isAdminRoute = state.matchedLocation.startsWith(_adminPathPrefix);
+          if (isAdminRoute) {
+            final profile = ref.read(currentUserProfileProvider).valueOrNull;
+            if (profile != null && profile.role != 'admin') {
+              return NavigationPage.watches.path;
+            }
+          }
+          return null;
       }
     },
     routes: [
@@ -91,6 +109,30 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: NavigationPage.profile.path,
                 builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: NavigationPage.adminUsers.path,
+                builder: (context, state) => const AdminUsersScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: NavigationPage.adminWatches.path,
+                builder: (context, state) => const AdminWatchesScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: NavigationPage.adminSettings.path,
+                builder: (context, state) => const AdminSettingsScreen(),
               ),
             ],
           ),

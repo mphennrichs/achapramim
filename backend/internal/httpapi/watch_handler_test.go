@@ -225,3 +225,51 @@ func TestWatchHandler_List(t *testing.T) {
 	require.NoError(t, json.Unmarshal(listRec.Body.Bytes(), &watches))
 	require.Len(t, watches, 2)
 }
+
+func TestWatchHandler_ListAllForAdmin(t *testing.T) {
+	pool := newTestPool(t)
+	owner := createTestUser(t, pool, "user")
+	admin := createTestUser(t, pool, "admin")
+	h := NewWatchHandler(pool)
+
+	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
+	createRec := httptest.NewRecorder()
+	h.Create(createRec, createReq)
+	require.Equal(t, http.StatusCreated, createRec.Code)
+
+	listReq := newWatchRequest(t, http.MethodGet, "/api/watches?all=true", claimsFor(admin), nil)
+	listRec := httptest.NewRecorder()
+	h.List(listRec, listReq)
+	require.Equal(t, http.StatusOK, listRec.Code, listRec.Body.String())
+
+	var watches []watchResponse
+	require.NoError(t, json.Unmarshal(listRec.Body.Bytes(), &watches))
+	require.Len(t, watches, 1)
+	require.NotNil(t, watches[0].OwnerName)
+	require.Equal(t, owner.Name, *watches[0].OwnerName)
+	require.NotNil(t, watches[0].OwnerEmail)
+	require.Equal(t, owner.Email, *watches[0].OwnerEmail)
+}
+
+func TestWatchHandler_ListAllIgnoredForNonAdmin(t *testing.T) {
+	pool := newTestPool(t)
+	owner := createTestUser(t, pool, "user")
+	other := createTestUser(t, pool, "user")
+	h := NewWatchHandler(pool)
+
+	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claimsFor(owner), sampleWatchBody())
+	createRec := httptest.NewRecorder()
+	h.Create(createRec, createReq)
+	require.Equal(t, http.StatusCreated, createRec.Code)
+
+	// ?all=true só tem efeito para admin — um User comum continua vendo
+	// apenas os próprios Watches, mesmo pedindo all=true.
+	listReq := newWatchRequest(t, http.MethodGet, "/api/watches?all=true", claimsFor(other), nil)
+	listRec := httptest.NewRecorder()
+	h.List(listRec, listReq)
+	require.Equal(t, http.StatusOK, listRec.Code)
+
+	var watches []watchResponse
+	require.NoError(t, json.Unmarshal(listRec.Body.Bytes(), &watches))
+	require.Len(t, watches, 0)
+}
