@@ -128,6 +128,20 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newWatchNameLabel => 'Nome do Alerta';
 
   @override
+  String get newWatchRegionTitle => 'Região da Busca';
+
+  @override
+  String get newWatchCityLabel => 'Cidade';
+
+  @override
+  String get newWatchStateLabel => 'Estado (UF)';
+
+  @override
+  String newWatchRegionHint(String city, String state) {
+    return 'Opcional — deixe em branco para usar o padrão: $city/$state';
+  }
+
+  @override
   String get newWatchKeywords => 'Palavras-Chave';
 
   @override
@@ -399,8 +413,28 @@ class AppLocalizationsPt extends AppLocalizations {
   String get adminSettingsMaxIntervalLabel => 'Intervalo máximo (minutos)';
 
   @override
+  String get adminSettingsRegionTitle => 'Região Padrão de Busca';
+
+  @override
+  String get adminSettingsRegionDescription =>
+      'Usada por um Alerta quando ele não define cidade/estado próprios.';
+
+  @override
+  String get adminSettingsDefaultCityLabel => 'Cidade padrão';
+
+  @override
+  String get adminSettingsDefaultStateLabel => 'Estado (UF)';
+
+  @override
+  String get adminSettingsBlockedWordsTitle => 'Palavras Bloqueadas Padrão';
+
+  @override
+  String get adminSettingsBlockedWordsDescription =>
+      'Copiadas para todo Alerta novo na criação. Editar aqui não afeta Alertas já criados.';
+
+  @override
   String get adminSettingsValidationError =>
-      'O intervalo máximo deve ser maior ou igual ao mínimo.';
+      'Verifique o intervalo (máximo ≥ mínimo) e preencha cidade e estado padrão.';
 
   @override
   String get adminSettingsSaveError =>

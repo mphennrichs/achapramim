@@ -182,6 +182,11 @@ func (ns NullScanStatus) Value() (driver.Value, error) {
 	return string(ns.ScanStatus), nil
 }
 
+type DefaultBlockedWord struct {
+	ID   pgtype.UUID `json:"id"`
+	Term string      `json:"term"`
+}
+
 type Marketplace struct {
 	Slug string `json:"slug"`
 }
@@ -257,6 +262,8 @@ type ScanSetting struct {
 	MinIntervalMinutes int32              `json:"min_interval_minutes"`
 	MaxIntervalMinutes int32              `json:"max_interval_minutes"`
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	DefaultCity        string             `json:"default_city"`
+	DefaultState       string             `json:"default_state"`
 }
 
 type User struct {
@@ -292,6 +299,8 @@ type Watch struct {
 	NextScanAt                pgtype.Timestamptz `json:"next_scan_at"`
 	CreatedAt                 pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                 pgtype.Timestamptz `json:"updated_at"`
+	City                      *string            `json:"city"`
+	State                     *string            `json:"state"`
 }
 
 type WatchBlockedWord struct {

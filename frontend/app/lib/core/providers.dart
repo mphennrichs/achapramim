@@ -7,6 +7,7 @@ import 'api/auth_service.dart';
 import 'api/link_preview_service.dart';
 import 'api/me_service.dart';
 import 'api/watch_service.dart';
+import 'models/scan_settings.dart';
 import 'models/user_profile.dart';
 
 /// URL base da API.
@@ -55,4 +56,12 @@ final adminServiceProvider = Provider<AdminService>((ref) {
 /// enquanto uma tela específica está montada.
 final currentUserProfileProvider = FutureProvider<UserProfile>((ref) {
   return ref.watch(meServiceProvider).get();
+});
+
+/// Configuração global de Scan (região padrão, palavras bloqueadas seed,
+/// intervalo) — GET é liberado a qualquer User autenticado (só o PUT é
+/// admin-only, ver router.go); autoDispose porque só é usado por telas
+/// pontuais (Novo Alerta, Configurações Globais), não pela sessão inteira.
+final scanSettingsProvider = FutureProvider.autoDispose<ScanSettings>((ref) {
+  return ref.watch(adminServiceProvider).getScanSettings();
 });

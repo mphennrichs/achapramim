@@ -14,10 +14,10 @@ import (
 const createWatch = `-- name: CreateWatch :one
 INSERT INTO watches (
     user_id, name, target_price_cents, tolerance_percent,
-    max_offers, price_drop_threshold_percent
+    max_offers, price_drop_threshold_percent, city, state
 )
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state
 `
 
 type CreateWatchParams struct {
@@ -27,8 +27,12 @@ type CreateWatchParams struct {
 	TolerancePercent          pgtype.Numeric `json:"tolerance_percent"`
 	MaxOffers                 int32          `json:"max_offers"`
 	PriceDropThresholdPercent pgtype.Numeric `json:"price_drop_threshold_percent"`
+	City                      *string        `json:"city"`
+	State                     *string        `json:"state"`
 }
 
+// city/state são opcionais (NULL): quando ausentes, o Scan usa o padrão
+// global em scan_settings (default_city/default_state) — ver OLXFetcher.
 func (q *Queries) CreateWatch(ctx context.Context, arg CreateWatchParams) (Watch, error) {
 	row := q.db.QueryRow(ctx, createWatch,
 		arg.UserID,
@@ -37,6 +41,8 @@ func (q *Queries) CreateWatch(ctx context.Context, arg CreateWatchParams) (Watch
 		arg.TolerancePercent,
 		arg.MaxOffers,
 		arg.PriceDropThresholdPercent,
+		arg.City,
+		arg.State,
 	)
 	var i Watch
 	err := row.Scan(
@@ -51,6 +57,8 @@ func (q *Queries) CreateWatch(ctx context.Context, arg CreateWatchParams) (Watch
 		&i.NextScanAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.City,
+		&i.State,
 	)
 	return i, err
 }
@@ -65,7 +73,7 @@ func (q *Queries) DeleteWatch(ctx context.Context, id pgtype.UUID) error {
 }
 
 const dueWatches = `-- name: DueWatches :many
-SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at
+SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, w.city, w.state
 FROM watches w
 JOIN users u ON u.id = w.user_id
 WHERE w.active
@@ -97,6 +105,8 @@ func (q *Queries) DueWatches(ctx context.Context) ([]Watch, error) {
 			&i.NextScanAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.City,
+			&i.State,
 		); err != nil {
 			return nil, err
 		}
@@ -109,7 +119,7 @@ func (q *Queries) DueWatches(ctx context.Context) ([]Watch, error) {
 }
 
 const getWatchByID = `-- name: GetWatchByID :one
-SELECT id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at FROM watches WHERE id = $1
+SELECT id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state FROM watches WHERE id = $1
 `
 
 func (q *Queries) GetWatchByID(ctx context.Context, id pgtype.UUID) (Watch, error) {
@@ -127,12 +137,14 @@ func (q *Queries) GetWatchByID(ctx context.Context, id pgtype.UUID) (Watch, erro
 		&i.NextScanAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.City,
+		&i.State,
 	)
 	return i, err
 }
 
 const listAllWatchesWithOwner = `-- name: ListAllWatchesWithOwner :many
-SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, u.name AS owner_name, u.email AS owner_email
+SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, w.city, w.state, u.name AS owner_name, u.email AS owner_email
 FROM watches w
 JOIN users u ON u.id = w.user_id
 ORDER BY w.user_id, w.created_at DESC
@@ -150,6 +162,8 @@ type ListAllWatchesWithOwnerRow struct {
 	NextScanAt                pgtype.Timestamptz `json:"next_scan_at"`
 	CreatedAt                 pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt                 pgtype.Timestamptz `json:"updated_at"`
+	City                      *string            `json:"city"`
+	State                     *string            `json:"state"`
 	OwnerName                 string             `json:"owner_name"`
 	OwnerEmail                string             `json:"owner_email"`
 }
@@ -178,6 +192,8 @@ func (q *Queries) ListAllWatchesWithOwner(ctx context.Context) ([]ListAllWatches
 			&i.NextScanAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.City,
+			&i.State,
 			&i.OwnerName,
 			&i.OwnerEmail,
 		); err != nil {
@@ -192,7 +208,7 @@ func (q *Queries) ListAllWatchesWithOwner(ctx context.Context) ([]ListAllWatches
 }
 
 const listWatchesByUser = `-- name: ListWatchesByUser :many
-SELECT id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at FROM watches WHERE user_id = $1 ORDER BY created_at DESC
+SELECT id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state FROM watches WHERE user_id = $1 ORDER BY created_at DESC
 `
 
 func (q *Queries) ListWatchesByUser(ctx context.Context, userID pgtype.UUID) ([]Watch, error) {
@@ -216,6 +232,8 @@ func (q *Queries) ListWatchesByUser(ctx context.Context, userID pgtype.UUID) ([]
 			&i.NextScanAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.City,
+			&i.State,
 		); err != nil {
 			return nil, err
 		}
@@ -242,7 +260,7 @@ func (q *Queries) RescheduleWatch(ctx context.Context, arg RescheduleWatchParams
 }
 
 const setWatchActive = `-- name: SetWatchActive :one
-UPDATE watches SET active = $2, updated_at = now() WHERE id = $1 RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at
+UPDATE watches SET active = $2, updated_at = now() WHERE id = $1 RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state
 `
 
 type SetWatchActiveParams struct {
@@ -265,6 +283,8 @@ func (q *Queries) SetWatchActive(ctx context.Context, arg SetWatchActiveParams) 
 		&i.NextScanAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.City,
+		&i.State,
 	)
 	return i, err
 }
@@ -276,9 +296,11 @@ UPDATE watches SET
     tolerance_percent = $4,
     max_offers = $5,
     price_drop_threshold_percent = $6,
+    city = $7,
+    state = $8,
     updated_at = now()
 WHERE id = $1
-RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at
+RETURNING id, user_id, name, target_price_cents, tolerance_percent, max_offers, price_drop_threshold_percent, active, next_scan_at, created_at, updated_at, city, state
 `
 
 type UpdateWatchParams struct {
@@ -288,6 +310,8 @@ type UpdateWatchParams struct {
 	TolerancePercent          pgtype.Numeric `json:"tolerance_percent"`
 	MaxOffers                 int32          `json:"max_offers"`
 	PriceDropThresholdPercent pgtype.Numeric `json:"price_drop_threshold_percent"`
+	City                      *string        `json:"city"`
+	State                     *string        `json:"state"`
 }
 
 func (q *Queries) UpdateWatch(ctx context.Context, arg UpdateWatchParams) (Watch, error) {
@@ -298,6 +322,8 @@ func (q *Queries) UpdateWatch(ctx context.Context, arg UpdateWatchParams) (Watch
 		arg.TolerancePercent,
 		arg.MaxOffers,
 		arg.PriceDropThresholdPercent,
+		arg.City,
+		arg.State,
 	)
 	var i Watch
 	err := row.Scan(
@@ -312,6 +338,8 @@ func (q *Queries) UpdateWatch(ctx context.Context, arg UpdateWatchParams) (Watch
 		&i.NextScanAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.City,
+		&i.State,
 	)
 	return i, err
 }

@@ -6,17 +6,13 @@ import '../../core/models/scan_settings.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
 
-final _scanSettingsProvider = FutureProvider.autoDispose<ScanSettings>((ref) {
-  return ref.watch(adminServiceProvider).getScanSettings();
-});
-
 class AdminSettingsScreen extends ConsumerWidget {
   const AdminSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final settingsAsync = ref.watch(_scanSettingsProvider);
+    final settingsAsync = ref.watch(scanSettingsProvider);
 
     return Scaffold(
       body: settingsAsync.when(
@@ -42,6 +38,10 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
       TextEditingController(text: widget.settings.minIntervalMinutes.toString());
   late final _maxController =
       TextEditingController(text: widget.settings.maxIntervalMinutes.toString());
+  late final _cityController = TextEditingController(text: widget.settings.defaultCity);
+  late final _stateController = TextEditingController(text: widget.settings.defaultState);
+  late final _blockedWordInputController = TextEditingController();
+  late final List<String> _blockedWords = List.of(widget.settings.defaultBlockedWords);
 
   bool _saving = false;
   String? _errorMessage;
@@ -51,15 +51,31 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
   void dispose() {
     _minController.dispose();
     _maxController.dispose();
+    _cityController.dispose();
+    _stateController.dispose();
+    _blockedWordInputController.dispose();
     super.dispose();
+  }
+
+  void _addBlockedWord() {
+    final value = _blockedWordInputController.text.trim();
+    if (value.isEmpty) return;
+    setState(() {
+      if (!_blockedWords.any((w) => w.toLowerCase() == value.toLowerCase())) {
+        _blockedWords.add(value);
+      }
+      _blockedWordInputController.clear();
+    });
   }
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context)!;
     final min = int.tryParse(_minController.text.trim());
     final max = int.tryParse(_maxController.text.trim());
+    final city = _cityController.text.trim();
+    final state = _stateController.text.trim();
 
-    if (min == null || max == null || max < min) {
+    if (min == null || max == null || max < min || city.isEmpty || state.isEmpty) {
       setState(() {
         _errorMessage = l10n.adminSettingsValidationError;
         _successMessage = null;
@@ -77,10 +93,16 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
       await ref.read(adminServiceProvider).updateScanSettings(
             minIntervalMinutes: min,
             maxIntervalMinutes: max,
+            defaultCity: city,
+            defaultState: state,
+            defaultBlockedWords: _blockedWords,
           );
-      setState(() => _successMessage = l10n.adminSettingsSaveSuccess);
+      // A tela de Novo Alerta também lê scanSettingsProvider (hint de
+      // região) — invalida para refletir a mudança sem precisar recarregar.
+      ref.invalidate(scanSettingsProvider);
+      if (mounted) setState(() => _successMessage = l10n.adminSettingsSaveSuccess);
     } on DioException {
-      setState(() => _errorMessage = l10n.adminSettingsSaveError);
+      if (mounted) setState(() => _errorMessage = l10n.adminSettingsSaveError);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -95,60 +117,153 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
       padding: const EdgeInsets.all(24),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 640),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(l10n.adminSettingsScanTitle, style: Theme.of(context).textTheme.labelLarge),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.adminSettingsScanDescription,
-                  style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
-                ),
-                const SizedBox(height: 20),
-                Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _minController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(labelText: l10n.adminSettingsMinIntervalLabel),
-                      ),
+                    Text(l10n.adminSettingsScanTitle, style: Theme.of(context).textTheme.labelLarge),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.adminSettingsScanDescription,
+                      style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _maxController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(labelText: l10n.adminSettingsMaxIntervalLabel),
-                      ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _minController,
+                            keyboardType: TextInputType.number,
+                            decoration:
+                                InputDecoration(labelText: l10n.adminSettingsMinIntervalLabel),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: _maxController,
+                            keyboardType: TextInputType.number,
+                            decoration:
+                                InputDecoration(labelText: l10n.adminSettingsMaxIntervalLabel),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 12),
-                  Text(_errorMessage!, style: TextStyle(color: scheme.error)),
-                ],
-                if (_successMessage != null) ...[
-                  const SizedBox(height: 12),
-                  Text(_successMessage!, style: TextStyle(color: scheme.primary)),
-                ],
-                const SizedBox(height: 20),
-                FilledButton(
-                  onPressed: _saving ? null : _save,
-                  child: _saving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.adminSettingsSave),
-                ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(l10n.adminSettingsRegionTitle, style: Theme.of(context).textTheme.labelLarge),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.adminSettingsRegionDescription,
+                      style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: TextField(
+                            controller: _cityController,
+                            decoration: InputDecoration(labelText: l10n.adminSettingsDefaultCityLabel),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: _stateController,
+                            textCapitalization: TextCapitalization.characters,
+                            maxLength: 2,
+                            decoration: InputDecoration(
+                              labelText: l10n.adminSettingsDefaultStateLabel,
+                              counterText: '',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l10n.adminSettingsBlockedWordsTitle,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: scheme.error),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.adminSettingsBlockedWordsDescription,
+                      style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final word in _blockedWords)
+                          InputChip(
+                            label: Text(word),
+                            onDeleted: () => setState(() => _blockedWords.remove(word)),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _blockedWordInputController,
+                            decoration: InputDecoration(hintText: l10n.newWatchAddWordHint),
+                            onSubmitted: (_) => _addBlockedWord(),
+                          ),
+                        ),
+                        IconButton(onPressed: _addBlockedWord, icon: const Icon(Icons.add)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 16),
+              Text(_errorMessage!, style: TextStyle(color: scheme.error)),
+            ],
+            if (_successMessage != null) ...[
+              const SizedBox(height: 16),
+              Text(_successMessage!, style: TextStyle(color: scheme.primary)),
+            ],
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: _saving ? null : _save,
+              child: _saving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.adminSettingsSave),
+            ),
+          ],
         ),
       ),
     );

@@ -48,6 +48,13 @@
   "newWatchIdentification": "Watch Identification",
   "newWatchAiSuggested": "AI suggested",
   "newWatchNameLabel": "Watch name",
+  "newWatchRegionTitle": "Search Region",
+  "newWatchCityLabel": "City",
+  "newWatchStateLabel": "State",
+  "newWatchRegionHint": "Optional — leave blank to use the default: {city}/{state}",
+  "@newWatchRegionHint": {
+    "placeholders": { "city": { "type": "String" }, "state": { "type": "String" } }
+  },
   "newWatchKeywords": "Keywords",
   "newWatchBlockedWords": "Blocked Words",
   "newWatchAddWordHint": "Add...",
@@ -180,7 +187,13 @@
   "adminSettingsScanDescription": "Minimum and maximum interval (in minutes) between Scan runs for each Watch. Each Watch's actual schedule is randomized within this range.",
   "adminSettingsMinIntervalLabel": "Minimum interval (minutes)",
   "adminSettingsMaxIntervalLabel": "Maximum interval (minutes)",
-  "adminSettingsValidationError": "The maximum interval must be greater than or equal to the minimum.",
+  "adminSettingsRegionTitle": "Default Search Region",
+  "adminSettingsRegionDescription": "Used by a Watch when it doesn't define its own city/state.",
+  "adminSettingsDefaultCityLabel": "Default city",
+  "adminSettingsDefaultStateLabel": "State",
+  "adminSettingsBlockedWordsTitle": "Default Blocked Words",
+  "adminSettingsBlockedWordsDescription": "Copied to every new Watch on creation. Editing here does not affect existing Watches.",
+  "adminSettingsValidationError": "Check the interval (max >= min) and fill in the default city and state.",
   "adminSettingsSaveError": "Failed to save settings. Please try again.",
   "adminSettingsSaveSuccess": "Settings saved successfully.",
   "adminSettingsSave": "Save"

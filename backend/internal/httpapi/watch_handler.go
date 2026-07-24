@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -31,6 +32,10 @@ type watchRequest struct {
 	Keywords                  []string `json:"keywords"`
 	BlockedWords              []string `json:"blocked_words"`
 	Marketplaces              []string `json:"marketplaces"`
+	// City/State são opcionais — omitidos ou vazios, o Scan usa o padrão
+	// global (Configurações Globais). Ver resolveRegion em scan/runner.go.
+	City  *string `json:"city"`
+	State *string `json:"state"`
 }
 
 type setActiveRequest struct {
@@ -49,6 +54,8 @@ type watchResponse struct {
 	Keywords                  []string `json:"keywords"`
 	BlockedWords              []string `json:"blocked_words"`
 	Marketplaces              []string `json:"marketplaces"`
+	City                      *string  `json:"city"`
+	State                     *string  `json:"state"`
 	// Preenchidos só na listagem admin (GET /api/watches?all=true) — o dono
 	// de um Watch é irrelevante nas demais respostas (o próprio User já sabe
 	// quais Watches são seus).
@@ -99,9 +106,20 @@ func (h *WatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		TolerancePercent:          tolerance,
 		MaxOffers:                 req.MaxOffers,
 		PriceDropThresholdPercent: threshold,
+		City:                      req.City,
+		State:                     req.State,
 	})
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "failed to create watch: "+err.Error())
+		return
+	}
+
+	// Seed global de palavras bloqueadas (Configurações Globais) é somado às
+	// informadas pelo usuário na criação — nunca substitui, só complementa
+	// (união, sem duplicatas). Só se aplica na criação, não em Update.
+	req.BlockedWords, err = mergeWithDefaultBlockedWords(ctx, q, req.BlockedWords)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal error")
 		return
 	}
 
@@ -127,7 +145,38 @@ func (h *WatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Keywords:                  req.Keywords,
 		BlockedWords:              req.BlockedWords,
 		Marketplaces:              req.Marketplaces,
+		City:                      watch.City,
+		State:                     watch.State,
 	})
+}
+
+// mergeWithDefaultBlockedWords retorna a união (sem duplicatas) entre as
+// palavras bloqueadas informadas pelo usuário e o seed global (admin,
+// Configurações Globais) — comparação case-insensitive para não duplicar
+// "Quebrado" com "quebrado".
+func mergeWithDefaultBlockedWords(ctx context.Context, q *sqlcgen.Queries, userWords []string) ([]string, error) {
+	defaults, err := q.ListDefaultBlockedWords(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	seen := make(map[string]bool, len(userWords)+len(defaults))
+	merged := make([]string, 0, len(userWords)+len(defaults))
+	for _, term := range userWords {
+		key := strings.ToLower(term)
+		if !seen[key] {
+			seen[key] = true
+			merged = append(merged, term)
+		}
+	}
+	for _, d := range defaults {
+		key := strings.ToLower(d.Term)
+		if !seen[key] {
+			seen[key] = true
+			merged = append(merged, d.Term)
+		}
+	}
+	return merged, nil
 }
 
 // writeWatchChildren insere keywords, palavras bloqueadas e marketplaces de
@@ -203,6 +252,8 @@ func (h *WatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 		TolerancePercent:          tolerance,
 		MaxOffers:                 req.MaxOffers,
 		PriceDropThresholdPercent: threshold,
+		City:                      req.City,
+		State:                     req.State,
 	})
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "failed to update watch: "+err.Error())
@@ -243,6 +294,8 @@ func (h *WatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Keywords:                  req.Keywords,
 		BlockedWords:              req.BlockedWords,
 		Marketplaces:              req.Marketplaces,
+		City:                      watch.City,
+		State:                     watch.State,
 	})
 }
 
@@ -305,6 +358,8 @@ func (h *WatchHandler) List(w http.ResponseWriter, r *http.Request) {
 				NextScanAt:                row.NextScanAt,
 				CreatedAt:                 row.CreatedAt,
 				UpdatedAt:                 row.UpdatedAt,
+				City:                      row.City,
+				State:                     row.State,
 			}
 			wr, err := loadWatchResponse(ctx, q, watch)
 			if err != nil {
@@ -435,5 +490,7 @@ func loadWatchResponse(ctx context.Context, q *sqlcgen.Queries, watch sqlcgen.Wa
 		Keywords:                  keywords,
 		BlockedWords:              blockedWords,
 		Marketplaces:              marketplaces,
+		City:                      watch.City,
+		State:                     watch.State,
 	}, nil
 }

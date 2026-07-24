@@ -128,6 +128,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newWatchNameLabel => 'Watch name';
 
   @override
+  String get newWatchRegionTitle => 'Search Region';
+
+  @override
+  String get newWatchCityLabel => 'City';
+
+  @override
+  String get newWatchStateLabel => 'State';
+
+  @override
+  String newWatchRegionHint(String city, String state) {
+    return 'Optional — leave blank to use the default: $city/$state';
+  }
+
+  @override
   String get newWatchKeywords => 'Keywords';
 
   @override
@@ -399,8 +413,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminSettingsMaxIntervalLabel => 'Maximum interval (minutes)';
 
   @override
+  String get adminSettingsRegionTitle => 'Default Search Region';
+
+  @override
+  String get adminSettingsRegionDescription =>
+      'Used by a Watch when it doesn\'t define its own city/state.';
+
+  @override
+  String get adminSettingsDefaultCityLabel => 'Default city';
+
+  @override
+  String get adminSettingsDefaultStateLabel => 'State';
+
+  @override
+  String get adminSettingsBlockedWordsTitle => 'Default Blocked Words';
+
+  @override
+  String get adminSettingsBlockedWordsDescription =>
+      'Copied to every new Watch on creation. Editing here does not affect existing Watches.';
+
+  @override
   String get adminSettingsValidationError =>
-      'The maximum interval must be greater than or equal to the minimum.';
+      'Check the interval (max >= min) and fill in the default city and state.';
 
   @override
   String get adminSettingsSaveError =>

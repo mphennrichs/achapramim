@@ -10,6 +10,10 @@ class Watch {
   final List<String> keywords;
   final List<String> blockedWords;
   final List<String> marketplaces;
+  // Cidade/estado opcionais: quando ausentes, o Scan usa o padrão global
+  // (ScanSettings.defaultCity/defaultState).
+  final String? city;
+  final String? state;
   // Só preenchidos na listagem admin (GET /api/watches?all=true).
   final String? ownerName;
   final String? ownerEmail;
@@ -26,6 +30,8 @@ class Watch {
     required this.keywords,
     required this.blockedWords,
     required this.marketplaces,
+    this.city,
+    this.state,
     this.ownerName,
     this.ownerEmail,
   });
@@ -43,6 +49,8 @@ class Watch {
       keywords: (json['keywords'] as List<dynamic>? ?? []).cast<String>(),
       blockedWords: (json['blocked_words'] as List<dynamic>? ?? []).cast<String>(),
       marketplaces: (json['marketplaces'] as List<dynamic>? ?? []).cast<String>(),
+      city: json['city'] as String?,
+      state: json['state'] as String?,
       ownerName: json['owner_name'] as String?,
       ownerEmail: json['owner_email'] as String?,
     );
@@ -58,6 +66,8 @@ class Watch {
       'keywords': keywords,
       'blocked_words': blockedWords,
       'marketplaces': marketplaces,
+      'city': city,
+      'state': state,
     };
   }
 }

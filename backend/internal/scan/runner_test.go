@@ -15,14 +15,16 @@ import (
 )
 
 type fakeFetcher struct {
-	slug     string
-	listings []marketplace.Listing
-	err      error
+	slug      string
+	listings  []marketplace.Listing
+	err       error
+	lastQuery marketplace.Query
 }
 
 func (f *fakeFetcher) Slug() string { return f.slug }
 
 func (f *fakeFetcher) Fetch(ctx context.Context, query marketplace.Query) ([]marketplace.Listing, error) {
+	f.lastQuery = query
 	if f.err != nil {
 		return nil, f.err
 	}
@@ -30,6 +32,10 @@ func (f *fakeFetcher) Fetch(ctx context.Context, query marketplace.Query) ([]mar
 }
 
 func createTestUserAndWatch(t *testing.T, pool *pgxpool.Pool, marketplaceSlugs []string, keywords, blockedWords []string) sqlcgen.Watch {
+	return createTestUserAndWatchWithRegion(t, pool, marketplaceSlugs, keywords, blockedWords, nil, nil)
+}
+
+func createTestUserAndWatchWithRegion(t *testing.T, pool *pgxpool.Pool, marketplaceSlugs []string, keywords, blockedWords []string, city, state *string) sqlcgen.Watch {
 	t.Helper()
 	ctx := context.Background()
 	q := sqlcgen.New(pool)
@@ -54,6 +60,8 @@ func createTestUserAndWatch(t *testing.T, pool *pgxpool.Pool, marketplaceSlugs [
 		TolerancePercent:          tolerance,
 		MaxOffers:                 20,
 		PriceDropThresholdPercent: threshold,
+		City:                      city,
+		State:                     state,
 	})
 	require.NoError(t, err)
 
@@ -146,4 +154,32 @@ func TestRunner_RunWatch_MarksMissingOfferUnavailable(t *testing.T) {
 	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
 	require.NoError(t, err)
 	require.Empty(t, offers, "offer no longer returned by fetcher should become unavailable")
+}
+
+func TestRunner_RunWatch_UsesGlobalDefaultRegionWhenWatchHasNone(t *testing.T) {
+	pool := newTestPool(t)
+	watch := createTestUserAndWatch(t, pool, []string{"olx"}, nil, nil)
+
+	fetcher := &fakeFetcher{slug: "olx"}
+	runner := NewRunner(pool, []marketplace.Fetcher{fetcher})
+	require.NoError(t, runner.RunWatch(context.Background(), watch))
+
+	// scan_settings.default_city/default_state (seed da migration) — ver
+	// resolveRegion.
+	require.Equal(t, "Belo Horizonte", fetcher.lastQuery.City)
+	require.Equal(t, "MG", fetcher.lastQuery.State)
+}
+
+func TestRunner_RunWatch_UsesWatchOwnRegionOverGlobalDefault(t *testing.T) {
+	pool := newTestPool(t)
+	city := "Curitiba"
+	state := "PR"
+	watch := createTestUserAndWatchWithRegion(t, pool, []string{"olx"}, nil, nil, &city, &state)
+
+	fetcher := &fakeFetcher{slug: "olx"}
+	runner := NewRunner(pool, []marketplace.Fetcher{fetcher})
+	require.NoError(t, runner.RunWatch(context.Background(), watch))
+
+	require.Equal(t, "Curitiba", fetcher.lastQuery.City)
+	require.Equal(t, "PR", fetcher.lastQuery.State)
 }

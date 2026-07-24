@@ -23,6 +23,13 @@ func TestScanSettingsHandler_GetDefaults(t *testing.T) {
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &settings))
 	require.Equal(t, int32(30), settings.MinIntervalMinutes)
 	require.Equal(t, int32(120), settings.MaxIntervalMinutes)
+	require.Equal(t, "Belo Horizonte", settings.DefaultCity)
+	require.Equal(t, "MG", settings.DefaultState)
+	require.ElementsMatch(t, []string{
+		"quebrado", "quebrada", "sucata", "para peças", "para peca", "para pecas",
+		"no estado", "avariado", "avariada", "danificado", "danificada",
+		"defeito", "com defeito", "não funciona", "nao funciona",
+	}, settings.DefaultBlockedWords)
 }
 
 func TestScanSettingsHandler_Update(t *testing.T) {
@@ -31,8 +38,11 @@ func TestScanSettingsHandler_Update(t *testing.T) {
 	h := NewScanSettingsHandler(pool)
 
 	req := newWatchRequest(t, http.MethodPut, "/api/scan-settings", claimsFor(admin), scanSettingsRequest{
-		MinIntervalMinutes: 15,
-		MaxIntervalMinutes: 60,
+		MinIntervalMinutes:  15,
+		MaxIntervalMinutes:  60,
+		DefaultCity:         "Curitiba",
+		DefaultState:        "PR",
+		DefaultBlockedWords: []string{"quebrado", "Quebrado", "sucata"},
 	})
 	rec := httptest.NewRecorder()
 	h.Update(rec, req)
@@ -42,6 +52,9 @@ func TestScanSettingsHandler_Update(t *testing.T) {
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &updated))
 	require.Equal(t, int32(15), updated.MinIntervalMinutes)
 	require.Equal(t, int32(60), updated.MaxIntervalMinutes)
+	require.Equal(t, "Curitiba", updated.DefaultCity)
+	require.Equal(t, "PR", updated.DefaultState)
+	require.ElementsMatch(t, []string{"quebrado", "sucata"}, updated.DefaultBlockedWords)
 
 	getReq := newWatchRequest(t, http.MethodGet, "/api/scan-settings", claimsFor(admin), nil)
 	getRec := httptest.NewRecorder()
@@ -49,6 +62,7 @@ func TestScanSettingsHandler_Update(t *testing.T) {
 	var fetched scanSettingsResponse
 	require.NoError(t, json.Unmarshal(getRec.Body.Bytes(), &fetched))
 	require.Equal(t, int32(15), fetched.MinIntervalMinutes)
+	require.ElementsMatch(t, []string{"quebrado", "sucata"}, fetched.DefaultBlockedWords)
 }
 
 func TestScanSettingsHandler_UpdateRejectsMaxBelowMin(t *testing.T) {

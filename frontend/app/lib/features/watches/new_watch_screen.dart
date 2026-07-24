@@ -38,6 +38,8 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
   final _maxOffersController = TextEditingController(text: '50');
   final _keywordInputController = TextEditingController();
   final _blockedInputController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _stateController = TextEditingController();
 
   final List<String> _keywords = [];
   final List<String> _blockedWords = [];
@@ -55,6 +57,8 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
     _maxOffersController.dispose();
     _keywordInputController.dispose();
     _blockedInputController.dispose();
+    _cityController.dispose();
+    _stateController.dispose();
     super.dispose();
   }
 
@@ -92,6 +96,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
       _errorMessage = null;
     });
 
+    final city = _cityController.text.trim();
+    final state = _stateController.text.trim();
+
     final watch = Watch(
       id: '',
       userId: '',
@@ -104,6 +111,9 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
       keywords: _keywords,
       blockedWords: _blockedWords,
       marketplaces: _selectedMarketplaces.toList(),
+      // Vazio = usa o padrão global (ver ScanSettingsHandler/OLXFetcher).
+      city: city.isEmpty ? null : city,
+      state: state.isEmpty ? null : state,
     );
 
     try {
@@ -154,6 +164,56 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                       TextField(
                         controller: _nameController,
                         decoration: InputDecoration(labelText: l10n.newWatchNameLabel),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(l10n.newWatchRegionTitle, style: Theme.of(context).textTheme.labelLarge),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextField(
+                              controller: _cityController,
+                              decoration: InputDecoration(labelText: l10n.newWatchCityLabel),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextField(
+                              controller: _stateController,
+                              textCapitalization: TextCapitalization.characters,
+                              maxLength: 2,
+                              decoration: InputDecoration(
+                                labelText: l10n.newWatchStateLabel,
+                                counterText: '',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final settings = ref.watch(scanSettingsProvider);
+                          return settings.when(
+                            data: (s) => Text(
+                              l10n.newWatchRegionHint(s.defaultCity, s.defaultState),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, _) => const SizedBox.shrink(),
+                          );
+                        },
                       ),
                     ],
                   ),

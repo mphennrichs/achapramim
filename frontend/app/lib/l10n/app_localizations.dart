@@ -314,6 +314,30 @@ abstract class AppLocalizations {
   /// **'Nome do Alerta'**
   String get newWatchNameLabel;
 
+  /// No description provided for @newWatchRegionTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Região da Busca'**
+  String get newWatchRegionTitle;
+
+  /// No description provided for @newWatchCityLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cidade'**
+  String get newWatchCityLabel;
+
+  /// No description provided for @newWatchStateLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estado (UF)'**
+  String get newWatchStateLabel;
+
+  /// No description provided for @newWatchRegionHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opcional — deixe em branco para usar o padrão: {city}/{state}'**
+  String newWatchRegionHint(String city, String state);
+
   /// No description provided for @newWatchKeywords.
   ///
   /// In pt, this message translates to:
@@ -782,10 +806,46 @@ abstract class AppLocalizations {
   /// **'Intervalo máximo (minutos)'**
   String get adminSettingsMaxIntervalLabel;
 
+  /// No description provided for @adminSettingsRegionTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Região Padrão de Busca'**
+  String get adminSettingsRegionTitle;
+
+  /// No description provided for @adminSettingsRegionDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usada por um Alerta quando ele não define cidade/estado próprios.'**
+  String get adminSettingsRegionDescription;
+
+  /// No description provided for @adminSettingsDefaultCityLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cidade padrão'**
+  String get adminSettingsDefaultCityLabel;
+
+  /// No description provided for @adminSettingsDefaultStateLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estado (UF)'**
+  String get adminSettingsDefaultStateLabel;
+
+  /// No description provided for @adminSettingsBlockedWordsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Palavras Bloqueadas Padrão'**
+  String get adminSettingsBlockedWordsTitle;
+
+  /// No description provided for @adminSettingsBlockedWordsDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiadas para todo Alerta novo na criação. Editar aqui não afeta Alertas já criados.'**
+  String get adminSettingsBlockedWordsDescription;
+
   /// No description provided for @adminSettingsValidationError.
   ///
   /// In pt, this message translates to:
-  /// **'O intervalo máximo deve ser maior ou igual ao mínimo.'**
+  /// **'Verifique o intervalo (máximo ≥ mínimo) e preencha cidade e estado padrão.'**
   String get adminSettingsValidationError;
 
   /// No description provided for @adminSettingsSaveError.

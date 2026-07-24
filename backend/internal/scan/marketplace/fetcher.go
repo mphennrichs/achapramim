@@ -14,10 +14,14 @@ type Listing struct {
 
 // Query descreve o que buscar: as palavras-chave e bloqueadas já
 // determinam o texto de busca e o filtro client-side, sem nenhuma
-// dependência do domínio Watch dentro deste pacote.
+// dependência do domínio Watch dentro deste pacote. City/State escopam a
+// busca por região — já resolvidos para o padrão global pelo chamador
+// (Runner) quando o Watch não define os seus próprios.
 type Query struct {
 	Keywords     []string
 	BlockedWords []string
+	City         string
+	State        string
 }
 
 // Fetcher busca anúncios em um Marketplace específico. Cada implementação

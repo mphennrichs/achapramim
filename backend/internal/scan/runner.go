@@ -51,6 +51,11 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 		return err
 	}
 
+	city, state, err := resolveRegion(ctx, q, watch)
+	if err != nil {
+		return err
+	}
+
 	keywords := make([]string, len(keywordRows))
 	for i, k := range keywordRows {
 		keywords[i] = k.Term
@@ -78,6 +83,8 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 		listings, err := fetcher.Fetch(ctx, marketplace.Query{
 			Keywords:     keywords,
 			BlockedWords: blockedWords,
+			City:         city,
+			State:        state,
 		})
 		if err != nil {
 			anyFailure = true
@@ -157,6 +164,21 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 	}
 
 	return nil
+}
+
+// resolveRegion retorna a região de busca do Watch (city/state), caindo
+// para o padrão global (scan_settings.default_city/default_state) quando o
+// Watch não define os seus — ver CreateWatch, onde city/state ficam NULL a
+// menos que o usuário informe explicitamente.
+func resolveRegion(ctx context.Context, q *sqlcgen.Queries, watch sqlcgen.Watch) (city, state string, err error) {
+	if watch.City != nil && watch.State != nil {
+		return *watch.City, *watch.State, nil
+	}
+	settings, err := q.GetScanSettings(ctx)
+	if err != nil {
+		return "", "", err
+	}
+	return settings.DefaultCity, settings.DefaultState, nil
 }
 
 func numericToFloat(n pgtype.Numeric) float64 {

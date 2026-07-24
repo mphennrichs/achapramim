@@ -1,9 +1,11 @@
 -- name: CreateWatch :one
+-- city/state são opcionais (NULL): quando ausentes, o Scan usa o padrão
+-- global em scan_settings (default_city/default_state) — ver OLXFetcher.
 INSERT INTO watches (
     user_id, name, target_price_cents, tolerance_percent,
-    max_offers, price_drop_threshold_percent
+    max_offers, price_drop_threshold_percent, city, state
 )
-VALUES ($1, $2, $3, $4, $5, $6)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
 -- name: GetWatchByID :one
@@ -28,6 +30,8 @@ UPDATE watches SET
     tolerance_percent = $4,
     max_offers = $5,
     price_drop_threshold_percent = $6,
+    city = $7,
+    state = $8,
     updated_at = now()
 WHERE id = $1
 RETURNING *;

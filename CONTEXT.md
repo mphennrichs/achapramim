@@ -5,7 +5,7 @@ Monitora marketplaces em busca de ofertas que atendam critérios cadastrados pel
 ## Language
 
 **Alerta**:
-Configuração salva de monitoramento: contém valor-alvo (com % de variação aceitável), palavras-chave, lista de palavras bloqueadas, quantidade de ofertas listadas (limite total, somado entre marketplaces), limiar mínimo de queda de preço para notificação, e os marketplaces a monitorar. Um Alerta pode abranger múltiplos marketplaces simultaneamente. Pode ser criado manualmente ou a partir de uma Proposta de Preenchimento gerada a partir de um link.
+Configuração salva de monitoramento: contém valor-alvo (com % de variação aceitável), palavras-chave, lista de palavras bloqueadas, quantidade de ofertas listadas (limite total, somado entre marketplaces), limiar mínimo de queda de preço para notificação, os marketplaces a monitorar, e opcionalmente uma Região de Busca própria. Um Alerta pode abranger múltiplos marketplaces simultaneamente. Pode ser criado manualmente ou a partir de uma Proposta de Preenchimento gerada a partir de um link.
 _Avoid_: Consulta, busca, monitoramento, Watch (termo anterior, substituído para consistência com a UI em português)
 
 **Proposta de Preenchimento**:
@@ -34,6 +34,14 @@ _Avoid_: Score, ranking (como nome do campo)
 **Palavra bloqueada**:
 Termo cadastrado no Alerta que, se presente na Offer, a exclui totalmente dos resultados — ela não é exibida nem gera Notificação. Diferente de palavra-chave, que influencia a Classificação mas não exclui.
 _Avoid_: Blocklist (como nome do campo), palavra banida
+
+**Palavra bloqueada padrão**:
+Termo definido pelo admin (Configurações Globais) que é copiado para a lista de Palavra bloqueada de todo Alerta novo, no momento da criação — uma união com o que o próprio usuário já tiver digitado no formulário, nunca substituindo. Editar a lista padrão não retroage sobre Alertas já criados; o usuário pode remover, no próprio Alerta, qualquer termo herdado do padrão sem afetar o padrão global.
+_Avoid_: Seed (como nome do campo/tela), blocklist global, palavra bloqueada global
+
+**Região de Busca**:
+Cidade e estado (UF) usados para restringir a busca de um Alerta em um Marketplace a uma localidade. Opcional por Alerta — quando ausente, o Scan usa a Região de Busca Padrão definida pelo admin (Configurações Globais). Um Marketplace pode ignorar a Região de Busca se não tiver uma localidade correspondente mapeada, caindo para busca nacional (comportamento de implementação, não uma regra do domínio).
+_Avoid_: Localização, location (como nome do campo)
 
 **Sugestão de Sinônimos**:
 Ação explícita, acionada pelo usuário ao cadastrar/editar uma palavra-chave ou palavra bloqueada, que consulta um LLM para propor variações (sinônimos, termos relacionados). As sugestões são sempre revisadas manualmente — o usuário marca quais aceitar antes delas entrarem na lista. Uma vez aceita, uma sugestão vira uma entrada solta na mesma lista, indistinguível de uma palavra digitada manualmente (sem vínculo rastreável com a palavra que a originou).

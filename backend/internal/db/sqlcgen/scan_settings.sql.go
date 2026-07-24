@@ -10,7 +10,7 @@ import (
 )
 
 const getScanSettings = `-- name: GetScanSettings :one
-SELECT id, min_interval_minutes, max_interval_minutes, updated_at FROM scan_settings WHERE id = TRUE
+SELECT id, min_interval_minutes, max_interval_minutes, updated_at, default_city, default_state FROM scan_settings WHERE id = TRUE
 `
 
 func (q *Queries) GetScanSettings(ctx context.Context) (ScanSetting, error) {
@@ -21,30 +21,45 @@ func (q *Queries) GetScanSettings(ctx context.Context) (ScanSetting, error) {
 		&i.MinIntervalMinutes,
 		&i.MaxIntervalMinutes,
 		&i.UpdatedAt,
+		&i.DefaultCity,
+		&i.DefaultState,
 	)
 	return i, err
 }
 
 const updateScanSettings = `-- name: UpdateScanSettings :one
 UPDATE scan_settings
-SET min_interval_minutes = $1, max_interval_minutes = $2, updated_at = now()
+SET min_interval_minutes = $1,
+    max_interval_minutes = $2,
+    default_city = $3,
+    default_state = $4,
+    updated_at = now()
 WHERE id = TRUE
-RETURNING id, min_interval_minutes, max_interval_minutes, updated_at
+RETURNING id, min_interval_minutes, max_interval_minutes, updated_at, default_city, default_state
 `
 
 type UpdateScanSettingsParams struct {
-	MinIntervalMinutes int32 `json:"min_interval_minutes"`
-	MaxIntervalMinutes int32 `json:"max_interval_minutes"`
+	MinIntervalMinutes int32  `json:"min_interval_minutes"`
+	MaxIntervalMinutes int32  `json:"max_interval_minutes"`
+	DefaultCity        string `json:"default_city"`
+	DefaultState       string `json:"default_state"`
 }
 
 func (q *Queries) UpdateScanSettings(ctx context.Context, arg UpdateScanSettingsParams) (ScanSetting, error) {
-	row := q.db.QueryRow(ctx, updateScanSettings, arg.MinIntervalMinutes, arg.MaxIntervalMinutes)
+	row := q.db.QueryRow(ctx, updateScanSettings,
+		arg.MinIntervalMinutes,
+		arg.MaxIntervalMinutes,
+		arg.DefaultCity,
+		arg.DefaultState,
+	)
 	var i ScanSetting
 	err := row.Scan(
 		&i.ID,
 		&i.MinIntervalMinutes,
 		&i.MaxIntervalMinutes,
 		&i.UpdatedAt,
+		&i.DefaultCity,
+		&i.DefaultState,
 	)
 	return i, err
 }

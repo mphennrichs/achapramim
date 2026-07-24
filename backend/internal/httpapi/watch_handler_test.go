@@ -85,7 +85,10 @@ func TestWatchHandler_CreateAndGet(t *testing.T) {
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &created))
 	require.Equal(t, "PS5 barato", created.Name)
 	require.ElementsMatch(t, []string{"playstation", "ps5"}, created.Keywords)
-	require.ElementsMatch(t, []string{"quebrado"}, created.BlockedWords)
+	// "quebrado" já está no seed global (Configurações Globais) — a lista
+	// final é a união com o seed, não apenas o que foi enviado no request.
+	require.Contains(t, created.BlockedWords, "quebrado")
+	require.Contains(t, created.BlockedWords, "sucata")
 	require.ElementsMatch(t, []string{"mercado_livre", "olx"}, created.Marketplaces)
 	require.True(t, created.Active)
 
@@ -249,6 +252,107 @@ func TestWatchHandler_ListAllForAdmin(t *testing.T) {
 	require.Equal(t, owner.Name, *watches[0].OwnerName)
 	require.NotNil(t, watches[0].OwnerEmail)
 	require.Equal(t, owner.Email, *watches[0].OwnerEmail)
+}
+
+func TestWatchHandler_CreateMergesDefaultBlockedWordsWithoutDuplicates(t *testing.T) {
+	pool := newTestPool(t)
+	user := createTestUser(t, pool, "user")
+	claims := claimsFor(user)
+	h := NewWatchHandler(pool)
+
+	body := sampleWatchBody()
+	// "Quebrado" (maiúsculo) e "sucata" já estão no seed global — a união
+	// deve ser case-insensitive e não duplicar.
+	body.BlockedWords = []string{"Quebrado", "sucata", "extra do usuário"}
+
+	req := newWatchRequest(t, http.MethodPost, "/api/watches", claims, body)
+	rec := httptest.NewRecorder()
+	h.Create(rec, req)
+	require.Equal(t, http.StatusCreated, rec.Code, rec.Body.String())
+
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &created))
+	require.Contains(t, created.BlockedWords, "Quebrado")
+	require.Contains(t, created.BlockedWords, "extra do usuário")
+	require.Contains(t, created.BlockedWords, "para peças")
+	// "sucata" só aparece uma vez (do request, não duplicado pelo seed).
+	count := 0
+	for _, w := range created.BlockedWords {
+		if w == "sucata" {
+			count++
+		}
+	}
+	require.Equal(t, 1, count)
+}
+
+func TestWatchHandler_UpdateDoesNotReapplyDefaultBlockedWordsSeed(t *testing.T) {
+	pool := newTestPool(t)
+	user := createTestUser(t, pool, "user")
+	claims := claimsFor(user)
+	h := NewWatchHandler(pool)
+
+	createReq := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
+	createRec := httptest.NewRecorder()
+	h.Create(createRec, createReq)
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(createRec.Body.Bytes(), &created))
+	require.Contains(t, created.BlockedWords, "sucata")
+
+	updated := sampleWatchBody()
+	updated.BlockedWords = []string{"palavra específica"}
+
+	updateReq := withChiParam(newWatchRequest(t, http.MethodPut, "/api/watches/"+created.ID, claims, updated), "id", created.ID)
+	updateRec := httptest.NewRecorder()
+	h.Update(updateRec, updateReq)
+	require.Equal(t, http.StatusOK, updateRec.Code, updateRec.Body.String())
+
+	var result watchResponse
+	require.NoError(t, json.Unmarshal(updateRec.Body.Bytes(), &result))
+	// Update é replace completo, sem reaplicar o seed — só o que o usuário
+	// mandou desta vez.
+	require.ElementsMatch(t, []string{"palavra específica"}, result.BlockedWords)
+}
+
+func TestWatchHandler_CreateWithRegionOverridesGlobalDefault(t *testing.T) {
+	pool := newTestPool(t)
+	user := createTestUser(t, pool, "user")
+	claims := claimsFor(user)
+	h := NewWatchHandler(pool)
+
+	city := "Curitiba"
+	state := "PR"
+	body := sampleWatchBody()
+	body.City = &city
+	body.State = &state
+
+	req := newWatchRequest(t, http.MethodPost, "/api/watches", claims, body)
+	rec := httptest.NewRecorder()
+	h.Create(rec, req)
+	require.Equal(t, http.StatusCreated, rec.Code, rec.Body.String())
+
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &created))
+	require.NotNil(t, created.City)
+	require.Equal(t, "Curitiba", *created.City)
+	require.NotNil(t, created.State)
+	require.Equal(t, "PR", *created.State)
+}
+
+func TestWatchHandler_CreateWithoutRegionLeavesFieldsNil(t *testing.T) {
+	pool := newTestPool(t)
+	user := createTestUser(t, pool, "user")
+	claims := claimsFor(user)
+	h := NewWatchHandler(pool)
+
+	req := newWatchRequest(t, http.MethodPost, "/api/watches", claims, sampleWatchBody())
+	rec := httptest.NewRecorder()
+	h.Create(rec, req)
+	require.Equal(t, http.StatusCreated, rec.Code, rec.Body.String())
+
+	var created watchResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &created))
+	require.Nil(t, created.City)
+	require.Nil(t, created.State)
 }
 
 func TestWatchHandler_ListAllIgnoredForNonAdmin(t *testing.T) {
