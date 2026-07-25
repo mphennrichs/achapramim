@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/marketplace_labels.dart';
 import '../../core/models/scan_settings.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
@@ -53,6 +54,36 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
     widget.settings.defaultBlockedWords,
   );
 
+  // Um par de controllers min/max por marketplace conhecido
+  // (availableMarketplaces) — pré-preenchido com o override existente, ou
+  // com o fallback global quando o marketplace ainda não tem override
+  // próprio.
+  late final Map<String, TextEditingController> _marketplaceMinControllers = {
+    for (final slug in availableMarketplaces)
+      slug: TextEditingController(
+        text:
+            (_findMarketplaceInterval(slug)?.minIntervalMinutes ??
+                    widget.settings.minIntervalMinutes)
+                .toString(),
+      ),
+  };
+  late final Map<String, TextEditingController> _marketplaceMaxControllers = {
+    for (final slug in availableMarketplaces)
+      slug: TextEditingController(
+        text:
+            (_findMarketplaceInterval(slug)?.maxIntervalMinutes ??
+                    widget.settings.maxIntervalMinutes)
+                .toString(),
+      ),
+  };
+
+  MarketplaceScanInterval? _findMarketplaceInterval(String slug) {
+    for (final interval in widget.settings.marketplaceIntervals) {
+      if (interval.marketplaceSlug == slug) return interval;
+    }
+    return null;
+  }
+
   bool _saving = false;
   String? _errorMessage;
   String? _successMessage;
@@ -64,6 +95,12 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
     _cityController.dispose();
     _stateController.dispose();
     _blockedWordInputController.dispose();
+    for (final c in _marketplaceMinControllers.values) {
+      c.dispose();
+    }
+    for (final c in _marketplaceMaxControllers.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -97,6 +134,26 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
       return;
     }
 
+    final marketplaceIntervals = <MarketplaceScanInterval>[];
+    for (final slug in availableMarketplaces) {
+      final mMin = int.tryParse(_marketplaceMinControllers[slug]!.text.trim());
+      final mMax = int.tryParse(_marketplaceMaxControllers[slug]!.text.trim());
+      if (mMin == null || mMax == null || mMax < mMin) {
+        setState(() {
+          _errorMessage = l10n.adminSettingsValidationError;
+          _successMessage = null;
+        });
+        return;
+      }
+      marketplaceIntervals.add(
+        MarketplaceScanInterval(
+          marketplaceSlug: slug,
+          minIntervalMinutes: mMin,
+          maxIntervalMinutes: mMax,
+        ),
+      );
+    }
+
     setState(() {
       _saving = true;
       _errorMessage = null;
@@ -107,11 +164,14 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
       await ref
           .read(adminServiceProvider)
           .updateScanSettings(
-            minIntervalMinutes: min,
-            maxIntervalMinutes: max,
-            defaultCity: city,
-            defaultState: state,
-            defaultBlockedWords: _blockedWords,
+            ScanSettings(
+              minIntervalMinutes: min,
+              maxIntervalMinutes: max,
+              defaultCity: city,
+              defaultState: state,
+              defaultBlockedWords: _blockedWords,
+              marketplaceIntervals: marketplaceIntervals,
+            ),
           );
       // A tela de Novo Alerta também lê scanSettingsProvider (hint de
       // região) — invalida para refletir a mudança sem precisar recarregar.
@@ -180,6 +240,63 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                         ),
                       ],
                     ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l10n.adminSettingsMarketplaceIntervalsTitle,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.adminSettingsMarketplaceIntervalsDescription,
+                      style: TextStyle(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    for (final slug in availableMarketplaces) ...[
+                      Text(
+                        marketplaceLabel(l10n, slug),
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _marketplaceMinControllers[slug],
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: l10n.adminSettingsMinIntervalLabel,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextField(
+                              controller: _marketplaceMaxControllers[slug],
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: l10n.adminSettingsMaxIntervalLabel,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (slug != availableMarketplaces.last)
+                        const SizedBox(height: 16),
+                    ],
                   ],
                 ),
               ),

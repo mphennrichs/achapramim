@@ -234,6 +234,12 @@ type Marketplace struct {
 	Slug string `json:"slug"`
 }
 
+type MarketplaceScanSetting struct {
+	MarketplaceSlug    string `json:"marketplace_slug"`
+	MinIntervalMinutes int32  `json:"min_interval_minutes"`
+	MaxIntervalMinutes int32  `json:"max_interval_minutes"`
+}
+
 type Notification struct {
 	ID          pgtype.UUID         `json:"id"`
 	UserID      pgtype.UUID         `json:"user_id"`
@@ -296,6 +302,7 @@ type Scan struct {
 	OffersFound     int32              `json:"offers_found"`
 	NewOffersCount  int32              `json:"new_offers_count"`
 	SeenOffersCount int32              `json:"seen_offers_count"`
+	MarketplaceSlug *string            `json:"marketplace_slug"`
 }
 
 type ScanMarketplaceFailure struct {
@@ -364,6 +371,7 @@ type WatchKeyword struct {
 }
 
 type WatchMarketplace struct {
-	WatchID         pgtype.UUID `json:"watch_id"`
-	MarketplaceSlug string      `json:"marketplace_slug"`
+	WatchID         pgtype.UUID        `json:"watch_id"`
+	MarketplaceSlug string             `json:"marketplace_slug"`
+	NextScanAt      pgtype.Timestamptz `json:"next_scan_at"`
 }

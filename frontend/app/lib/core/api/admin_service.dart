@@ -77,22 +77,10 @@ class AdminService {
     return ScanSettings.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<ScanSettings> updateScanSettings({
-    required int minIntervalMinutes,
-    required int maxIntervalMinutes,
-    required String defaultCity,
-    required String defaultState,
-    required List<String> defaultBlockedWords,
-  }) async {
+  Future<ScanSettings> updateScanSettings(ScanSettings settings) async {
     final response = await _client.dio.put(
       '/api/scan-settings',
-      data: {
-        'min_interval_minutes': minIntervalMinutes,
-        'max_interval_minutes': maxIntervalMinutes,
-        'default_city': defaultCity,
-        'default_state': defaultState,
-        'default_blocked_words': defaultBlockedWords,
-      },
+      data: settings.toRequestJson(),
     );
     return ScanSettings.fromJson(response.data as Map<String, dynamic>);
   }

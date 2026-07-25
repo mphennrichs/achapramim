@@ -274,6 +274,8 @@
   "adminSettingsScanDescription": "Minimum and maximum interval (in minutes) between Scan runs for each Watch. Each Watch's actual schedule is randomized within this range.",
   "adminSettingsMinIntervalLabel": "Minimum interval (minutes)",
   "adminSettingsMaxIntervalLabel": "Maximum interval (minutes)",
+  "adminSettingsMarketplaceIntervalsTitle": "Interval per Marketplace",
+  "adminSettingsMarketplaceIntervalsDescription": "Overrides the default interval above for each marketplace individually (e.g. OLX every 1-2h, Facebook once a day = 1440 minutes).",
   "adminSettingsRegionTitle": "Default Search Region",
   "adminSettingsRegionDescription": "Used by a Watch when it doesn't define its own city/state.",
   "adminSettingsDefaultCityLabel": "Default city",

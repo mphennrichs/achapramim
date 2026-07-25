@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -107,7 +108,7 @@ func TestRunner_RunWatch_PersistsOffersAndPricePoint(t *testing.T) {
 	}
 	runner := NewRunner(pool, []marketplace.Fetcher{fetcher})
 
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	q := sqlcgen.New(pool)
 	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
@@ -130,7 +131,7 @@ func TestRunner_RunWatch_FailsScanWhenOnlyFetcherErrors(t *testing.T) {
 	failingFetcher := &fakeFetcher{slug: "olx", err: errors.New("blocked by anti-bot")}
 
 	runner := NewRunner(pool, []marketplace.Fetcher{failingFetcher})
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	q := sqlcgen.New(pool)
 	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
@@ -154,11 +155,11 @@ func TestRunner_RunWatch_MarksMissingOfferUnavailable(t *testing.T) {
 		},
 	}
 	runner := NewRunner(pool, []marketplace.Fetcher{firstRunFetcher})
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	secondRunFetcher := &fakeFetcher{slug: "olx", listings: nil}
 	runner2 := NewRunner(pool, []marketplace.Fetcher{secondRunFetcher})
-	require.NoError(t, runner2.RunWatch(context.Background(), watch))
+	require.NoError(t, runner2.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	q := sqlcgen.New(pool)
 	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
@@ -177,7 +178,7 @@ func TestRunner_RunWatch_TracksNewAndSeenOfferCounts(t *testing.T) {
 		},
 	}
 	runner := NewRunner(pool, []marketplace.Fetcher{firstRunFetcher})
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	q := sqlcgen.New(pool)
 	scans, err := q.ListScansByWatch(context.Background(), sqlcgen.ListScansByWatchParams{WatchID: watch.ID, Limit: 20})
@@ -194,7 +195,7 @@ func TestRunner_RunWatch_TracksNewAndSeenOfferCounts(t *testing.T) {
 		},
 	}
 	runner2 := NewRunner(pool, []marketplace.Fetcher{secondRunFetcher})
-	require.NoError(t, runner2.RunWatch(context.Background(), watch))
+	require.NoError(t, runner2.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	scans, err = q.ListScansByWatch(context.Background(), sqlcgen.ListScansByWatchParams{WatchID: watch.ID, Limit: 20})
 	require.NoError(t, err)
@@ -214,7 +215,7 @@ func TestRunner_RunWatch_NotifiesPriceDropForMonitoredOfferBelowTarget(t *testin
 		},
 	}
 	runner := NewRunner(pool, []marketplace.Fetcher{firstRunFetcher})
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	q := sqlcgen.New(pool)
 	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
@@ -231,7 +232,7 @@ func TestRunner_RunWatch_NotifiesPriceDropForMonitoredOfferBelowTarget(t *testin
 		},
 	}
 	runner2 := NewRunner(pool, []marketplace.Fetcher{secondRunFetcher})
-	require.NoError(t, runner2.RunWatch(context.Background(), watch))
+	require.NoError(t, runner2.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	notifications, err := q.ListNotificationsByUser(context.Background(), sqlcgen.ListNotificationsByUserParams{UserID: watch.UserID, Limit: 20})
 	require.NoError(t, err)
@@ -251,7 +252,7 @@ func TestRunner_RunWatch_DoesNotNotifyWhenOfferNotMonitored(t *testing.T) {
 		},
 	}
 	runner := NewRunner(pool, []marketplace.Fetcher{firstRunFetcher})
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	secondRunFetcher := &fakeFetcher{
 		slug: "olx",
@@ -260,7 +261,7 @@ func TestRunner_RunWatch_DoesNotNotifyWhenOfferNotMonitored(t *testing.T) {
 		},
 	}
 	runner2 := NewRunner(pool, []marketplace.Fetcher{secondRunFetcher})
-	require.NoError(t, runner2.RunWatch(context.Background(), watch))
+	require.NoError(t, runner2.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	q := sqlcgen.New(pool)
 	notifications, err := q.ListNotificationsByUser(context.Background(), sqlcgen.ListNotificationsByUserParams{UserID: watch.UserID, Limit: 20})
@@ -280,7 +281,7 @@ func TestRunner_RunWatch_AllModeFiltersOutOffersMissingAnyKeyword(t *testing.T) 
 		},
 	}
 	runner := NewRunner(pool, []marketplace.Fetcher{fetcher})
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	q := sqlcgen.New(pool)
 	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
@@ -301,7 +302,7 @@ func TestRunner_RunWatch_AnyModeKeepsOffersMissingSomeKeywords(t *testing.T) {
 		},
 	}
 	runner := NewRunner(pool, []marketplace.Fetcher{fetcher})
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	q := sqlcgen.New(pool)
 	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
@@ -315,7 +316,7 @@ func TestRunner_RunWatch_UsesGlobalDefaultRegionWhenWatchHasNone(t *testing.T) {
 
 	fetcher := &fakeFetcher{slug: "olx"}
 	runner := NewRunner(pool, []marketplace.Fetcher{fetcher})
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	// scan_settings.default_city/default_state (seed da migration) — ver
 	// resolveRegion.
@@ -331,8 +332,54 @@ func TestRunner_RunWatch_UsesWatchOwnRegionOverGlobalDefault(t *testing.T) {
 
 	fetcher := &fakeFetcher{slug: "olx"}
 	runner := NewRunner(pool, []marketplace.Fetcher{fetcher})
-	require.NoError(t, runner.RunWatch(context.Background(), watch))
+	require.NoError(t, runner.RunWatchMarketplace(context.Background(), watch, "olx"))
 
 	require.Equal(t, "Curitiba", fetcher.lastQuery.City)
 	require.Equal(t, "PR", fetcher.lastQuery.State)
+}
+
+func TestRunner_RunWatchMarketplaceAndReschedule_UsesPerMarketplaceInterval(t *testing.T) {
+	pool := newTestPool(t)
+	watch := createTestUserAndWatch(t, pool, []string{"olx", "facebook_marketplace"}, nil, nil)
+
+	q := sqlcgen.New(pool)
+	_, err := q.UpsertMarketplaceScanSetting(context.Background(), sqlcgen.UpsertMarketplaceScanSettingParams{
+		MarketplaceSlug:    "facebook_marketplace",
+		MinIntervalMinutes: 1440,
+		MaxIntervalMinutes: 1440,
+	})
+	require.NoError(t, err)
+
+	runner := NewRunner(pool, []marketplace.Fetcher{
+		&fakeFetcher{slug: "olx"},
+		&fakeFetcher{slug: "facebook_marketplace"},
+	})
+
+	before := time.Now()
+	runner.RunWatchMarketplaceAndReschedule(context.Background(), watch, "olx")
+	runner.RunWatchMarketplaceAndReschedule(context.Background(), watch, "facebook_marketplace")
+
+	rows, err := q.DueWatchMarketplaces(context.Background())
+	require.NoError(t, err)
+	require.Empty(t, rows, "both marketplaces should be rescheduled into the future, not due immediately")
+
+	olxNext := watchMarketplaceNextScanAt(t, pool, watch.ID, "olx")
+	fbNext := watchMarketplaceNextScanAt(t, pool, watch.ID, "facebook_marketplace")
+
+	// OLX cai no fallback global (scan_settings: 30-120min); Facebook tem
+	// override próprio de 1440min — a diferença precisa refletir isso,
+	// não apenas "ambos no futuro".
+	require.True(t, fbNext.Sub(before) > olxNext.Sub(before),
+		"facebook_marketplace (1440min override) should be scheduled much further out than olx (global default)")
+}
+
+func watchMarketplaceNextScanAt(t *testing.T, pool *pgxpool.Pool, watchID pgtype.UUID, marketplaceSlug string) time.Time {
+	t.Helper()
+	var nextScanAt time.Time
+	err := pool.QueryRow(context.Background(),
+		"SELECT next_scan_at FROM watch_marketplaces WHERE watch_id = $1 AND marketplace_slug = $2",
+		watchID, marketplaceSlug,
+	).Scan(&nextScanAt)
+	require.NoError(t, err)
+	return nextScanAt
 }

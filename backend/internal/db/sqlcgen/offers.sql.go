@@ -132,22 +132,27 @@ func (q *Queries) ListOfferPricePoints(ctx context.Context, offerID pgtype.UUID)
 	return items, nil
 }
 
-const markOffersUnavailableNotIn = `-- name: MarkOffersUnavailableNotIn :exec
+const markOffersUnavailableNotInForMarketplace = `-- name: MarkOffersUnavailableNotInForMarketplace :exec
 UPDATE offers SET available = FALSE, updated_at = now()
 WHERE watch_id = $1
+  AND marketplace_slug = $2
   AND available
-  AND external_id != ALL($2::text[])
+  AND external_id != ALL($3::text[])
 `
 
-type MarkOffersUnavailableNotInParams struct {
+type MarkOffersUnavailableNotInForMarketplaceParams struct {
 	WatchID         pgtype.UUID `json:"watch_id"`
+	MarketplaceSlug string      `json:"marketplace_slug"`
 	SeenExternalIds []string    `json:"seen_external_ids"`
 }
 
-// Marca como indisponíveis as Offers que estavam no top-N e não vieram mais
-// no resultado do Scan atual (anúncio vendido/removido).
-func (q *Queries) MarkOffersUnavailableNotIn(ctx context.Context, arg MarkOffersUnavailableNotInParams) error {
-	_, err := q.db.Exec(ctx, markOffersUnavailableNotIn, arg.WatchID, arg.SeenExternalIds)
+// Marca como indisponíveis as Offers de um marketplace específico que
+// estavam no top-N e não vieram mais no resultado do Scan atual (anúncio
+// vendido/removido) — escopado por marketplace porque cada Scan agora
+// cobre só um marketplace do Watch (ver Runner.RunWatchMarketplace), não
+// mais todos de uma vez.
+func (q *Queries) MarkOffersUnavailableNotInForMarketplace(ctx context.Context, arg MarkOffersUnavailableNotInForMarketplaceParams) error {
+	_, err := q.db.Exec(ctx, markOffersUnavailableNotInForMarketplace, arg.WatchID, arg.MarketplaceSlug, arg.SeenExternalIds)
 	return err
 }
 

@@ -191,7 +191,7 @@ func (h *UserHandler) SetRole(w http.ResponseWriter, r *http.Request) {
 }
 
 // SetActive ativa/desativa um User. Desativar pausa automaticamente todos
-// os Watches dele (derivado via join em DueWatches, nunca persistido no
+// os Watches dele (derivado via join em DueWatchMarketplaces, nunca persistido no
 // Watch) — reativar volta os Watches ao funcionamento normal, respeitando
 // o estado ativo/inativo de cada um.
 func (h *UserHandler) SetActive(w http.ResponseWriter, r *http.Request) {

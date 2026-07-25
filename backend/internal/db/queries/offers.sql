@@ -35,11 +35,15 @@ ORDER BY o.monitored DESC, o.classification DESC;
 -- name: SetOfferMonitored :one
 UPDATE offers SET monitored = $2, updated_at = now() WHERE id = $1 RETURNING *;
 
--- name: MarkOffersUnavailableNotIn :exec
--- Marca como indisponíveis as Offers que estavam no top-N e não vieram mais
--- no resultado do Scan atual (anúncio vendido/removido).
+-- name: MarkOffersUnavailableNotInForMarketplace :exec
+-- Marca como indisponíveis as Offers de um marketplace específico que
+-- estavam no top-N e não vieram mais no resultado do Scan atual (anúncio
+-- vendido/removido) — escopado por marketplace porque cada Scan agora
+-- cobre só um marketplace do Watch (ver Runner.RunWatchMarketplace), não
+-- mais todos de uma vez.
 UPDATE offers SET available = FALSE, updated_at = now()
 WHERE watch_id = $1
+  AND marketplace_slug = $2
   AND available
   AND external_id != ALL(sqlc.arg(seen_external_ids)::text[]);
 

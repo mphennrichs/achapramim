@@ -145,14 +145,17 @@ func (h *WatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Primeiro Scan roda imediatamente ao criar o Alerta, em vez de esperar
-	// o próximo tick do Scheduler (até ScanPollInterval de atraso) — os
-	// seguintes seguem o intervalo aleatório normal (ver
-	// RunWatchAndReschedule). Em goroutine própria com contexto
+	// Primeiro Scan de cada marketplace roda imediatamente ao criar o
+	// Alerta, em vez de esperar o próximo tick do Scheduler (até
+	// ScanPollInterval de atraso) — os seguintes seguem o intervalo
+	// aleatório normal configurado por marketplace (ver
+	// RunWatchMarketplaceAndReschedule). Em goroutine própria com contexto
 	// independente do request HTTP: a resposta não deve esperar o Scan
 	// (chamadas de rede a Fetchers podem levar dezenas de segundos), e o
 	// ctx do request morre assim que a resposta é enviada.
-	go h.runner.RunWatchAndReschedule(context.Background(), watch)
+	for _, slug := range req.Marketplaces {
+		go h.runner.RunWatchMarketplaceAndReschedule(context.Background(), watch, slug)
+	}
 
 	writeJSON(w, http.StatusCreated, watchResponse{
 		ID:                        uuidString(watch.ID),
@@ -473,12 +476,13 @@ func (h *WatchHandler) SetActive(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
-// TriggerScan roda um Scan do Watch imediatamente, fora do ciclo normal do
-// Scheduler — admin-only (ver router.go), para diagnosticar/forçar
-// atualização de um Watch específico sem esperar o próximo agendamento.
-// Síncrono (não em goroutine): o admin que disparou quer ver o resultado
-// na hora, diferente do primeiro Scan automático na criação do Watch (que
-// não deve atrasar a resposta HTTP de criação).
+// TriggerScan roda um Scan de cada marketplace do Watch imediatamente,
+// fora do ciclo normal do Scheduler — admin-only (ver router.go), para
+// diagnosticar/forçar atualização de um Watch específico sem esperar o
+// próximo agendamento. Síncrono (não em goroutine): o admin que disparou
+// quer ver o resultado na hora, diferente do primeiro Scan automático na
+// criação do Watch (que não deve atrasar a resposta HTTP de criação). Um
+// marketplace falhando não impede os demais de rodar.
 func (h *WatchHandler) TriggerScan(w http.ResponseWriter, r *http.Request) {
 	claims, ok := auth.FromContext(r.Context())
 	if !ok {
@@ -495,8 +499,20 @@ func (h *WatchHandler) TriggerScan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.runner.RunWatch(ctx, watch); err != nil {
-		writeError(w, http.StatusInternalServerError, "scan failed: "+err.Error())
+	marketplaces, err := q.ListWatchMarketplaces(ctx, watchID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	var scanErrors []string
+	for _, slug := range marketplaces {
+		if err := h.runner.RunWatchMarketplace(ctx, watch, slug); err != nil {
+			scanErrors = append(scanErrors, slug+": "+err.Error())
+		}
+	}
+	if len(scanErrors) > 0 {
+		writeError(w, http.StatusInternalServerError, "scan failed: "+strings.Join(scanErrors, "; "))
 		return
 	}
 

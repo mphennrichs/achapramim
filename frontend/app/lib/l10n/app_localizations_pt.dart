@@ -598,6 +598,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get adminSettingsMaxIntervalLabel => 'Intervalo máximo (minutos)';
 
   @override
+  String get adminSettingsMarketplaceIntervalsTitle =>
+      'Intervalo por Marketplace';
+
+  @override
+  String get adminSettingsMarketplaceIntervalsDescription =>
+      'Sobrescreve o intervalo padrão acima para cada marketplace individualmente (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos).';
+
+  @override
   String get adminSettingsRegionTitle => 'Região Padrão de Busca';
 
   @override

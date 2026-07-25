@@ -14,10 +14,12 @@ import (
 	"github.com/mphennrichs/achapramim/backend/internal/scan/marketplace"
 )
 
-// Runner executa um Scan por Watch: consulta os Fetchers dos marketplaces
-// configurados, filtra por palavra bloqueada, calcula Classificação,
-// persiste Offers e Histórico de Preço. Falhas de um Marketplace não
-// interrompem os demais (sucesso parcial — ver CONTEXT.md).
+// Runner executa um Scan por (Watch, marketplace): consulta o Fetcher do
+// marketplace configurado, filtra por palavra bloqueada, calcula
+// Classificação, persiste Offers e Histórico de Preço. Cada marketplace de
+// um Watch roda e é reagendado independentemente (ver
+// watch_marketplaces.next_scan_at) — não mais todos juntos num único Scan
+// por Watch.
 type Runner struct {
 	pool     *pgxpool.Pool
 	fetchers map[string]marketplace.Fetcher
@@ -31,19 +33,16 @@ func NewRunner(pool *pgxpool.Pool, fetchers []marketplace.Fetcher) *Runner {
 	return &Runner{pool: pool, fetchers: byslug}
 }
 
-// RunWatch executa um único Scan do Watch informado.
-func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
+// RunWatchMarketplace executa um único Scan de um marketplace específico do
+// Watch informado.
+func (r *Runner) RunWatchMarketplace(ctx context.Context, watch sqlcgen.Watch, marketplaceSlug string) error {
 	q := sqlcgen.New(r.pool)
 
-	scan, err := q.CreateScan(ctx, watch.ID)
+	scan, err := q.CreateScan(ctx, sqlcgen.CreateScanParams{WatchID: watch.ID, MarketplaceSlug: &marketplaceSlug})
 	if err != nil {
 		return err
 	}
 
-	marketplaceSlugs, err := q.ListWatchMarketplaces(ctx, watch.ID)
-	if err != nil {
-		return err
-	}
 	keywordRows, err := q.ListWatchKeywords(ctx, watch.ID)
 	if err != nil {
 		return err
@@ -74,16 +73,12 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 	totalOffersFound := 0
 	newOffersCount := 0
 	seenOffersCount := 0
-	anyFailure := false
-	allFailed := true
+	status := sqlcgen.ScanStatusSuccess
 
-	for _, slug := range marketplaceSlugs {
-		fetcher, ok := r.fetchers[slug]
-		if !ok {
-			slog.Warn("no fetcher registered for marketplace", "marketplace", slug)
-			continue
-		}
-
+	fetcher, ok := r.fetchers[marketplaceSlug]
+	if !ok {
+		slog.Warn("no fetcher registered for marketplace", "marketplace", marketplaceSlug)
+	} else {
 		listings, err := fetcher.Fetch(ctx, marketplace.Query{
 			Keywords:     keywords,
 			BlockedWords: blockedWords,
@@ -91,18 +86,16 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 			State:        state,
 		})
 		if err != nil {
-			anyFailure = true
+			status = sqlcgen.ScanStatusFailed
 			errMsg := err.Error()
 			if recErr := q.RecordScanMarketplaceFailure(ctx, sqlcgen.RecordScanMarketplaceFailureParams{
 				ScanID:          scan.ID,
-				MarketplaceSlug: slug,
+				MarketplaceSlug: marketplaceSlug,
 				ErrorMessage:    &errMsg,
 			}); recErr != nil {
 				slog.Error("failed to record scan marketplace failure", "error", recErr)
 			}
-			continue
 		}
-		allFailed = false
 
 		for _, listing := range listings {
 			if containsBlockedWord(listing.Title, blockedWords) {
@@ -127,7 +120,7 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 			hasPrevious := false
 			if existing, err := q.GetOfferByExternalID(ctx, sqlcgen.GetOfferByExternalIDParams{
 				WatchID:         watch.ID,
-				MarketplaceSlug: slug,
+				MarketplaceSlug: marketplaceSlug,
 				ExternalID:      listing.ExternalID,
 			}); err == nil {
 				previous = existing
@@ -136,7 +129,7 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 
 			row, err := q.UpsertOffer(ctx, sqlcgen.UpsertOfferParams{
 				WatchID:         watch.ID,
-				MarketplaceSlug: slug,
+				MarketplaceSlug: marketplaceSlug,
 				ExternalID:      listing.ExternalID,
 				Url:             listing.URL,
 				Title:           listing.Title,
@@ -185,18 +178,12 @@ func (r *Runner) RunWatch(ctx context.Context, watch sqlcgen.Watch) error {
 		}
 	}
 
-	if err := q.MarkOffersUnavailableNotIn(ctx, sqlcgen.MarkOffersUnavailableNotInParams{
+	if err := q.MarkOffersUnavailableNotInForMarketplace(ctx, sqlcgen.MarkOffersUnavailableNotInForMarketplaceParams{
 		WatchID:         watch.ID,
+		MarketplaceSlug: marketplaceSlug,
 		SeenExternalIds: seenExternalIDs,
 	}); err != nil {
 		slog.Error("failed to mark offers unavailable", "error", err)
-	}
-
-	status := sqlcgen.ScanStatusSuccess
-	if allFailed && len(marketplaceSlugs) > 0 {
-		status = sqlcgen.ScanStatusFailed
-	} else if anyFailure {
-		status = sqlcgen.ScanStatusPartial
 	}
 
 	if _, err := q.FinishScan(ctx, sqlcgen.FinishScanParams{
@@ -241,30 +228,54 @@ func floatToNumeric(f float64) (pgtype.Numeric, error) {
 	return n, err
 }
 
-// RunWatchAndReschedule executa um Scan do Watch e agenda o próximo para um
-// instante aleatório dentro do intervalo mín/máx global — mesma lógica
-// usada pelo Scheduler a cada tick, reaproveitada aqui para a primeira
-// execução (disparada direto na criação do Watch, ver WatchHandler.Create,
-// em vez de esperar o próximo tick do Scheduler).
-func (r *Runner) RunWatchAndReschedule(ctx context.Context, watch sqlcgen.Watch) {
-	if err := r.RunWatch(ctx, watch); err != nil {
-		slog.Error("scan run failed", "watch_id", watch.ID, "error", err)
+// RunWatchMarketplaceAndReschedule executa um Scan de um marketplace do
+// Watch e agenda o próximo para um instante aleatório dentro do intervalo
+// mín/máx configurado para aquele marketplace (ver
+// resolveMarketplaceInterval) — mesma lógica usada pelo Scheduler a cada
+// tick, reaproveitada aqui para a primeira execução de cada marketplace
+// (disparada direto na criação do Watch, ver WatchHandler.Create, em vez
+// de esperar o próximo tick do Scheduler).
+func (r *Runner) RunWatchMarketplaceAndReschedule(ctx context.Context, watch sqlcgen.Watch, marketplaceSlug string) {
+	if err := r.RunWatchMarketplace(ctx, watch, marketplaceSlug); err != nil {
+		slog.Error("scan run failed", "watch_id", watch.ID, "marketplace", marketplaceSlug, "error", err)
 	}
 
 	q := sqlcgen.New(r.pool)
-	settings, err := q.GetScanSettings(ctx)
+	minMinutes, maxMinutes, err := resolveMarketplaceInterval(ctx, q, marketplaceSlug)
 	if err != nil {
-		slog.Error("failed to load scan settings for reschedule", "watch_id", watch.ID, "error", err)
+		slog.Error("failed to resolve scan interval for reschedule", "watch_id", watch.ID, "marketplace", marketplaceSlug, "error", err)
 		return
 	}
 
-	next := nextScanTime(settings.MinIntervalMinutes, settings.MaxIntervalMinutes)
-	if err := q.RescheduleWatch(ctx, sqlcgen.RescheduleWatchParams{
-		ID:         watch.ID,
-		NextScanAt: pgtype.Timestamptz{Time: next, Valid: true},
+	next := nextScanTime(minMinutes, maxMinutes)
+	if err := q.RescheduleWatchMarketplace(ctx, sqlcgen.RescheduleWatchMarketplaceParams{
+		WatchID:         watch.ID,
+		MarketplaceSlug: marketplaceSlug,
+		NextScanAt:      pgtype.Timestamptz{Time: next, Valid: true},
 	}); err != nil {
-		slog.Error("failed to reschedule watch", "watch_id", watch.ID, "error", err)
+		slog.Error("failed to reschedule watch marketplace", "watch_id", watch.ID, "marketplace", marketplaceSlug, "error", err)
 	}
+}
+
+// resolveMarketplaceInterval retorna o intervalo mín/máx configurado para
+// um marketplace específico (marketplace_scan_settings), caindo para o
+// padrão global (scan_settings) quando o marketplace não tem configuração
+// própria — ver ADR sobre intervalo de Scan por engine.
+func resolveMarketplaceInterval(ctx context.Context, q *sqlcgen.Queries, marketplaceSlug string) (min, max int32, err error) {
+	settings, err := q.ListMarketplaceScanSettings(ctx)
+	if err != nil {
+		return 0, 0, err
+	}
+	for _, s := range settings {
+		if s.MarketplaceSlug == marketplaceSlug {
+			return s.MinIntervalMinutes, s.MaxIntervalMinutes, nil
+		}
+	}
+	global, err := q.GetScanSettings(ctx)
+	if err != nil {
+		return 0, 0, err
+	}
+	return global.MinIntervalMinutes, global.MaxIntervalMinutes, nil
 }
 
 func nextScanTime(minMinutes, maxMinutes int32) time.Time {

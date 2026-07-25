@@ -274,6 +274,8 @@
   "adminSettingsScanDescription": "Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada Alerta. O agendamento real de cada Alerta é sorteado dentro dessa faixa.",
   "adminSettingsMinIntervalLabel": "Intervalo mínimo (minutos)",
   "adminSettingsMaxIntervalLabel": "Intervalo máximo (minutos)",
+  "adminSettingsMarketplaceIntervalsTitle": "Intervalo por Marketplace",
+  "adminSettingsMarketplaceIntervalsDescription": "Sobrescreve o intervalo padrão acima para cada marketplace individualmente (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos).",
   "adminSettingsRegionTitle": "Região Padrão de Busca",
   "adminSettingsRegionDescription": "Usada por um Alerta quando ele não define cidade/estado próprios.",
   "adminSettingsDefaultCityLabel": "Cidade padrão",

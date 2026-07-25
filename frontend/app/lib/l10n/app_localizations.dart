@@ -1130,6 +1130,18 @@ abstract class AppLocalizations {
   /// **'Intervalo máximo (minutos)'**
   String get adminSettingsMaxIntervalLabel;
 
+  /// No description provided for @adminSettingsMarketplaceIntervalsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intervalo por Marketplace'**
+  String get adminSettingsMarketplaceIntervalsTitle;
+
+  /// No description provided for @adminSettingsMarketplaceIntervalsDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sobrescreve o intervalo padrão acima para cada marketplace individualmente (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos).'**
+  String get adminSettingsMarketplaceIntervalsDescription;
+
   /// No description provided for @adminSettingsRegionTitle.
   ///
   /// In pt, this message translates to:

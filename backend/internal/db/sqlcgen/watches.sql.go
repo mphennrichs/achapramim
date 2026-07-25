@@ -75,27 +75,49 @@ func (q *Queries) DeleteWatch(ctx context.Context, id pgtype.UUID) error {
 	return err
 }
 
-const dueWatches = `-- name: DueWatches :many
-SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, w.city, w.state, w.keyword_match_mode
-FROM watches w
+const dueWatchMarketplaces = `-- name: DueWatchMarketplaces :many
+SELECT w.id, w.user_id, w.name, w.target_price_cents, w.tolerance_percent, w.max_offers, w.price_drop_threshold_percent, w.active, w.next_scan_at, w.created_at, w.updated_at, w.city, w.state, w.keyword_match_mode, wm.marketplace_slug
+FROM watch_marketplaces wm
+JOIN watches w ON w.id = wm.watch_id
 JOIN users u ON u.id = w.user_id
 WHERE w.active
   AND u.active
-  AND w.next_scan_at <= now()
+  AND wm.next_scan_at <= now()
 `
 
-// Watches prontos para rodar um novo Scan: ativos, dono ativo, e
-// next_scan_at já passou. A pausa por dono desativado nunca é persistida
-// como estado do Watch — é sempre derivada via join com users.active.
-func (q *Queries) DueWatches(ctx context.Context) ([]Watch, error) {
-	rows, err := q.db.Query(ctx, dueWatches)
+type DueWatchMarketplacesRow struct {
+	ID                        pgtype.UUID        `json:"id"`
+	UserID                    pgtype.UUID        `json:"user_id"`
+	Name                      string             `json:"name"`
+	TargetPriceCents          int64              `json:"target_price_cents"`
+	TolerancePercent          pgtype.Numeric     `json:"tolerance_percent"`
+	MaxOffers                 int32              `json:"max_offers"`
+	PriceDropThresholdPercent pgtype.Numeric     `json:"price_drop_threshold_percent"`
+	Active                    bool               `json:"active"`
+	NextScanAt                pgtype.Timestamptz `json:"next_scan_at"`
+	CreatedAt                 pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                 pgtype.Timestamptz `json:"updated_at"`
+	City                      *string            `json:"city"`
+	State                     *string            `json:"state"`
+	KeywordMatchMode          KeywordMatchMode   `json:"keyword_match_mode"`
+	MarketplaceSlug           string             `json:"marketplace_slug"`
+}
+
+// Pares (Watch, marketplace) prontos para rodar um novo Scan: Watch ativo,
+// dono ativo, e o next_scan_at daquele marketplace específico já passou —
+// cada marketplace de um Watch é agendado e reagendado independentemente
+// (ver watch_marketplaces.next_scan_at), não mais o Watch inteiro de uma
+// vez. A pausa por dono desativado nunca é persistida como estado do
+// Watch — é sempre derivada via join com users.active.
+func (q *Queries) DueWatchMarketplaces(ctx context.Context) ([]DueWatchMarketplacesRow, error) {
+	rows, err := q.db.Query(ctx, dueWatchMarketplaces)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Watch
+	var items []DueWatchMarketplacesRow
 	for rows.Next() {
-		var i Watch
+		var i DueWatchMarketplacesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -111,6 +133,7 @@ func (q *Queries) DueWatches(ctx context.Context) ([]Watch, error) {
 			&i.City,
 			&i.State,
 			&i.KeywordMatchMode,
+			&i.MarketplaceSlug,
 		); err != nil {
 			return nil, err
 		}
@@ -253,17 +276,19 @@ func (q *Queries) ListWatchesByUser(ctx context.Context, userID pgtype.UUID) ([]
 	return items, nil
 }
 
-const rescheduleWatch = `-- name: RescheduleWatch :exec
-UPDATE watches SET next_scan_at = $2 WHERE id = $1
+const rescheduleWatchMarketplace = `-- name: RescheduleWatchMarketplace :exec
+UPDATE watch_marketplaces SET next_scan_at = $3
+WHERE watch_id = $1 AND marketplace_slug = $2
 `
 
-type RescheduleWatchParams struct {
-	ID         pgtype.UUID        `json:"id"`
-	NextScanAt pgtype.Timestamptz `json:"next_scan_at"`
+type RescheduleWatchMarketplaceParams struct {
+	WatchID         pgtype.UUID        `json:"watch_id"`
+	MarketplaceSlug string             `json:"marketplace_slug"`
+	NextScanAt      pgtype.Timestamptz `json:"next_scan_at"`
 }
 
-func (q *Queries) RescheduleWatch(ctx context.Context, arg RescheduleWatchParams) error {
-	_, err := q.db.Exec(ctx, rescheduleWatch, arg.ID, arg.NextScanAt)
+func (q *Queries) RescheduleWatchMarketplace(ctx context.Context, arg RescheduleWatchMarketplaceParams) error {
+	_, err := q.db.Exec(ctx, rescheduleWatchMarketplace, arg.WatchID, arg.MarketplaceSlug, arg.NextScanAt)
 	return err
 }
 

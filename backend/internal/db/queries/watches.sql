@@ -43,16 +43,21 @@ UPDATE watches SET active = $2, updated_at = now() WHERE id = $1 RETURNING *;
 -- name: DeleteWatch :exec
 DELETE FROM watches WHERE id = $1;
 
--- name: DueWatches :many
--- Watches prontos para rodar um novo Scan: ativos, dono ativo, e
--- next_scan_at já passou. A pausa por dono desativado nunca é persistida
--- como estado do Watch — é sempre derivada via join com users.active.
-SELECT w.*
-FROM watches w
+-- name: DueWatchMarketplaces :many
+-- Pares (Watch, marketplace) prontos para rodar um novo Scan: Watch ativo,
+-- dono ativo, e o next_scan_at daquele marketplace específico já passou —
+-- cada marketplace de um Watch é agendado e reagendado independentemente
+-- (ver watch_marketplaces.next_scan_at), não mais o Watch inteiro de uma
+-- vez. A pausa por dono desativado nunca é persistida como estado do
+-- Watch — é sempre derivada via join com users.active.
+SELECT w.*, wm.marketplace_slug
+FROM watch_marketplaces wm
+JOIN watches w ON w.id = wm.watch_id
 JOIN users u ON u.id = w.user_id
 WHERE w.active
   AND u.active
-  AND w.next_scan_at <= now();
+  AND wm.next_scan_at <= now();
 
--- name: RescheduleWatch :exec
-UPDATE watches SET next_scan_at = $2 WHERE id = $1;
+-- name: RescheduleWatchMarketplace :exec
+UPDATE watch_marketplaces SET next_scan_at = $3
+WHERE watch_id = $1 AND marketplace_slug = $2;

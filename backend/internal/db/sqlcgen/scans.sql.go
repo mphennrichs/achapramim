@@ -12,11 +12,16 @@ import (
 )
 
 const createScan = `-- name: CreateScan :one
-INSERT INTO scans (watch_id, status) VALUES ($1, 'success') RETURNING id, watch_id, status, started_at, finished_at, offers_found, new_offers_count, seen_offers_count
+INSERT INTO scans (watch_id, marketplace_slug, status) VALUES ($1, $2, 'success') RETURNING id, watch_id, status, started_at, finished_at, offers_found, new_offers_count, seen_offers_count, marketplace_slug
 `
 
-func (q *Queries) CreateScan(ctx context.Context, watchID pgtype.UUID) (Scan, error) {
-	row := q.db.QueryRow(ctx, createScan, watchID)
+type CreateScanParams struct {
+	WatchID         pgtype.UUID `json:"watch_id"`
+	MarketplaceSlug *string     `json:"marketplace_slug"`
+}
+
+func (q *Queries) CreateScan(ctx context.Context, arg CreateScanParams) (Scan, error) {
+	row := q.db.QueryRow(ctx, createScan, arg.WatchID, arg.MarketplaceSlug)
 	var i Scan
 	err := row.Scan(
 		&i.ID,
@@ -27,6 +32,7 @@ func (q *Queries) CreateScan(ctx context.Context, watchID pgtype.UUID) (Scan, er
 		&i.OffersFound,
 		&i.NewOffersCount,
 		&i.SeenOffersCount,
+		&i.MarketplaceSlug,
 	)
 	return i, err
 }
@@ -35,7 +41,7 @@ const finishScan = `-- name: FinishScan :one
 UPDATE scans SET status = $2, finished_at = now(), offers_found = $3,
     new_offers_count = $4, seen_offers_count = $5
 WHERE id = $1
-RETURNING id, watch_id, status, started_at, finished_at, offers_found, new_offers_count, seen_offers_count
+RETURNING id, watch_id, status, started_at, finished_at, offers_found, new_offers_count, seen_offers_count, marketplace_slug
 `
 
 type FinishScanParams struct {
@@ -64,6 +70,7 @@ func (q *Queries) FinishScan(ctx context.Context, arg FinishScanParams) (Scan, e
 		&i.OffersFound,
 		&i.NewOffersCount,
 		&i.SeenOffersCount,
+		&i.MarketplaceSlug,
 	)
 	return i, err
 }
@@ -93,7 +100,7 @@ func (q *Queries) ListScanMarketplaceFailures(ctx context.Context, scanID pgtype
 }
 
 const listScansByWatch = `-- name: ListScansByWatch :many
-SELECT id, watch_id, status, started_at, finished_at, offers_found, new_offers_count, seen_offers_count FROM scans WHERE watch_id = $1 ORDER BY started_at DESC LIMIT $2
+SELECT id, watch_id, status, started_at, finished_at, offers_found, new_offers_count, seen_offers_count, marketplace_slug FROM scans WHERE watch_id = $1 ORDER BY started_at DESC LIMIT $2
 `
 
 type ListScansByWatchParams struct {
@@ -119,6 +126,7 @@ func (q *Queries) ListScansByWatch(ctx context.Context, arg ListScansByWatchPara
 			&i.OffersFound,
 			&i.NewOffersCount,
 			&i.SeenOffersCount,
+			&i.MarketplaceSlug,
 		); err != nil {
 			return nil, err
 		}

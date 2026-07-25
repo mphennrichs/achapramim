@@ -18,10 +18,11 @@ func seedOfferAndScan(t *testing.T, q *sqlcgen.Queries, watch sqlcgen.Watch) (sq
 	t.Helper()
 	ctx := context.Background()
 
-	scan, err := q.CreateScan(ctx, watch.ID)
+	marketplaceSlug := "olx"
+	scan, err := q.CreateScan(ctx, sqlcgen.CreateScanParams{WatchID: watch.ID, MarketplaceSlug: &marketplaceSlug})
 	require.NoError(t, err)
 
-	_, err = q.FinishScan(ctx, sqlcgen.FinishScanParams{ID: scan.ID, Status: sqlcgen.ScanStatusSuccess, OffersFound: 1})
+	_, err = q.FinishScan(ctx, sqlcgen.FinishScanParams{ID: scan.ID, Status: sqlcgen.ScanStatusSuccess, OffersFound: 1, NewOffersCount: 1})
 	require.NoError(t, err)
 
 	var classification pgtype.Numeric
