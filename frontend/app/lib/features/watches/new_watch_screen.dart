@@ -360,33 +360,33 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                     onRemove: (word) => setState(() => _keywords.remove(word)),
                     trailing: Padding(
                       padding: const EdgeInsets.only(top: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                      child: Row(
                         children: [
-                          SegmentedButton<String>(
-                            segments: [
-                              ButtonSegment(
-                                value: 'any',
-                                label: Text(l10n.newWatchKeywordModeAny),
+                          Expanded(
+                            child: SegmentedButton<String>(
+                              segments: [
+                                ButtonSegment(
+                                  value: 'any',
+                                  label: Text(l10n.newWatchKeywordModeAny),
+                                ),
+                                ButtonSegment(
+                                  value: 'all',
+                                  label: Text(l10n.newWatchKeywordModeAll),
+                                ),
+                              ],
+                              selected: {_keywordMatchMode},
+                              onSelectionChanged: (selection) => setState(
+                                () => _keywordMatchMode = selection.first,
                               ),
-                              ButtonSegment(
-                                value: 'all',
-                                label: Text(l10n.newWatchKeywordModeAll),
-                              ),
-                            ],
-                            selected: {_keywordMatchMode},
-                            onSelectionChanged: (selection) => setState(
-                              () => _keywordMatchMode = selection.first,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.newWatchKeywordModeHint,
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                              fontSize: 12,
+                          const SizedBox(width: 8),
+                          Tooltip(
+                            message: l10n.newWatchKeywordModeHint,
+                            child: Icon(
+                              Icons.info_outline,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],

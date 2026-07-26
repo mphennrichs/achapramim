@@ -95,48 +95,60 @@ class _OfferCardState extends ConsumerState<OfferCard> {
       ),
     );
 
-    final details = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    // A nota fica sobreposta no canto superior direito só desta coluna (não
+    // do card inteiro), reservando espaço no título para não sobrepor o
+    // texto e sem invadir a área dos IconButtons de ação ao lado.
+    final scoreChip = Chip(
+      label: Text(l10n.watchDetailScoreLabel(offer.score100)),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
+
+    final details = Stack(
       children: [
-        Text(
-          offer.title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          marketplaceLabel(l10n, offer.marketplaceSlug),
-          style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(
-              priceLabel,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: scheme.primary,
+        Padding(
+          padding: const EdgeInsets.only(right: 72),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                offer.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
-            ),
-            Chip(
-              label: Text(l10n.watchDetailScoreLabel(offer.score100)),
-              visualDensity: VisualDensity.compact,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            if (!offer.available)
-              Chip(
-                label: Text(l10n.watchDetailOfferUnavailable),
-                backgroundColor: scheme.errorContainer,
-                labelStyle: TextStyle(color: scheme.onErrorContainer),
+              const SizedBox(height: 4),
+              Text(
+                marketplaceLabel(l10n, offer.marketplaceSlug),
+                style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
               ),
-          ],
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    priceLabel,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: scheme.primary,
+                    ),
+                  ),
+                  if (!offer.available)
+                    Chip(
+                      label: Text(l10n.watchDetailOfferUnavailable),
+                      backgroundColor: scheme.errorContainer,
+                      labelStyle: TextStyle(color: scheme.onErrorContainer),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
+        Positioned(top: 0, right: 0, child: scoreChip),
       ],
     );
 
