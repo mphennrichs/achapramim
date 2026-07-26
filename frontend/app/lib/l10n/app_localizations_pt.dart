@@ -179,6 +179,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newWatchKeywordModeAll => 'Todas (E)';
 
   @override
+  String get newWatchKeywordModeHint =>
+      'OU: o anúncio aparece se contiver ao menos uma palavra-chave (quanto mais bater, melhor a posição na lista). E: o anúncio só aparece se contiver todas as palavras-chave. É preciso informar ao menos uma palavra-chave.';
+
+  @override
   String get newWatchBlockedWords => 'Palavras Bloqueadas';
 
   @override
@@ -201,7 +205,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get newWatchValidationError =>
-      'Preencha nome, preço-alvo e ao menos um marketplace.';
+      'Preencha nome, preço-alvo, ao menos um marketplace e ao menos uma palavra-chave.';
 
   @override
   String newWatchSaveError(String details) {
@@ -272,6 +276,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get watchDetailSortRecommended => 'Recomendados';
 
   @override
+  String get watchDetailSortScore => 'Nota';
+
+  @override
   String get watchDetailSortPriceAsc => 'Menor preço';
 
   @override
@@ -279,6 +286,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get watchDetailSortNewest => 'Mais recentes';
+
+  @override
+  String watchDetailScoreLabel(int score) {
+    return 'Nota $score';
+  }
 
   @override
   String get watchDetailOfferUnavailable => 'Indisponível';

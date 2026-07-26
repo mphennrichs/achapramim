@@ -101,7 +101,11 @@ func (r *Runner) RunWatchMarketplace(ctx context.Context, watch sqlcgen.Watch, m
 			if containsBlockedWord(listing.Title, blockedWords) {
 				continue
 			}
-			if watch.KeywordMatchMode == sqlcgen.KeywordMatchModeAll && !matchesAllKeywords(listing.Title, keywords) {
+			if watch.KeywordMatchMode == sqlcgen.KeywordMatchModeAll {
+				if !matchesAllKeywords(listing.Title, keywords) {
+					continue
+				}
+			} else if !matchesAnyKeyword(listing.Title, keywords) {
 				continue
 			}
 

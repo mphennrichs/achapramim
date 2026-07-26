@@ -99,6 +99,10 @@ func (h *WatchHandler) Create(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if err := validateKeywords(req.Keywords); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	ctx := r.Context()
 	tx, err := h.pool.Begin(ctx)
@@ -189,6 +193,19 @@ func parseKeywordMatchMode(raw string) (sqlcgen.KeywordMatchMode, error) {
 	}
 }
 
+// validateKeywords exige ao menos uma keyword não-vazia: no modo 'any' ela
+// vira um filtro de inclusão (matchesAnyKeyword em scan/classification.go) —
+// um Watch sem nenhuma keyword nunca excluiria anúncio nenhum por keyword,
+// tornando o filtro inócuo e o campo sem sentido em qualquer modo.
+func validateKeywords(keywords []string) error {
+	for _, kw := range keywords {
+		if strings.TrimSpace(kw) != "" {
+			return nil
+		}
+	}
+	return errors.New("at least one keyword is required")
+}
+
 // mergeWithDefaultBlockedWords retorna a união (sem duplicatas) entre as
 // palavras bloqueadas informadas pelo usuário e o seed global (admin,
 // Configurações Globais) — comparação case-insensitive para não duplicar
@@ -269,6 +286,10 @@ func (h *WatchHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	keywordMatchMode, err := parseKeywordMatchMode(req.KeywordMatchMode)
 	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := validateKeywords(req.Keywords); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}

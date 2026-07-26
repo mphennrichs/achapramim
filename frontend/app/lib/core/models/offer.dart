@@ -26,9 +26,14 @@ class Offer {
   });
 
   /// Classification vem do backend como string decimal (NUMERIC do
-  /// Postgres) — parseada aqui só para permitir ordenação numérica na UI,
-  /// sem afetar a exibição (que usa o campo String original, se exibida).
+  /// Postgres, 0 a 1) — parseada aqui para permitir ordenação numérica e
+  /// exibição na UI.
   double get classificationValue => double.tryParse(classification) ?? 0;
+
+  /// Nota na escala 0-100, mais fácil de entender que a fração 0-1 crua
+  /// vinda do backend — só uma reescala para exibição, sem mudar a lógica
+  /// de cálculo (ver scan/classification.go).
+  int get score100 => (classificationValue * 100).round();
 
   factory Offer.fromJson(Map<String, dynamic> json) {
     return Offer(

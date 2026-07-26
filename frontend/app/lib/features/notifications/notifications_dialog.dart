@@ -29,10 +29,15 @@ class _NotificationsDialog extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final notificationsAsync = ref.watch(_notificationsProvider);
 
+    // Largura fixa (420) estoura em telas estreitas — limitada ao espaço
+    // disponível descontando o insetPadding padrão do AlertDialog (40 de
+    // cada lado).
+    final maxWidth = MediaQuery.sizeOf(context).width - 80;
+
     return AlertDialog(
       title: Text(l10n.notificationsTitle),
       content: SizedBox(
-        width: 420,
+        width: maxWidth < 420 ? maxWidth : 420,
         height: 400,
         child: notificationsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),

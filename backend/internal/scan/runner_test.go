@@ -290,7 +290,7 @@ func TestRunner_RunWatch_AllModeFiltersOutOffersMissingAnyKeyword(t *testing.T) 
 	require.Equal(t, "PlayStation 5 novo lacrado", offers[0].Title)
 }
 
-func TestRunner_RunWatch_AnyModeKeepsOffersMissingSomeKeywords(t *testing.T) {
+func TestRunner_RunWatch_AnyModeKeepsOffersMatchingAtLeastOneKeyword(t *testing.T) {
 	pool := newTestPool(t)
 	watch := createTestUserAndWatchWithMode(t, pool, []string{"olx"}, []string{"playstation", "5"}, nil, nil, nil, sqlcgen.KeywordMatchModeAny)
 
@@ -299,6 +299,7 @@ func TestRunner_RunWatch_AnyModeKeepsOffersMissingSomeKeywords(t *testing.T) {
 		listings: []marketplace.Listing{
 			{ExternalID: "123", URL: "https://olx.com.br/123", Title: "PlayStation 5 novo lacrado", ImageURL: "https://img/1.jpg", PriceCents: 250000},
 			{ExternalID: "456", URL: "https://olx.com.br/456", Title: "PlayStation 4 usado", ImageURL: "https://img/2.jpg", PriceCents: 250000},
+			{ExternalID: "789", URL: "https://olx.com.br/789", Title: "Xbox Series X novo", ImageURL: "https://img/3.jpg", PriceCents: 250000},
 		},
 	}
 	runner := NewRunner(pool, []marketplace.Fetcher{fetcher})
@@ -307,7 +308,7 @@ func TestRunner_RunWatch_AnyModeKeepsOffersMissingSomeKeywords(t *testing.T) {
 	q := sqlcgen.New(pool)
 	offers, err := q.TopOffersByWatch(context.Background(), sqlcgen.TopOffersByWatchParams{WatchID: watch.ID, Limit: 20})
 	require.NoError(t, err)
-	require.Len(t, offers, 2, "default 'any' mode should not filter by keyword")
+	require.Len(t, offers, 2, "'any' mode should keep offers matching at least one keyword, and drop offers matching none")
 }
 
 func TestRunner_RunWatch_UsesGlobalDefaultRegionWhenWatchHasNone(t *testing.T) {

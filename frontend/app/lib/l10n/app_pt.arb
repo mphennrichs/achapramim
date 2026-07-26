@@ -67,6 +67,7 @@
   "newWatchKeywords": "Palavras-Chave",
   "newWatchKeywordModeAny": "Qualquer uma (OU)",
   "newWatchKeywordModeAll": "Todas (E)",
+  "newWatchKeywordModeHint": "OU: o anúncio aparece se contiver ao menos uma palavra-chave (quanto mais bater, melhor a posição na lista). E: o anúncio só aparece se contiver todas as palavras-chave. É preciso informar ao menos uma palavra-chave.",
   "newWatchBlockedWords": "Palavras Bloqueadas",
   "newWatchAddWordHint": "Adicionar...",
   "newWatchFinanceAndLimits": "Financeiro e Limites",
@@ -74,7 +75,7 @@
   "newWatchToleranceLabel": "Tolerância (%)",
   "newWatchDropThresholdLabel": "Gatilho de Queda (%)",
   "newWatchMaxOffersLabel": "Máximo de Ofertas",
-  "newWatchValidationError": "Preencha nome, preço-alvo e ao menos um marketplace.",
+  "newWatchValidationError": "Preencha nome, preço-alvo, ao menos um marketplace e ao menos uma palavra-chave.",
   "newWatchSaveError": "Falha ao salvar Alerta: {details}",
   "@newWatchSaveError": {
     "placeholders": { "details": { "type": "String" } }
@@ -115,9 +116,14 @@
   "watchDetailNoOffers": "Nenhuma Offer encontrada ainda.",
   "watchDetailSortLabel": "Ordenar por",
   "watchDetailSortRecommended": "Recomendados",
+  "watchDetailSortScore": "Nota",
   "watchDetailSortPriceAsc": "Menor preço",
   "watchDetailSortPriceDesc": "Maior preço",
   "watchDetailSortNewest": "Mais recentes",
+  "watchDetailScoreLabel": "Nota {score}",
+  "@watchDetailScoreLabel": {
+    "placeholders": { "score": { "type": "int" } }
+  },
   "watchDetailOfferUnavailable": "Indisponível",
   "watchDetailOpenListing": "Abrir anúncio",
   "watchDetailOpenListingError": "Não foi possível abrir o anúncio. O link pode estar inválido.",

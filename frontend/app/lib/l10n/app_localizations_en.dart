@@ -179,6 +179,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newWatchKeywordModeAll => 'All (AND)';
 
   @override
+  String get newWatchKeywordModeHint =>
+      'OR: the listing shows up if it contains at least one keyword (the more it matches, the higher it ranks). AND: the listing only shows up if it contains every keyword. At least one keyword is required.';
+
+  @override
   String get newWatchBlockedWords => 'Blocked Words';
 
   @override
@@ -201,7 +205,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newWatchValidationError =>
-      'Fill in the name, target price and at least one marketplace.';
+      'Fill in the name, target price, at least one marketplace and at least one keyword.';
 
   @override
   String newWatchSaveError(String details) {
@@ -272,6 +276,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get watchDetailSortRecommended => 'Recommended';
 
   @override
+  String get watchDetailSortScore => 'Score';
+
+  @override
   String get watchDetailSortPriceAsc => 'Lowest price';
 
   @override
@@ -279,6 +286,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get watchDetailSortNewest => 'Newest';
+
+  @override
+  String watchDetailScoreLabel(int score) {
+    return 'Score $score';
+  }
 
   @override
   String get watchDetailOfferUnavailable => 'Unavailable';

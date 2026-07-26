@@ -8,7 +8,8 @@ import '../../core/models/scan_settings.dart';
 import '../../core/models/watch.dart';
 import '../../core/providers.dart';
 import '../../l10n/app_localizations.dart';
-import 'watch_list_screen.dart';
+import 'watch_providers.dart';
+import 'widgets/word_list_card.dart';
 
 final _editWatchProvider = FutureProvider.autoDispose.family<Watch, String>((
   ref,
@@ -153,7 +154,10 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
       _targetPriceController.text.replaceAll(',', '.'),
     );
 
-    if (name.isEmpty || targetPrice == null || _selectedMarketplaces.isEmpty) {
+    if (name.isEmpty ||
+        targetPrice == null ||
+        _selectedMarketplaces.isEmpty ||
+        _keywords.isEmpty) {
       setState(() {
         _errorMessage = AppLocalizations.of(context)!.newWatchValidationError;
       });
@@ -218,6 +222,11 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    // Abaixo do breakpoint, pares de campo lado a lado (cidade/estado,
+    // keywords/bloqueadas, preço/tolerância, gatilho/máximo) ficam
+    // espremidos demais para o SegmentedButton e os TextFields — empilha em
+    // Column em vez de dividir a largura ao meio.
+    final isNarrow = MediaQuery.of(context).size.width < 600;
 
     ref.listen(scanSettingsProvider, (previous, next) {
       final settings = next.valueOrNull;
@@ -340,53 +349,79 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: _WordListCard(
-                      label: l10n.newWatchKeywords,
-                      hint: l10n.newWatchAddWordHint,
-                      inputController: _keywordInputController,
-                      words: _keywords,
-                      onAdd: _addKeyword,
-                      onRemove: (word) =>
-                          setState(() => _keywords.remove(word)),
-                      trailing: Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: SegmentedButton<String>(
-                          segments: [
-                            ButtonSegment(
-                              value: 'any',
-                              label: Text(l10n.newWatchKeywordModeAny),
+              Builder(
+                builder: (context) {
+                  final keywordsCard = WordListCard(
+                    label: l10n.newWatchKeywords,
+                    hint: l10n.newWatchAddWordHint,
+                    inputController: _keywordInputController,
+                    words: _keywords,
+                    onAdd: _addKeyword,
+                    onRemove: (word) => setState(() => _keywords.remove(word)),
+                    trailing: Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SegmentedButton<String>(
+                            segments: [
+                              ButtonSegment(
+                                value: 'any',
+                                label: Text(l10n.newWatchKeywordModeAny),
+                              ),
+                              ButtonSegment(
+                                value: 'all',
+                                label: Text(l10n.newWatchKeywordModeAll),
+                              ),
+                            ],
+                            selected: {_keywordMatchMode},
+                            onSelectionChanged: (selection) => setState(
+                              () => _keywordMatchMode = selection.first,
                             ),
-                            ButtonSegment(
-                              value: 'all',
-                              label: Text(l10n.newWatchKeywordModeAll),
-                            ),
-                          ],
-                          selected: {_keywordMatchMode},
-                          onSelectionChanged: (selection) => setState(
-                            () => _keywordMatchMode = selection.first,
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.newWatchKeywordModeHint,
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _WordListCard(
-                      label: l10n.newWatchBlockedWords,
-                      hint: l10n.newWatchAddWordHint,
-                      inputController: _blockedInputController,
-                      words: _blockedWords,
-                      onAdd: _addBlockedWord,
-                      onRemove: (word) =>
-                          setState(() => _blockedWords.remove(word)),
-                      isError: true,
-                    ),
-                  ),
-                ],
+                  );
+                  final blockedWordsCard = WordListCard(
+                    label: l10n.newWatchBlockedWords,
+                    hint: l10n.newWatchAddWordHint,
+                    inputController: _blockedInputController,
+                    words: _blockedWords,
+                    onAdd: _addBlockedWord,
+                    onRemove: (word) =>
+                        setState(() => _blockedWords.remove(word)),
+                    isError: true,
+                  );
+
+                  if (isNarrow) {
+                    return Column(
+                      children: [
+                        keywordsCard,
+                        const SizedBox(height: 16),
+                        blockedWordsCard,
+                      ],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: keywordsCard),
+                      const SizedBox(width: 16),
+                      Expanded(child: blockedWordsCard),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 16),
               Card(
@@ -400,55 +435,42 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _targetPriceController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              decoration: InputDecoration(
-                                labelText: l10n.newWatchTargetPriceLabel,
-                              ),
-                            ),
+                      _FieldPair(
+                        stacked: isNarrow,
+                        first: TextField(
+                          controller: _targetPriceController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: _toleranceController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: l10n.newWatchToleranceLabel,
-                              ),
-                            ),
+                          decoration: InputDecoration(
+                            labelText: l10n.newWatchTargetPriceLabel,
                           ),
-                        ],
+                        ),
+                        second: TextField(
+                          controller: _toleranceController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: l10n.newWatchToleranceLabel,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _thresholdController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: l10n.newWatchDropThresholdLabel,
-                              ),
-                            ),
+                      _FieldPair(
+                        stacked: isNarrow,
+                        first: TextField(
+                          controller: _thresholdController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: l10n.newWatchDropThresholdLabel,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: _maxOffersController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: l10n.newWatchMaxOffersLabel,
-                              ),
-                            ),
+                        ),
+                        second: TextField(
+                          controller: _maxOffersController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: l10n.newWatchMaxOffersLabel,
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
@@ -481,70 +503,33 @@ class _NewWatchScreenState extends ConsumerState<NewWatchScreen> {
   }
 }
 
-class _WordListCard extends StatelessWidget {
-  final String label;
-  final String hint;
-  final TextEditingController inputController;
-  final List<String> words;
-  final VoidCallback onAdd;
-  final ValueChanged<String> onRemove;
-  final bool isError;
-  final Widget? trailing;
+/// Dois campos lado a lado em telas largas; empilhados (um por linha) em
+/// telas estreitas, onde dividir a largura ao meio deixa os TextFields
+/// apertados demais.
+class _FieldPair extends StatelessWidget {
+  final bool stacked;
+  final Widget first;
+  final Widget second;
 
-  const _WordListCard({
-    required this.label,
-    required this.hint,
-    required this.inputController,
-    required this.words,
-    required this.onAdd,
-    required this.onRemove,
-    this.isError = false,
-    this.trailing,
+  const _FieldPair({
+    required this.stacked,
+    required this.first,
+    required this.second,
   });
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final accent = isError ? scheme.error : scheme.primary;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge?.copyWith(color: accent),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final word in words)
-                  InputChip(label: Text(word), onDeleted: () => onRemove(word)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: inputController,
-                    decoration: InputDecoration(hintText: hint),
-                    onSubmitted: (_) => onAdd(),
-                  ),
-                ),
-                IconButton(onPressed: onAdd, icon: const Icon(Icons.add)),
-              ],
-            ),
-            ?trailing,
-          ],
-        ),
-      ),
+    if (stacked) {
+      return Column(
+        children: [first, const SizedBox(height: 12), second],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(child: first),
+        const SizedBox(width: 12),
+        Expanded(child: second),
+      ],
     );
   }
 }

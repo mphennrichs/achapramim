@@ -410,6 +410,12 @@ abstract class AppLocalizations {
   /// **'Todas (E)'**
   String get newWatchKeywordModeAll;
 
+  /// No description provided for @newWatchKeywordModeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'OU: o anúncio aparece se contiver ao menos uma palavra-chave (quanto mais bater, melhor a posição na lista). E: o anúncio só aparece se contiver todas as palavras-chave. É preciso informar ao menos uma palavra-chave.'**
+  String get newWatchKeywordModeHint;
+
   /// No description provided for @newWatchBlockedWords.
   ///
   /// In pt, this message translates to:
@@ -455,7 +461,7 @@ abstract class AppLocalizations {
   /// No description provided for @newWatchValidationError.
   ///
   /// In pt, this message translates to:
-  /// **'Preencha nome, preço-alvo e ao menos um marketplace.'**
+  /// **'Preencha nome, preço-alvo, ao menos um marketplace e ao menos uma palavra-chave.'**
   String get newWatchValidationError;
 
   /// No description provided for @newWatchSaveError.
@@ -566,6 +572,12 @@ abstract class AppLocalizations {
   /// **'Recomendados'**
   String get watchDetailSortRecommended;
 
+  /// No description provided for @watchDetailSortScore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota'**
+  String get watchDetailSortScore;
+
   /// No description provided for @watchDetailSortPriceAsc.
   ///
   /// In pt, this message translates to:
@@ -583,6 +595,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Mais recentes'**
   String get watchDetailSortNewest;
+
+  /// No description provided for @watchDetailScoreLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota {score}'**
+  String watchDetailScoreLabel(int score);
 
   /// No description provided for @watchDetailOfferUnavailable.
   ///

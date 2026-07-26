@@ -48,11 +48,11 @@ func containsBlockedWord(title string, blockedWords []string) bool {
 }
 
 // matchesAllKeywords reporta se o título contém TODAS as keywords
-// informadas (case insensitive) — usado para filtrar de verdade quando
-// keyword_match_mode do Watch é 'all', diferente do modo 'any' (padrão),
-// em que nenhuma keyword é obrigatória e a fração batida só influencia a
-// Classificação (ver keywordMatchRatio). Lista vazia sempre passa (sem
-// keyword configurada, nada a exigir).
+// informadas (case insensitive) — usado para filtrar quando
+// keyword_match_mode do Watch é 'all'. No modo 'any' o filtro equivalente é
+// matchesAnyKeyword; em ambos os modos, a fração de keywords batidas ainda
+// influencia a Classificação (ver keywordMatchRatio). Lista vazia sempre
+// passa (sem keyword configurada, nada a exigir).
 func matchesAllKeywords(title string, keywords []string) bool {
 	lowerTitle := strings.ToLower(title)
 	for _, kw := range keywords {
@@ -64,6 +64,30 @@ func matchesAllKeywords(title string, keywords []string) bool {
 		}
 	}
 	return true
+}
+
+// matchesAnyKeyword reporta se o título contém ao menos uma das keywords
+// informadas (case insensitive) — usado para filtrar no modo 'any': o
+// anúncio só é incluído se bater com pelo menos uma keyword (quantas mais
+// baterem, melhor a Classificação via keywordMatchRatio, mas zero
+// correspondências já exclui o anúncio). Lista vazia sempre passa (Watch
+// sem nenhuma keyword configurada não é permitido — ver validação na
+// criação/edição — mas o guard aqui evita comportamento surpreendente caso
+// isso mude).
+func matchesAnyKeyword(title string, keywords []string) bool {
+	if len(keywords) == 0 {
+		return true
+	}
+	lowerTitle := strings.ToLower(title)
+	for _, kw := range keywords {
+		if kw == "" {
+			continue
+		}
+		if strings.Contains(lowerTitle, strings.ToLower(kw)) {
+			return true
+		}
+	}
+	return false
 }
 
 // priceProximityScore vale 1 quando o preço está exatamente no valor-alvo,

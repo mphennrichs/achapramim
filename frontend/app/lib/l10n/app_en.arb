@@ -67,6 +67,7 @@
   "newWatchKeywords": "Keywords",
   "newWatchKeywordModeAny": "Any (OR)",
   "newWatchKeywordModeAll": "All (AND)",
+  "newWatchKeywordModeHint": "OR: the listing shows up if it contains at least one keyword (the more it matches, the higher it ranks). AND: the listing only shows up if it contains every keyword. At least one keyword is required.",
   "newWatchBlockedWords": "Blocked Words",
   "newWatchAddWordHint": "Add...",
   "newWatchFinanceAndLimits": "Finance and Limits",
@@ -74,7 +75,7 @@
   "newWatchToleranceLabel": "Tolerance (%)",
   "newWatchDropThresholdLabel": "Drop Trigger (%)",
   "newWatchMaxOffersLabel": "Max Offers",
-  "newWatchValidationError": "Fill in the name, target price and at least one marketplace.",
+  "newWatchValidationError": "Fill in the name, target price, at least one marketplace and at least one keyword.",
   "newWatchSaveError": "Failed to save Watch: {details}",
   "@newWatchSaveError": {
     "placeholders": { "details": { "type": "String" } }
@@ -115,9 +116,14 @@
   "watchDetailNoOffers": "No Offer found yet.",
   "watchDetailSortLabel": "Sort by",
   "watchDetailSortRecommended": "Recommended",
+  "watchDetailSortScore": "Score",
   "watchDetailSortPriceAsc": "Lowest price",
   "watchDetailSortPriceDesc": "Highest price",
   "watchDetailSortNewest": "Newest",
+  "watchDetailScoreLabel": "Score {score}",
+  "@watchDetailScoreLabel": {
+    "placeholders": { "score": { "type": "int" } }
+  },
   "watchDetailOfferUnavailable": "Unavailable",
   "watchDetailOpenListing": "Open listing",
   "watchDetailOpenListingError": "Could not open the listing. The link may be invalid.",
