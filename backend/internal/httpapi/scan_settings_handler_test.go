@@ -21,8 +21,6 @@ func TestScanSettingsHandler_GetDefaults(t *testing.T) {
 
 	var settings scanSettingsResponse
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &settings))
-	require.Equal(t, int32(30), settings.MinIntervalMinutes)
-	require.Equal(t, int32(120), settings.MaxIntervalMinutes)
 	require.Equal(t, "Belo Horizonte", settings.DefaultCity)
 	require.Equal(t, "MG", settings.DefaultState)
 	require.ElementsMatch(t, []string{
@@ -38,11 +36,12 @@ func TestScanSettingsHandler_Update(t *testing.T) {
 	h := NewScanSettingsHandler(pool)
 
 	req := newWatchRequest(t, http.MethodPut, "/api/scan-settings", claimsFor(admin), scanSettingsRequest{
-		MinIntervalMinutes:  15,
-		MaxIntervalMinutes:  60,
 		DefaultCity:         "Curitiba",
 		DefaultState:        "PR",
 		DefaultBlockedWords: []string{"quebrado", "Quebrado", "sucata"},
+		MarketplaceIntervals: []marketplaceScanIntervalRequest{
+			{MarketplaceSlug: "olx", MinIntervalMinutes: 60, MaxIntervalMinutes: 120},
+		},
 	})
 	rec := httptest.NewRecorder()
 	h.Update(rec, req)
@@ -50,8 +49,6 @@ func TestScanSettingsHandler_Update(t *testing.T) {
 
 	var updated scanSettingsResponse
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &updated))
-	require.Equal(t, int32(15), updated.MinIntervalMinutes)
-	require.Equal(t, int32(60), updated.MaxIntervalMinutes)
 	require.Equal(t, "Curitiba", updated.DefaultCity)
 	require.Equal(t, "PR", updated.DefaultState)
 	require.ElementsMatch(t, []string{"quebrado", "sucata"}, updated.DefaultBlockedWords)
@@ -61,7 +58,6 @@ func TestScanSettingsHandler_Update(t *testing.T) {
 	h.Get(getRec, getReq)
 	var fetched scanSettingsResponse
 	require.NoError(t, json.Unmarshal(getRec.Body.Bytes(), &fetched))
-	require.Equal(t, int32(15), fetched.MinIntervalMinutes)
 	require.ElementsMatch(t, []string{"quebrado", "sucata"}, fetched.DefaultBlockedWords)
 }
 
@@ -71,8 +67,6 @@ func TestScanSettingsHandler_UpdateMarketplaceIntervals(t *testing.T) {
 	h := NewScanSettingsHandler(pool)
 
 	req := newWatchRequest(t, http.MethodPut, "/api/scan-settings", claimsFor(admin), scanSettingsRequest{
-		MinIntervalMinutes:  15,
-		MaxIntervalMinutes:  60,
 		DefaultCity:         "Curitiba",
 		DefaultState:        "PR",
 		DefaultBlockedWords: nil,
@@ -99,13 +93,10 @@ func TestScanSettingsHandler_UpdateMarketplaceIntervals(t *testing.T) {
 	require.Equal(t, int32(1440), byslug["facebook_marketplace"].MaxIntervalMinutes)
 
 	// Uma segunda atualização sem "facebook_marketplace" deve removê-lo
-	// (replace completo, mesmo padrão de DefaultBlockedWords) — volta a
-	// usar o fallback global.
+	// (replace completo, mesmo padrão de DefaultBlockedWords).
 	req2 := newWatchRequest(t, http.MethodPut, "/api/scan-settings", claimsFor(admin), scanSettingsRequest{
-		MinIntervalMinutes: 15,
-		MaxIntervalMinutes: 60,
-		DefaultCity:        "Curitiba",
-		DefaultState:       "PR",
+		DefaultCity:  "Curitiba",
+		DefaultState: "PR",
 		MarketplaceIntervals: []marketplaceScanIntervalRequest{
 			{MarketplaceSlug: "olx", MinIntervalMinutes: 60, MaxIntervalMinutes: 120},
 		},
@@ -126,10 +117,8 @@ func TestScanSettingsHandler_UpdateRejectsMarketplaceMaxBelowMin(t *testing.T) {
 	h := NewScanSettingsHandler(pool)
 
 	req := newWatchRequest(t, http.MethodPut, "/api/scan-settings", claimsFor(admin), scanSettingsRequest{
-		MinIntervalMinutes: 15,
-		MaxIntervalMinutes: 60,
-		DefaultCity:        "Curitiba",
-		DefaultState:       "PR",
+		DefaultCity:  "Curitiba",
+		DefaultState: "PR",
 		MarketplaceIntervals: []marketplaceScanIntervalRequest{
 			{MarketplaceSlug: "olx", MinIntervalMinutes: 120, MaxIntervalMinutes: 60},
 		},
@@ -139,14 +128,14 @@ func TestScanSettingsHandler_UpdateRejectsMarketplaceMaxBelowMin(t *testing.T) {
 	require.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-func TestScanSettingsHandler_UpdateRejectsMaxBelowMin(t *testing.T) {
+func TestScanSettingsHandler_UpdateRejectsEmptyMarketplaceIntervals(t *testing.T) {
 	pool := newTestPool(t)
 	admin := createTestUser(t, pool, "admin")
 	h := NewScanSettingsHandler(pool)
 
 	req := newWatchRequest(t, http.MethodPut, "/api/scan-settings", claimsFor(admin), scanSettingsRequest{
-		MinIntervalMinutes: 60,
-		MaxIntervalMinutes: 30,
+		DefaultCity:  "Curitiba",
+		DefaultState: "PR",
 	})
 	rec := httptest.NewRecorder()
 	h.Update(rec, req)

@@ -37,12 +37,6 @@ class _SettingsBody extends ConsumerStatefulWidget {
 }
 
 class _SettingsBodyState extends ConsumerState<_SettingsBody> {
-  late final _minController = TextEditingController(
-    text: widget.settings.minIntervalMinutes.toString(),
-  );
-  late final _maxController = TextEditingController(
-    text: widget.settings.maxIntervalMinutes.toString(),
-  );
   late final _cityController = TextEditingController(
     text: widget.settings.defaultCity,
   );
@@ -56,24 +50,20 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
 
   // Um par de controllers min/max por marketplace conhecido
   // (availableMarketplaces) — pré-preenchido com o override existente, ou
-  // com o fallback global quando o marketplace ainda não tem override
-  // próprio.
+  // com um default razoável quando o marketplace ainda não tem override
+  // próprio (todo marketplace precisa de um, não há mais fallback global).
   late final Map<String, TextEditingController> _marketplaceMinControllers = {
     for (final slug in availableMarketplaces)
       slug: TextEditingController(
-        text:
-            (_findMarketplaceInterval(slug)?.minIntervalMinutes ??
-                    widget.settings.minIntervalMinutes)
-                .toString(),
+        text: (_findMarketplaceInterval(slug)?.minIntervalMinutes ?? 30)
+            .toString(),
       ),
   };
   late final Map<String, TextEditingController> _marketplaceMaxControllers = {
     for (final slug in availableMarketplaces)
       slug: TextEditingController(
-        text:
-            (_findMarketplaceInterval(slug)?.maxIntervalMinutes ??
-                    widget.settings.maxIntervalMinutes)
-                .toString(),
+        text: (_findMarketplaceInterval(slug)?.maxIntervalMinutes ?? 120)
+            .toString(),
       ),
   };
 
@@ -90,8 +80,6 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
 
   @override
   void dispose() {
-    _minController.dispose();
-    _maxController.dispose();
     _cityController.dispose();
     _stateController.dispose();
     _blockedWordInputController.dispose();
@@ -117,16 +105,10 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context)!;
-    final min = int.tryParse(_minController.text.trim());
-    final max = int.tryParse(_maxController.text.trim());
     final city = _cityController.text.trim();
     final state = _stateController.text.trim();
 
-    if (min == null ||
-        max == null ||
-        max < min ||
-        city.isEmpty ||
-        state.isEmpty) {
+    if (city.isEmpty || state.isEmpty) {
       setState(() {
         _errorMessage = l10n.adminSettingsValidationError;
         _successMessage = null;
@@ -165,8 +147,6 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
           .read(adminServiceProvider)
           .updateScanSettings(
             ScanSettings(
-              minIntervalMinutes: min,
-              maxIntervalMinutes: max,
               defaultCity: city,
               defaultState: state,
               defaultBlockedWords: _blockedWords,
@@ -198,53 +178,6 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      l10n.adminSettingsScanTitle,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.adminSettingsScanDescription,
-                      style: TextStyle(
-                        color: scheme.onSurfaceVariant,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _minController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: l10n.adminSettingsMinIntervalLabel,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextField(
-                            controller: _maxController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: l10n.adminSettingsMaxIntervalLabel,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(20),

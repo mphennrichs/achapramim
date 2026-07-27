@@ -34,7 +34,7 @@ func TestRouter_RequireAdminBlocksRegularUser(t *testing.T) {
 	adminToken, err := issuer.IssueAccessToken(uuidString(admin.ID), admin.Role)
 	require.NoError(t, err)
 
-	body := `{"min_interval_minutes": 15, "max_interval_minutes": 60, "default_city": "Belo Horizonte", "default_state": "MG"}`
+	body := `{"default_city": "Belo Horizonte", "default_state": "MG", "marketplace_intervals": [{"marketplace_slug": "olx", "min_interval_minutes": 15, "max_interval_minutes": 60}]}`
 
 	userReq := httptest.NewRequest(http.MethodPut, "/api/scan-settings", strings.NewReader(body))
 	userReq.Header.Set("Authorization", "Bearer "+userToken)

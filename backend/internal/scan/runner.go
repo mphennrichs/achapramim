@@ -2,6 +2,7 @@ package scan
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"math/rand/v2"
 	"strconv"
@@ -262,9 +263,10 @@ func (r *Runner) RunWatchMarketplaceAndReschedule(ctx context.Context, watch sql
 }
 
 // resolveMarketplaceInterval retorna o intervalo mín/máx configurado para
-// um marketplace específico (marketplace_scan_settings), caindo para o
-// padrão global (scan_settings) quando o marketplace não tem configuração
-// própria — ver ADR sobre intervalo de Scan por engine.
+// um marketplace específico (marketplace_scan_settings) — todo marketplace
+// em availableMarketplaces (frontend) sempre tem uma linha própria aqui,
+// gravada pelo admin em Configurações; não há mais fallback para um
+// intervalo global (ver migration 000011).
 func resolveMarketplaceInterval(ctx context.Context, q *sqlcgen.Queries, marketplaceSlug string) (min, max int32, err error) {
 	settings, err := q.ListMarketplaceScanSettings(ctx)
 	if err != nil {
@@ -275,11 +277,7 @@ func resolveMarketplaceInterval(ctx context.Context, q *sqlcgen.Queries, marketp
 			return s.MinIntervalMinutes, s.MaxIntervalMinutes, nil
 		}
 	}
-	global, err := q.GetScanSettings(ctx)
-	if err != nil {
-		return 0, 0, err
-	}
-	return global.MinIntervalMinutes, global.MaxIntervalMinutes, nil
+	return 0, 0, fmt.Errorf("no scan interval configured for marketplace %q", marketplaceSlug)
 }
 
 func nextScanTime(minMinutes, maxMinutes int32) time.Time {

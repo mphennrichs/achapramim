@@ -597,13 +597,6 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get adminSettingsScanTitle => 'Intervalo de Scan';
-
-  @override
-  String get adminSettingsScanDescription =>
-      'Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada Alerta. O agendamento real de cada Alerta é sorteado dentro dessa faixa.';
-
-  @override
   String get adminSettingsMinIntervalLabel => 'Intervalo mínimo (minutos)';
 
   @override
@@ -615,7 +608,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get adminSettingsMarketplaceIntervalsDescription =>
-      'Sobrescreve o intervalo padrão acima para cada marketplace individualmente (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos).';
+      'Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada marketplace (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos). O agendamento real é sorteado dentro dessa faixa.';
 
   @override
   String get adminSettingsRegionTitle => 'Região Padrão de Busca';
@@ -639,7 +632,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get adminSettingsValidationError =>
-      'Verifique o intervalo (máximo ≥ mínimo) e preencha cidade e estado padrão.';
+      'Verifique o intervalo de cada marketplace (máximo ≥ mínimo) e preencha cidade e estado padrão.';
 
   @override
   String get adminSettingsSaveError =>

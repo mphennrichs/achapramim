@@ -32,8 +32,6 @@ type marketplaceScanIntervalResponse struct {
 }
 
 type scanSettingsRequest struct {
-	MinIntervalMinutes   int32                            `json:"min_interval_minutes"`
-	MaxIntervalMinutes   int32                            `json:"max_interval_minutes"`
 	DefaultCity          string                           `json:"default_city"`
 	DefaultState         string                           `json:"default_state"`
 	DefaultBlockedWords  []string                         `json:"default_blocked_words"`
@@ -41,18 +39,16 @@ type scanSettingsRequest struct {
 }
 
 type scanSettingsResponse struct {
-	MinIntervalMinutes   int32                             `json:"min_interval_minutes"`
-	MaxIntervalMinutes   int32                             `json:"max_interval_minutes"`
 	DefaultCity          string                            `json:"default_city"`
 	DefaultState         string                            `json:"default_state"`
 	DefaultBlockedWords  []string                          `json:"default_blocked_words"`
 	MarketplaceIntervals []marketplaceScanIntervalResponse `json:"marketplace_intervals"`
 }
 
-// Get retorna a configuração global: intervalo de Scan (padrão e por
-// marketplace), região padrão (usada quando um Watch não define
-// city/state próprios) e o seed global de palavras bloqueadas (copiado
-// para todo Watch novo na criação).
+// Get retorna a configuração global: intervalo de Scan por marketplace,
+// região padrão (usada quando um Watch não define city/state próprios) e o
+// seed global de palavras bloqueadas (copiado para todo Watch novo na
+// criação).
 func (h *ScanSettingsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	settings, err := h.queries.GetScanSettings(ctx)
@@ -83,16 +79,12 @@ func (h *ScanSettingsHandler) Update(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	if req.MinIntervalMinutes < 1 {
-		writeError(w, http.StatusBadRequest, "min_interval_minutes must be at least 1")
-		return
-	}
-	if req.MaxIntervalMinutes < req.MinIntervalMinutes {
-		writeError(w, http.StatusBadRequest, "max_interval_minutes must be >= min_interval_minutes")
-		return
-	}
 	if req.DefaultCity == "" || req.DefaultState == "" {
 		writeError(w, http.StatusBadRequest, "default_city and default_state are required")
+		return
+	}
+	if len(req.MarketplaceIntervals) == 0 {
+		writeError(w, http.StatusBadRequest, "at least one marketplace interval is required")
 		return
 	}
 	for _, mi := range req.MarketplaceIntervals {
@@ -117,10 +109,8 @@ func (h *ScanSettingsHandler) Update(w http.ResponseWriter, r *http.Request) {
 	q := sqlcgen.New(tx)
 
 	settings, err := q.UpdateScanSettings(ctx, sqlcgen.UpdateScanSettingsParams{
-		MinIntervalMinutes: req.MinIntervalMinutes,
-		MaxIntervalMinutes: req.MaxIntervalMinutes,
-		DefaultCity:        req.DefaultCity,
-		DefaultState:       req.DefaultState,
+		DefaultCity:  req.DefaultCity,
+		DefaultState: req.DefaultState,
 	})
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "internal error")
@@ -191,8 +181,6 @@ func toScanSettingsResponse(s sqlcgen.ScanSetting, blockedWords []sqlcgen.Defaul
 		}
 	}
 	return scanSettingsResponse{
-		MinIntervalMinutes:   s.MinIntervalMinutes,
-		MaxIntervalMinutes:   s.MaxIntervalMinutes,
 		DefaultCity:          s.DefaultCity,
 		DefaultState:         s.DefaultState,
 		DefaultBlockedWords:  terms,

@@ -1124,18 +1124,6 @@ abstract class AppLocalizations {
   /// **'Falha ao carregar configurações: {error}'**
   String adminSettingsLoadError(String error);
 
-  /// No description provided for @adminSettingsScanTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Intervalo de Scan'**
-  String get adminSettingsScanTitle;
-
-  /// No description provided for @adminSettingsScanDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada Alerta. O agendamento real de cada Alerta é sorteado dentro dessa faixa.'**
-  String get adminSettingsScanDescription;
-
   /// No description provided for @adminSettingsMinIntervalLabel.
   ///
   /// In pt, this message translates to:
@@ -1157,7 +1145,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminSettingsMarketplaceIntervalsDescription.
   ///
   /// In pt, this message translates to:
-  /// **'Sobrescreve o intervalo padrão acima para cada marketplace individualmente (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos).'**
+  /// **'Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada marketplace (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos). O agendamento real é sorteado dentro dessa faixa.'**
   String get adminSettingsMarketplaceIntervalsDescription;
 
   /// No description provided for @adminSettingsRegionTitle.
@@ -1199,7 +1187,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminSettingsValidationError.
   ///
   /// In pt, this message translates to:
-  /// **'Verifique o intervalo (máximo ≥ mínimo) e preencha cidade e estado padrão.'**
+  /// **'Verifique o intervalo de cada marketplace (máximo ≥ mínimo) e preencha cidade e estado padrão.'**
   String get adminSettingsValidationError;
 
   /// No description provided for @adminSettingsSaveError.

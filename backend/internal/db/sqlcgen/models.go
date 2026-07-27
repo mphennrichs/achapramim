@@ -312,12 +312,10 @@ type ScanMarketplaceFailure struct {
 }
 
 type ScanSetting struct {
-	ID                 bool               `json:"id"`
-	MinIntervalMinutes int32              `json:"min_interval_minutes"`
-	MaxIntervalMinutes int32              `json:"max_interval_minutes"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	DefaultCity        string             `json:"default_city"`
-	DefaultState       string             `json:"default_state"`
+	ID           bool               `json:"id"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	DefaultCity  string             `json:"default_city"`
+	DefaultState string             `json:"default_state"`
 }
 
 type User struct {

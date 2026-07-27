@@ -27,8 +27,6 @@ class MarketplaceScanInterval {
 }
 
 class ScanSettings {
-  final int minIntervalMinutes;
-  final int maxIntervalMinutes;
   // Região padrão usada por um Alerta quando não define cidade/estado
   // próprios (ver NewWatchScreen).
   final String defaultCity;
@@ -37,13 +35,11 @@ class ScanSettings {
   // não retroage sobre Alertas já criados.
   final List<String> defaultBlockedWords;
   // Intervalo de Scan por marketplace (ex: OLX a cada 1-2h, Facebook 1x/dia)
-  // — um marketplace sem entrada aqui usa min/maxIntervalMinutes acima como
-  // fallback.
+  // — todo marketplace em availableMarketplaces tem uma entrada própria
+  // aqui, sem fallback global (ver ADR sobre intervalo de Scan por engine).
   final List<MarketplaceScanInterval> marketplaceIntervals;
 
   ScanSettings({
-    required this.minIntervalMinutes,
-    required this.maxIntervalMinutes,
     required this.defaultCity,
     required this.defaultState,
     required this.defaultBlockedWords,
@@ -52,8 +48,6 @@ class ScanSettings {
 
   factory ScanSettings.fromJson(Map<String, dynamic> json) {
     return ScanSettings(
-      minIntervalMinutes: json['min_interval_minutes'] as int,
-      maxIntervalMinutes: json['max_interval_minutes'] as int,
       defaultCity: json['default_city'] as String,
       defaultState: json['default_state'] as String,
       defaultBlockedWords:
@@ -71,8 +65,6 @@ class ScanSettings {
 
   Map<String, dynamic> toRequestJson() {
     return {
-      'min_interval_minutes': minIntervalMinutes,
-      'max_interval_minutes': maxIntervalMinutes,
       'default_city': defaultCity,
       'default_state': defaultState,
       'default_blocked_words': defaultBlockedWords,

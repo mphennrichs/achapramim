@@ -344,7 +344,15 @@ func TestRunner_RunWatchMarketplaceAndReschedule_UsesPerMarketplaceInterval(t *t
 	watch := createTestUserAndWatch(t, pool, []string{"olx", "facebook_marketplace"}, nil, nil)
 
 	q := sqlcgen.New(pool)
+	// Sem fallback global (ver migration 000011), todo marketplace usado
+	// precisa de um override próprio em marketplace_scan_settings.
 	_, err := q.UpsertMarketplaceScanSetting(context.Background(), sqlcgen.UpsertMarketplaceScanSettingParams{
+		MarketplaceSlug:    "olx",
+		MinIntervalMinutes: 30,
+		MaxIntervalMinutes: 120,
+	})
+	require.NoError(t, err)
+	_, err = q.UpsertMarketplaceScanSetting(context.Background(), sqlcgen.UpsertMarketplaceScanSettingParams{
 		MarketplaceSlug:    "facebook_marketplace",
 		MinIntervalMinutes: 1440,
 		MaxIntervalMinutes: 1440,
@@ -367,11 +375,10 @@ func TestRunner_RunWatchMarketplaceAndReschedule_UsesPerMarketplaceInterval(t *t
 	olxNext := watchMarketplaceNextScanAt(t, pool, watch.ID, "olx")
 	fbNext := watchMarketplaceNextScanAt(t, pool, watch.ID, "facebook_marketplace")
 
-	// OLX cai no fallback global (scan_settings: 30-120min); Facebook tem
-	// override próprio de 1440min — a diferença precisa refletir isso,
-	// não apenas "ambos no futuro".
+	// OLX tem override de 30-120min; Facebook tem override de 1440min — a
+	// diferença precisa refletir isso, não apenas "ambos no futuro".
 	require.True(t, fbNext.Sub(before) > olxNext.Sub(before),
-		"facebook_marketplace (1440min override) should be scheduled much further out than olx (global default)")
+		"facebook_marketplace (1440min override) should be scheduled much further out than olx (30-120min override)")
 }
 
 func watchMarketplaceNextScanAt(t *testing.T, pool *pgxpool.Pool, watchID pgtype.UUID, marketplaceSlug string) time.Time {

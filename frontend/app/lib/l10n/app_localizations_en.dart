@@ -597,13 +597,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adminSettingsScanTitle => 'Scan Interval';
-
-  @override
-  String get adminSettingsScanDescription =>
-      'Minimum and maximum interval (in minutes) between Scan runs for each Watch. Each Watch\'s actual schedule is randomized within this range.';
-
-  @override
   String get adminSettingsMinIntervalLabel => 'Minimum interval (minutes)';
 
   @override
@@ -615,7 +608,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminSettingsMarketplaceIntervalsDescription =>
-      'Overrides the default interval above for each marketplace individually (e.g. OLX every 1-2h, Facebook once a day = 1440 minutes).';
+      'Minimum and maximum interval (in minutes) between Scan runs for each marketplace (e.g. OLX every 1-2h, Facebook once a day = 1440 minutes). The actual schedule is randomized within this range.';
 
   @override
   String get adminSettingsRegionTitle => 'Default Search Region';
@@ -639,7 +632,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminSettingsValidationError =>
-      'Check the interval (max >= min) and fill in the default city and state.';
+      'Check each marketplace\'s interval (max >= min) and fill in the default city and state.';
 
   @override
   String get adminSettingsSaveError =>
