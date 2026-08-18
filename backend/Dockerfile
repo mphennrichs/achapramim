@@ -6,7 +6,17 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 go build -o /out/api ./cmd/api
+# VERSION/GIT_COMMIT entram por -ldflags -X (cada um é um token único, sem
+# espaços). O binário passa a registrar no log de boot qual versão subiu, que é
+# o que permite acompanhar deploys no Grafana: o momento em que o processo NOVO
+# começou a servir — não quando a imagem foi construída nem quando o deploy foi
+# disparado, que podem preceder isso por muito tempo (ou nunca chegar lá).
+ARG VERSION=dev
+ARG GIT_COMMIT=unknown
+RUN CGO_ENABLED=0 go build -ldflags "\
+    -X 'github.com/mphennrichs/achapramim/backend/internal/buildinfo.Version=${VERSION}' \
+    -X 'github.com/mphennrichs/achapramim/backend/internal/buildinfo.Commit=${GIT_COMMIT}'" \
+    -o /out/api ./cmd/api
 
 # --- Runtime stage ---
 # glibc (não Alpine/musl) porque o Playwright assume glibc para o Chromium

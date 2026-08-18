@@ -23,10 +23,13 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.sha.outputs.sha }}
+      commit: ${{ steps.sha.outputs.commit }}
     steps:
       - uses: actions/checkout@v4
       - id: sha
-        run: echo "sha=sha-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "sha=sha-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
   build-backend:
     needs: [vars]
@@ -53,6 +56,11 @@ jobs:
         with:
           context: ./backend
           push: true
+          # Sem isto o binário reportaria "dev" no log de boot, e o
+          # acompanhamento de deploy no Grafana não saberia qual versão subiu.
+          build-args: |
+            VERSION=${{ needs.vars.outputs.sha }}
+            GIT_COMMIT=${{ needs.vars.outputs.commit }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.OWNER }}/achapramim-backend:latest
             ${{ env.REGISTRY }}/${{ env.OWNER }}/achapramim-backend:${{ needs.vars.outputs.sha }}

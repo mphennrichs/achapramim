@@ -13,6 +13,7 @@ import (
 
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
 	"github.com/mphennrichs/achapramim/backend/internal/bootstrap"
+	"github.com/mphennrichs/achapramim/backend/internal/buildinfo"
 	"github.com/mphennrichs/achapramim/backend/internal/config"
 	"github.com/mphennrichs/achapramim/backend/internal/db"
 	"github.com/mphennrichs/achapramim/backend/internal/httpapi"
@@ -78,7 +79,15 @@ func main() {
 	}
 
 	go func() {
-		logger.Info("starting http server", "port", cfg.HTTPPort)
+		// `version` aqui é o que marca o deploy no Grafana: a linha só é
+		// emitida quando o processo NOVO de fato começou a servir. Um deploy
+		// disparado que morre no boot nunca produz esta linha — e é justamente
+		// essa ausência que o alerta DeployNaoCompletou detecta.
+		logger.Info("starting http server",
+			"port", cfg.HTTPPort,
+			"version", buildinfo.Version,
+			"commit", buildinfo.Commit,
+		)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Error("http server error", "error", err)
 			os.Exit(1)
