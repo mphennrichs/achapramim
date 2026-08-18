@@ -69,6 +69,7 @@ func main() {
 		Proposer:        linkpreview.NewProposer(cfg.AnthropicAPIKey),
 		ApifyAPIToken:   cfg.ApifyAPIToken,
 		Runner:          runner,
+		Logger:          logger,
 	})
 
 	server := &http.Server{

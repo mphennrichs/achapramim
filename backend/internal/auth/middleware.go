@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"strings"
+
+	"github.com/mphennrichs/achapramim/backend/internal/observability"
 )
 
 type contextKey string
@@ -30,6 +32,14 @@ func Middleware(issuer *TokenIssuer) func(http.Handler) http.Handler {
 			}
 
 			ctx := context.WithValue(r.Context(), claimsContextKey, claims)
+			// Publica quem chamou para o logging: é o que responde "quem
+			// disparou esta requisição?" no Grafana. Fica no contexto (e não
+			// só nas Claims) para que qualquer passo intermediário possa
+			// carimbar o ator sem depender do pacote auth.
+			ctx = observability.WithActor(ctx, observability.Actor{
+				UserID: claims.UserID,
+				Role:   claims.Role,
+			})
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

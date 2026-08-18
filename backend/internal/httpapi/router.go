@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
 	"github.com/mphennrichs/achapramim/backend/internal/linkpreview"
+	"github.com/mphennrichs/achapramim/backend/internal/observability"
 	"github.com/mphennrichs/achapramim/backend/internal/scan"
 )
 
@@ -24,14 +26,26 @@ type Deps struct {
 	Proposer        *linkpreview.Proposer
 	ApifyAPIToken   string
 	Runner          *scan.Runner
+	// Logger é o slog JSON do processo. Injetado (em vez de slog.Default())
+	// para os testes poderem capturar a saída sem mexer em estado global.
+	Logger *slog.Logger
 }
 
 func NewRouter(deps Deps) http.Handler {
+	// Os testes de handler constroem Deps sem Logger; sem este fallback o
+	// middleware receberia nil e quebraria em toda requisição de teste.
+	if deps.Logger == nil {
+		deps.Logger = slog.Default()
+	}
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
+	// Substitui o middleware.Logger do chi (linha de texto, não filtrável no
+	// Loki) por log JSON com trace id, ator, bodies redigidos e duração.
+	// O healthcheck do Docker deixa de ser logado — era ~8.6k linhas/dia.
+	r.Use(observability.HTTPLogger(deps.Logger))
 	r.Use(middleware.Recoverer)
 	r.Use(corsMiddleware())
 

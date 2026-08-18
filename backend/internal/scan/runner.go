@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/mphennrichs/achapramim/backend/internal/db/sqlcgen"
+	"github.com/mphennrichs/achapramim/backend/internal/observability"
 	"github.com/mphennrichs/achapramim/backend/internal/scan/marketplace"
 )
 
@@ -37,6 +38,7 @@ func NewRunner(pool *pgxpool.Pool, fetchers []marketplace.Fetcher) *Runner {
 // RunWatchMarketplace executa um único Scan de um marketplace específico do
 // Watch informado.
 func (r *Runner) RunWatchMarketplace(ctx context.Context, watch sqlcgen.Watch, marketplaceSlug string) error {
+	scanStart := time.Now()
 	q := sqlcgen.New(r.pool)
 
 	scan, err := q.CreateScan(ctx, sqlcgen.CreateScanParams{WatchID: watch.ID, MarketplaceSlug: &marketplaceSlug})
@@ -76,16 +78,46 @@ func (r *Runner) RunWatchMarketplace(ctx context.Context, watch sqlcgen.Watch, m
 	seenOffersCount := 0
 	status := sqlcgen.ScanStatusSuccess
 
+	// Logger carimbado com trace id e ator: quando o Scan nasce de um
+	// POST /api/watches/{id}/scan, estas linhas ficam correlacionadas com a
+	// requisição que as originou. Disparado pelo scheduler, o trace vem vazio
+	// e os campos de scan abaixo continuam identificando a execução.
+	log := observability.Logger(ctx, slog.Default()).With(
+		"scan_id", scan.ID,
+		"watch_id", watch.ID,
+		"marketplace", marketplaceSlug,
+	)
+
+	// Contadores dos motivos de descarte. Sem isto, um Scan que devolve zero
+	// ofertas é indistinguível de um Scan que trouxe 200 anúncios e filtrou
+	// todos — a pergunta "por que meu Alerta não achou nada?" fica sem resposta.
+	droppedBlocked := 0
+	droppedKeywords := 0
+
 	fetcher, ok := r.fetchers[marketplaceSlug]
 	if !ok {
-		slog.Warn("no fetcher registered for marketplace", "marketplace", marketplaceSlug)
+		log.Warn("no fetcher registered for marketplace")
 	} else {
+		fetchStart := time.Now()
 		listings, err := fetcher.Fetch(ctx, marketplace.Query{
 			Keywords:     keywords,
 			BlockedWords: blockedWords,
 			City:         city,
 			State:        state,
 		})
+		// Passo 1 do pipeline: quanto o marketplace devolveu e quanto demorou.
+		// A latência aqui é a de uma chamada externa (OLX/Apify) — é o primeiro
+		// suspeito quando um Scan fica lento.
+		log.Info("scan step: fetch completed",
+			"step", "fetch",
+			"listings", len(listings),
+			"duration_ms", time.Since(fetchStart).Milliseconds(),
+			"city", city,
+			"state", state,
+			"keywords", len(keywords),
+			"blocked_words", len(blockedWords),
+			"error", errString(err),
+		)
 		if err != nil {
 			status = sqlcgen.ScanStatusFailed
 			errMsg := err.Error()
@@ -100,13 +132,16 @@ func (r *Runner) RunWatchMarketplace(ctx context.Context, watch sqlcgen.Watch, m
 
 		for _, listing := range listings {
 			if containsBlockedWord(listing.Title, blockedWords) {
+				droppedBlocked++
 				continue
 			}
 			if watch.KeywordMatchMode == sqlcgen.KeywordMatchModeAll {
 				if !matchesAllKeywords(listing.Title, keywords) {
+					droppedKeywords++
 					continue
 				}
 			} else if !matchesAnyKeyword(listing.Title, keywords) {
+				droppedKeywords++
 				continue
 			}
 
@@ -201,7 +236,32 @@ func (r *Runner) RunWatchMarketplace(ctx context.Context, watch sqlcgen.Watch, m
 		return err
 	}
 
+	// Fechamento do Scan: o funil inteiro numa linha só. Com fetched vs.
+	// dropped_* vs. offers_found dá para responder, sem abrir o banco, se o
+	// problema foi o marketplace não devolver nada, o filtro de palavras
+	// bloqueadas comer tudo, ou as palavras-chave estarem restritivas demais.
+	log.Info("scan step: completed",
+		"step", "complete",
+		"status", string(status),
+		"dropped_blocked_word", droppedBlocked,
+		"dropped_keyword_mismatch", droppedKeywords,
+		"keyword_match_mode", string(watch.KeywordMatchMode),
+		"offers_found", totalOffersFound,
+		"new_offers", newOffersCount,
+		"seen_offers", seenOffersCount,
+		"duration_ms", time.Since(scanStart).Milliseconds(),
+	)
+
 	return nil
+}
+
+// errString evita `"error", err` com err nil, que no slog vira o literal
+// <nil> e polui a busca por `error!=""` no Grafana.
+func errString(err error) string {
+	if err == nil {
+		return ""
+	}
+	return err.Error()
 }
 
 // resolveRegion retorna a região de busca do Watch (city/state), caindo
