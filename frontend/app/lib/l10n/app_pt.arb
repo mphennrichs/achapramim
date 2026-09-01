@@ -270,16 +270,31 @@
   "@adminWatchesTriggerScanError": {
     "placeholders": { "error": { "type": "String" } }
   },
+  "adminWatchesActiveTooltip": "Ativar/inativar Alerta",
+  "adminWatchesSetActiveError": "Falha ao alterar o Alerta: {error}",
+  "@adminWatchesSetActiveError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "adminWatchesDeleteTooltip": "Excluir Alerta",
+  "adminWatchesDeleteConfirmTitle": "Excluir Alerta de outro usuário?",
+  "adminWatchesDeleteConfirmMessage": "Isso apaga permanentemente o Alerta \"{name}\" de {owner}, junto de todas as Offers e histórico de Scans. Esta ação não pode ser desfeita.",
+  "@adminWatchesDeleteConfirmMessage": {
+    "placeholders": { "name": { "type": "String" }, "owner": { "type": "String" } }
+  },
+  "adminWatchesDeleteError": "Falha ao excluir Alerta: {error}",
+  "@adminWatchesDeleteError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
 
   "adminSettingsTitle": "Configurações",
   "adminSettingsLoadError": "Falha ao carregar configurações: {error}",
   "@adminSettingsLoadError": {
     "placeholders": { "error": { "type": "String" } }
   },
-  "adminSettingsMinIntervalLabel": "Intervalo mínimo (minutos)",
-  "adminSettingsMaxIntervalLabel": "Intervalo máximo (minutos)",
+  "adminSettingsMinIntervalLabel": "Intervalo mínimo (horas)",
+  "adminSettingsMaxIntervalLabel": "Intervalo máximo (horas)",
   "adminSettingsMarketplaceIntervalsTitle": "Intervalo por Marketplace",
-  "adminSettingsMarketplaceIntervalsDescription": "Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada marketplace (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos). O agendamento real é sorteado dentro dessa faixa.",
+  "adminSettingsMarketplaceIntervalsDescription": "Intervalo mínimo e máximo (em horas) entre execuções de Scan de cada marketplace (ex: OLX a cada 1-2h, Facebook 1x por dia = 24h). O agendamento real é sorteado dentro dessa faixa.",
   "adminSettingsRegionTitle": "Região Padrão de Busca",
   "adminSettingsRegionDescription": "Usada por um Alerta quando ele não define cidade/estado próprios.",
   "adminSettingsDefaultCityLabel": "Cidade padrão",

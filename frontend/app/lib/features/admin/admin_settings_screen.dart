@@ -52,20 +52,41 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
   // (availableMarketplaces) — pré-preenchido com o override existente, ou
   // com um default razoável quando o marketplace ainda não tem override
   // próprio (todo marketplace precisa de um, não há mais fallback global).
+  // Exibidos e editados em horas (a API/DB continuam em minutos — ver
+  // _formatHours/_parseHours).
   late final Map<String, TextEditingController> _marketplaceMinControllers = {
     for (final slug in availableMarketplaces)
       slug: TextEditingController(
-        text: (_findMarketplaceInterval(slug)?.minIntervalMinutes ?? 30)
-            .toString(),
+        text: _formatHours(_findMarketplaceInterval(slug)?.minIntervalMinutes ?? 30),
       ),
   };
   late final Map<String, TextEditingController> _marketplaceMaxControllers = {
     for (final slug in availableMarketplaces)
       slug: TextEditingController(
-        text: (_findMarketplaceInterval(slug)?.maxIntervalMinutes ?? 120)
-            .toString(),
+        text: _formatHours(_findMarketplaceInterval(slug)?.maxIntervalMinutes ?? 120),
       ),
   };
+
+  // Formata minutos como horas com no máximo 2 casas decimais (sem zeros à
+  // direita), já que o usuário edita/vê o intervalo em horas mas a API/DB
+  // continuam em minutos.
+  static String _formatHours(int minutes) {
+    final hours = minutes / 60;
+    if (hours == hours.roundToDouble()) return hours.toInt().toString();
+    return hours
+        .toStringAsFixed(2)
+        .replaceFirst(RegExp(r'0$'), '')
+        .replaceFirst(RegExp(r'\.$'), '');
+  }
+
+  // Converte o texto de horas (aceita vírgula ou ponto) de volta para
+  // minutos inteiros; retorna null se não for um número válido.
+  static int? _parseHours(String text) {
+    final normalized = text.trim().replaceAll(',', '.');
+    final hours = double.tryParse(normalized);
+    if (hours == null) return null;
+    return (hours * 60).round();
+  }
 
   MarketplaceScanInterval? _findMarketplaceInterval(String slug) {
     for (final interval in widget.settings.marketplaceIntervals) {
@@ -118,8 +139,8 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
 
     final marketplaceIntervals = <MarketplaceScanInterval>[];
     for (final slug in availableMarketplaces) {
-      final mMin = int.tryParse(_marketplaceMinControllers[slug]!.text.trim());
-      final mMax = int.tryParse(_marketplaceMaxControllers[slug]!.text.trim());
+      final mMin = _parseHours(_marketplaceMinControllers[slug]!.text);
+      final mMax = _parseHours(_marketplaceMaxControllers[slug]!.text);
       if (mMin == null || mMax == null || mMax < mMin) {
         setState(() {
           _errorMessage = l10n.adminSettingsValidationError;
@@ -209,7 +230,9 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                           Expanded(
                             child: TextField(
                               controller: _marketplaceMinControllers[slug],
-                              keyboardType: TextInputType.number,
+                              keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
                               decoration: InputDecoration(
                                 labelText: l10n.adminSettingsMinIntervalLabel,
                               ),
@@ -219,7 +242,9 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                           Expanded(
                             child: TextField(
                               controller: _marketplaceMaxControllers[slug],
-                              keyboardType: TextInputType.number,
+                              keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
                               decoration: InputDecoration(
                                 labelText: l10n.adminSettingsMaxIntervalLabel,
                               ),

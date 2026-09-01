@@ -1112,6 +1112,42 @@ abstract class AppLocalizations {
   /// **'Falha ao rodar Scan: {error}'**
   String adminWatchesTriggerScanError(String error);
 
+  /// No description provided for @adminWatchesActiveTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativar/inativar Alerta'**
+  String get adminWatchesActiveTooltip;
+
+  /// No description provided for @adminWatchesSetActiveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao alterar o Alerta: {error}'**
+  String adminWatchesSetActiveError(String error);
+
+  /// No description provided for @adminWatchesDeleteTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir Alerta'**
+  String get adminWatchesDeleteTooltip;
+
+  /// No description provided for @adminWatchesDeleteConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir Alerta de outro usuário?'**
+  String get adminWatchesDeleteConfirmTitle;
+
+  /// No description provided for @adminWatchesDeleteConfirmMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Isso apaga permanentemente o Alerta \"{name}\" de {owner}, junto de todas as Offers e histórico de Scans. Esta ação não pode ser desfeita.'**
+  String adminWatchesDeleteConfirmMessage(String name, String owner);
+
+  /// No description provided for @adminWatchesDeleteError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha ao excluir Alerta: {error}'**
+  String adminWatchesDeleteError(String error);
+
   /// No description provided for @adminSettingsTitle.
   ///
   /// In pt, this message translates to:
@@ -1127,13 +1163,13 @@ abstract class AppLocalizations {
   /// No description provided for @adminSettingsMinIntervalLabel.
   ///
   /// In pt, this message translates to:
-  /// **'Intervalo mínimo (minutos)'**
+  /// **'Intervalo mínimo (horas)'**
   String get adminSettingsMinIntervalLabel;
 
   /// No description provided for @adminSettingsMaxIntervalLabel.
   ///
   /// In pt, this message translates to:
-  /// **'Intervalo máximo (minutos)'**
+  /// **'Intervalo máximo (horas)'**
   String get adminSettingsMaxIntervalLabel;
 
   /// No description provided for @adminSettingsMarketplaceIntervalsTitle.
@@ -1145,7 +1181,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminSettingsMarketplaceIntervalsDescription.
   ///
   /// In pt, this message translates to:
-  /// **'Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada marketplace (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos). O agendamento real é sorteado dentro dessa faixa.'**
+  /// **'Intervalo mínimo e máximo (em horas) entre execuções de Scan de cada marketplace (ex: OLX a cada 1-2h, Facebook 1x por dia = 24h). O agendamento real é sorteado dentro dessa faixa.'**
   String get adminSettingsMarketplaceIntervalsDescription;
 
   /// No description provided for @adminSettingsRegionTitle.

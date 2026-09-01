@@ -589,6 +589,31 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get adminWatchesActiveTooltip => 'Ativar/inativar Alerta';
+
+  @override
+  String adminWatchesSetActiveError(String error) {
+    return 'Falha ao alterar o Alerta: $error';
+  }
+
+  @override
+  String get adminWatchesDeleteTooltip => 'Excluir Alerta';
+
+  @override
+  String get adminWatchesDeleteConfirmTitle =>
+      'Excluir Alerta de outro usuário?';
+
+  @override
+  String adminWatchesDeleteConfirmMessage(String name, String owner) {
+    return 'Isso apaga permanentemente o Alerta \"$name\" de $owner, junto de todas as Offers e histórico de Scans. Esta ação não pode ser desfeita.';
+  }
+
+  @override
+  String adminWatchesDeleteError(String error) {
+    return 'Falha ao excluir Alerta: $error';
+  }
+
+  @override
   String get adminSettingsTitle => 'Configurações';
 
   @override
@@ -597,10 +622,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get adminSettingsMinIntervalLabel => 'Intervalo mínimo (minutos)';
+  String get adminSettingsMinIntervalLabel => 'Intervalo mínimo (horas)';
 
   @override
-  String get adminSettingsMaxIntervalLabel => 'Intervalo máximo (minutos)';
+  String get adminSettingsMaxIntervalLabel => 'Intervalo máximo (horas)';
 
   @override
   String get adminSettingsMarketplaceIntervalsTitle =>
@@ -608,7 +633,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get adminSettingsMarketplaceIntervalsDescription =>
-      'Intervalo mínimo e máximo (em minutos) entre execuções de Scan de cada marketplace (ex: OLX a cada 1-2h, Facebook 1x por dia = 1440 minutos). O agendamento real é sorteado dentro dessa faixa.';
+      'Intervalo mínimo e máximo (em horas) entre execuções de Scan de cada marketplace (ex: OLX a cada 1-2h, Facebook 1x por dia = 24h). O agendamento real é sorteado dentro dessa faixa.';
 
   @override
   String get adminSettingsRegionTitle => 'Região Padrão de Busca';

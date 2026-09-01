@@ -589,6 +589,30 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get adminWatchesActiveTooltip => 'Activate/pause Watch';
+
+  @override
+  String adminWatchesSetActiveError(String error) {
+    return 'Failed to change Watch: $error';
+  }
+
+  @override
+  String get adminWatchesDeleteTooltip => 'Delete Watch';
+
+  @override
+  String get adminWatchesDeleteConfirmTitle => 'Delete another user\'s Watch?';
+
+  @override
+  String adminWatchesDeleteConfirmMessage(String name, String owner) {
+    return 'This permanently deletes $owner\'s Watch \"$name\", along with all its Offers and Scan history. This action cannot be undone.';
+  }
+
+  @override
+  String adminWatchesDeleteError(String error) {
+    return 'Failed to delete Watch: $error';
+  }
+
+  @override
   String get adminSettingsTitle => 'Settings';
 
   @override
@@ -597,10 +621,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adminSettingsMinIntervalLabel => 'Minimum interval (minutes)';
+  String get adminSettingsMinIntervalLabel => 'Minimum interval (hours)';
 
   @override
-  String get adminSettingsMaxIntervalLabel => 'Maximum interval (minutes)';
+  String get adminSettingsMaxIntervalLabel => 'Maximum interval (hours)';
 
   @override
   String get adminSettingsMarketplaceIntervalsTitle =>
@@ -608,7 +632,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminSettingsMarketplaceIntervalsDescription =>
-      'Minimum and maximum interval (in minutes) between Scan runs for each marketplace (e.g. OLX every 1-2h, Facebook once a day = 1440 minutes). The actual schedule is randomized within this range.';
+      'Minimum and maximum interval (in hours) between Scan runs for each marketplace (e.g. OLX every 1-2h, Facebook once a day = 24h). The actual schedule is randomized within this range.';
 
   @override
   String get adminSettingsRegionTitle => 'Default Search Region';

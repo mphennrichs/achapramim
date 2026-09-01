@@ -18,6 +18,7 @@ class AdminWatchCard extends ConsumerStatefulWidget {
 
 class _AdminWatchCardState extends ConsumerState<AdminWatchCard> {
   bool _scanning = false;
+  bool _busy = false;
 
   Future<void> _triggerScan() async {
     final l10n = AppLocalizations.of(context)!;
@@ -45,6 +46,71 @@ class _AdminWatchCardState extends ConsumerState<AdminWatchCard> {
     }
   }
 
+  Future<void> _setActive(bool active) async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _busy = true);
+    try {
+      await ref.read(watchServiceProvider).setActive(widget.watch.id, active);
+      ref.invalidate(allWatchesProvider);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.adminWatchesSetActiveError(error.toString())),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _confirmDelete() async {
+    final l10n = AppLocalizations.of(context)!;
+    final watch = widget.watch;
+    final owner = watch.ownerName ?? watch.ownerEmail ?? '';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.adminWatchesDeleteConfirmTitle),
+        content: Text(
+          l10n.adminWatchesDeleteConfirmMessage(watch.name, owner),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.watchDeleteConfirmCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: Text(l10n.watchDeleteConfirmConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _busy = true);
+    try {
+      await ref.read(watchServiceProvider).delete(watch.id);
+      ref.invalidate(allWatchesProvider);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.adminWatchesDeleteError(error.toString())),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final watch = widget.watch;
@@ -69,11 +135,14 @@ class _AdminWatchCardState extends ConsumerState<AdminWatchCard> {
                     ),
                   ),
                 ),
-                Icon(
-                  watch.active ? Icons.check_circle : Icons.pause_circle,
-                  color: watch.active
-                      ? scheme.primary
-                      : scheme.onSurfaceVariant,
+                Switch(
+                  value: watch.active,
+                  onChanged: _busy ? null : _setActive,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: l10n.adminWatchesDeleteTooltip,
+                  onPressed: _busy ? null : _confirmDelete,
                 ),
               ],
             ),
