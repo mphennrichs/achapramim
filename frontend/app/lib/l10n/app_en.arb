@@ -285,6 +285,11 @@
   "@adminWatchesDeleteError": {
     "placeholders": { "error": { "type": "String" } }
   },
+  "adminWatchDetailRegionDefault": "Global default region",
+  "adminWatchDetailKeywordModeLabel": "Match: {mode}",
+  "@adminWatchDetailKeywordModeLabel": {
+    "placeholders": { "mode": { "type": "String" } }
+  },
 
   "adminSettingsTitle": "Settings",
   "adminSettingsLoadError": "Failed to load settings: {error}",

@@ -1148,6 +1148,18 @@ abstract class AppLocalizations {
   /// **'Falha ao excluir Alerta: {error}'**
   String adminWatchesDeleteError(String error);
 
+  /// No description provided for @adminWatchDetailRegionDefault.
+  ///
+  /// In pt, this message translates to:
+  /// **'Região padrão global'**
+  String get adminWatchDetailRegionDefault;
+
+  /// No description provided for @adminWatchDetailKeywordModeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Correspondência: {mode}'**
+  String adminWatchDetailKeywordModeLabel(String mode);
+
   /// No description provided for @adminSettingsTitle.
   ///
   /// In pt, this message translates to:

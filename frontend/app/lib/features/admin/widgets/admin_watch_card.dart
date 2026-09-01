@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/marketplace_labels.dart';
 import '../../../core/models/watch.dart';
@@ -35,9 +36,7 @@ class _AdminWatchCardState extends ConsumerState<AdminWatchCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              l10n.adminWatchesTriggerScanError(error.toString()),
-            ),
+            content: Text(l10n.adminWatchesTriggerScanError(error.toString())),
           ),
         );
       }
@@ -73,9 +72,7 @@ class _AdminWatchCardState extends ConsumerState<AdminWatchCard> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.adminWatchesDeleteConfirmTitle),
-        content: Text(
-          l10n.adminWatchesDeleteConfirmMessage(watch.name, owner),
-        ),
+        content: Text(l10n.adminWatchesDeleteConfirmMessage(watch.name, owner)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -120,69 +117,78 @@ class _AdminWatchCardState extends ConsumerState<AdminWatchCard> {
         'R\$ ${(watch.targetPriceCents / 100).toStringAsFixed(2).replaceAll('.', ',')}';
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    watch.name,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+      child: InkWell(
+        onTap: () => context.push('/admin/watches/${watch.id}'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      watch.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-                Switch(
-                  value: watch.active,
-                  onChanged: _busy ? null : _setActive,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: l10n.adminWatchesDeleteTooltip,
-                  onPressed: _busy ? null : _confirmDelete,
+                  Switch(
+                    value: watch.active,
+                    onChanged: _busy ? null : _setActive,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    tooltip: l10n.adminWatchesDeleteTooltip,
+                    onPressed: _busy ? null : _confirmDelete,
+                  ),
+                ],
+              ),
+              if (watch.ownerName != null && watch.ownerEmail != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  l10n.adminWatchesOwnerLabel(
+                    watch.ownerName!,
+                    watch.ownerEmail!,
+                  ),
+                  style: TextStyle(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 13,
+                  ),
                 ),
               ],
-            ),
-            if (watch.ownerName != null && watch.ownerEmail != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                l10n.adminWatchesOwnerLabel(
-                  watch.ownerName!,
-                  watch.ownerEmail!,
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  Chip(label: Text(priceLabel)),
+                  Chip(
+                    label: Text(l10n.watchTolerance(watch.tolerancePercent)),
+                  ),
+                  for (final marketplace in watch.marketplaces)
+                    Chip(label: Text(marketplaceLabel(l10n, marketplace))),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _scanning ? null : _triggerScan,
+                  icon: _scanning
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.play_circle_outline),
+                  label: Text(l10n.adminWatchesTriggerScan),
                 ),
-                style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
               ),
             ],
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                Chip(label: Text(priceLabel)),
-                Chip(label: Text(l10n.watchTolerance(watch.tolerancePercent))),
-                for (final marketplace in watch.marketplaces)
-                  Chip(label: Text(marketplaceLabel(l10n, marketplace))),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: _scanning ? null : _triggerScan,
-                icon: _scanning
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.play_circle_outline),
-                label: Text(l10n.adminWatchesTriggerScan),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

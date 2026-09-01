@@ -613,6 +613,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get adminWatchDetailRegionDefault => 'Global default region';
+
+  @override
+  String adminWatchDetailKeywordModeLabel(String mode) {
+    return 'Match: $mode';
+  }
+
+  @override
   String get adminSettingsTitle => 'Settings';
 
   @override

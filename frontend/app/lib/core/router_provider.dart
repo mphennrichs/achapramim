@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/admin/admin_settings_screen.dart';
 import '../features/admin/admin_users_screen.dart';
+import '../features/admin/admin_watch_detail_screen.dart';
 import '../features/admin/admin_watches_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/set_username_screen.dart';
@@ -138,6 +139,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: NavigationPage.adminWatches.path,
                 builder: (context, state) => const AdminWatchesScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':watchId',
+                    builder: (context, state) => AdminWatchDetailScreen(
+                      watchId: state.pathParameters['watchId']!,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
