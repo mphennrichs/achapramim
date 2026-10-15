@@ -11,9 +11,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/httprate"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/mphennrichs/achapramim/backend/internal/auth"
+	"github.com/mphennrichs/achapramim/backend/internal/clientip"
 	"github.com/mphennrichs/achapramim/backend/internal/linkpreview"
 	"github.com/mphennrichs/achapramim/backend/internal/observability"
 	"github.com/mphennrichs/achapramim/backend/internal/scan"
@@ -41,7 +43,6 @@ func NewRouter(deps Deps) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
 	// Substitui o middleware.Logger do chi (linha de texto, não filtrável no
 	// Loki) por log JSON com trace id, ator, bodies redigidos e duração.
 	// O healthcheck do Docker deixa de ser logado — era ~8.6k linhas/dia.
@@ -52,8 +53,13 @@ func NewRouter(deps Deps) http.Handler {
 	r.Get("/api/health", handleHealth)
 
 	authHandler := NewAuthHandler(deps.Pool, deps.Issuer, deps.RefreshTokenTTL)
-	r.Post("/api/auth/login", authHandler.Login)
-	r.Post("/api/auth/refresh", authHandler.Refresh)
+	// Login é alvo de força bruta e não tinha limite nenhum. Chave = IP real
+	// do cliente (CF-Connecting-IP via internal/clientip; RemoteAddr é sempre
+	// o Traefik). O refresh roda sozinho no front, então tem balde mais folgado.
+	r.With(httprate.Limit(10, time.Minute, httprate.WithKeyFuncs(clientip.LimitKey))).
+		Post("/api/auth/login", authHandler.Login)
+	r.With(httprate.Limit(30, time.Minute, httprate.WithKeyFuncs(clientip.LimitKey))).
+		Post("/api/auth/refresh", authHandler.Refresh)
 
 	r.Group(func(r chi.Router) {
 		r.Use(auth.Middleware(deps.Issuer))

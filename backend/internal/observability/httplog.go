@@ -9,6 +9,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/mphennrichs/achapramim/backend/internal/clientip"
 )
 
 // skipRoutes não geram log de acesso. O healthcheck do Docker bate a cada 10s
@@ -107,7 +109,7 @@ func HTTPLogger(base *slog.Logger) func(http.Handler) http.Handler {
 					"duration_ms", time.Since(start).Milliseconds(),
 					"bytes_out", capture.BytesWritten(),
 					"request_id", middleware.GetReqID(r.Context()),
-					"remote_ip", r.RemoteAddr,
+					"remote_ip", clientip.FromRequest(r),
 					"user_agent", r.UserAgent(),
 					"request_body", RedactJSON(reqBody),
 					"response_body", RedactJSON(capture.buf.Bytes()),

@@ -32,15 +32,26 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends wget \
     && rm -rf /var/lib/apt/lists/*
 
+# Browsers num caminho fixo (não em /root/.cache) para o usuário sem
+# privilégio abaixo conseguir executá-los.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 COPY sidecar/requirements.txt ./sidecar/requirements.txt
 RUN pip install --no-cache-dir -r sidecar/requirements.txt \
     && playwright install --with-deps chromium
+
+# O Chromium do sidecar abre páginas de terceiros (link-preview) e roda sem
+# sandbox; como root, uma falha no renderer daria root no container. Usuário
+# comum limita o estrago (auditoria de segurança 2026-10-15, A2).
+RUN useradd --create-home --uid 10001 app
 
 COPY sidecar/ ./sidecar/
 COPY --from=builder /out/api ./api
 COPY internal/db/migrations ./internal/db/migrations
 
 ENV SIDECAR_SCRIPT_DIR=/app/sidecar
+
+USER app
 
 EXPOSE 8080
 
